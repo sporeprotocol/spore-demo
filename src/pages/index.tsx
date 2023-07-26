@@ -7,12 +7,16 @@ import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { useAccount } from 'wagmi';
 import useCkbAddress from '@/hooks/useCkbAddress';
 import useSendTransaction from '@/hooks/useSendTransaction';
+import { notifications } from '@mantine/notifications';
+import useClusterCollector from '@/hooks/useClusterCollector';
 
 export default function Home() {
   const { address: ethAddress } = useAccount();
   const { address, lock } = useCkbAddress(ethAddress);
   const { sendTransaction } = useSendTransaction();
   const [opened, { open, close }] = useDisclosure(false);
+
+  useClusterCollector();
 
   const form = useForm({
     initialValues: {
@@ -31,20 +35,27 @@ export default function Home() {
       if (!address) {
         return;
       }
-      console.log(address);
-      let { txSkeleton } = await createCluster({
-        clusterData: {
-          name: values.name,
-          description: values.description,
-        },
-        fromInfos: [address],
-        toLock: lock,
-        config: predefinedSporeConfigs.Aggron4,
-      });
-      const txHash = await sendTransaction(txSkeleton);
-      console.log(txHash);
+      try {
+        let { txSkeleton } = await createCluster({
+          clusterData: {
+            name: values.name,
+            description: values.description,
+          },
+          fromInfos: [address],
+          toLock: lock,
+          config: predefinedSporeConfigs.Aggron4,
+        });
+        await sendTransaction(txSkeleton);
+        close();
+      } catch (e) {
+        notifications.show({
+          color: 'red',
+          title: 'Failed',
+          message: (e as Error).message || `Failed to create cluster`,
+        });
+      }
     },
-    [address, lock, sendTransaction],
+    [address, lock, sendTransaction, close],
   );
 
   return (
@@ -70,7 +81,7 @@ export default function Home() {
         </form>
       </Modal>
 
-      <Group position="center">
+      <Group position="right">
         <Button onClick={open}>Create Cluster</Button>
       </Group>
     </Layout>

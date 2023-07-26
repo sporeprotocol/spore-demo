@@ -2,11 +2,9 @@ import type { AppProps } from 'next/app';
 import { MantineProvider } from '@mantine/core';
 import { WagmiConfig, configureChains, createConfig, mainnet } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
+import { Notifications } from '@mantine/notifications';
 
-const { publicClient } = configureChains(
-  [mainnet],
-  [publicProvider()],
-);
+const { publicClient } = configureChains([mainnet], [publicProvider()]);
 
 const config = createConfig({
   autoConnect: false,
@@ -23,6 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
       }}
     >
       <WagmiConfig config={config}>
+        <Notifications />
         <Component {...pageProps} />
       </WagmiConfig>
     </MantineProvider>
