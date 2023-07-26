@@ -20,10 +20,12 @@ import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
 import useCkbAddress from '@/hooks/useCkbAddress';
 import useSendTransaction from '@/hooks/useSendTransaction';
 import useSporeCollector from '@/hooks/useSporeCollector';
+import { useAccount } from 'wagmi';
 
 export default function ClusterPage() {
   const router = useRouter();
   const { id } = router.query;
+  const { isConnected } = useAccount();
   const { address, lock } = useCkbAddress();
   const [opened, { open, close }] = useDisclosure(false);
   const [content, setContent] = useState<Blob | null>(null);
@@ -86,6 +88,10 @@ export default function ClusterPage() {
     close();
   }, [content, cluster, address, lock, sendTransaction, close]);
 
+  if (!cluster) {
+    return null;
+  }
+
   return (
     <Layout>
       <Modal opened={opened} onClose={close} title="Create Spore">
@@ -124,8 +130,10 @@ export default function ClusterPage() {
           <Title order={1}>{cluster?.name}</Title>
           <Text>{cluster?.description}</Text>
         </Flex>
-        <Box>
-          <Button onClick={open}>Create</Button>
+        <Box style={{ cursor: isConnected ? 'pointer' : 'not-allowed' }}>
+          <Button disabled={!isConnected} onClick={open}>
+            Create
+          </Button>
         </Box>
       </Flex>
 
