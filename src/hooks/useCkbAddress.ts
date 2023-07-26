@@ -1,7 +1,9 @@
 import { commons, config, helpers } from '@ckb-lumos/lumos';
 import { useMemo } from 'react';
+import { useAccount } from 'wagmi';
 
-export default function useCkbAddress(ethAddress: string | undefined) {
+export default function useCkbAddress() {
+  const { address: ethAddress } = useAccount();
   const lock = useMemo(() => {
     return commons.omnilock.createOmnilockScript(
       {

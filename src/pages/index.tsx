@@ -1,5 +1,15 @@
 import Layout from '@/components/Layout';
-import { Button, Group, Modal, TextInput } from '@mantine/core';
+import {
+  Text,
+  Button,
+  Card,
+  Group,
+  Modal,
+  TextInput,
+  SimpleGrid,
+  Box,
+  Flex,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useCallback } from 'react';
@@ -8,15 +18,16 @@ import { useAccount } from 'wagmi';
 import useCkbAddress from '@/hooks/useCkbAddress';
 import useSendTransaction from '@/hooks/useSendTransaction';
 import { notifications } from '@mantine/notifications';
-import useClusterCollector from '@/hooks/useClusterCollector';
+import useClusterCollector, { Cluster } from '@/hooks/useClusterCollector';
+import { IconPlus } from '@tabler/icons-react';
+import Link from 'next/link';
 
-export default function Home() {
-  const { address: ethAddress } = useAccount();
-  const { address, lock } = useCkbAddress(ethAddress);
+export default function HomePage() {
+  const { isConnected } = useAccount();
+  const { address, lock } = useCkbAddress();
   const { sendTransaction } = useSendTransaction();
   const [opened, { open, close }] = useDisclosure(false);
-
-  useClusterCollector();
+  const { clusters } = useClusterCollector();
 
   const form = useForm({
     initialValues: {
@@ -45,7 +56,8 @@ export default function Home() {
           toLock: lock,
           config: predefinedSporeConfigs.Aggron4,
         });
-        await sendTransaction(txSkeleton);
+        const txHash = await sendTransaction(txSkeleton);
+        console.log(txHash);
         close();
       } catch (e) {
         notifications.show({
@@ -81,9 +93,54 @@ export default function Home() {
         </form>
       </Modal>
 
-      <Group position="right">
-        <Button onClick={open}>Create Cluster</Button>
-      </Group>
+      <Box mt={12}>
+        <SimpleGrid cols={4}>
+          <Card shadow="sm" padding="lg" radius="md" withBorder>
+            <Box
+              sx={{
+                height: '100%',
+                cursor: isConnected ? 'pointer' : 'not-allowed',
+              }}
+              onClick={() => isConnected && open()}
+            >
+              <Flex direction="row" h="100%" justify="center" align="center">
+                <IconPlus size={50} color="gray" />
+              </Flex>
+            </Box>
+          </Card>
+          {clusters.map((cluster: Cluster) => (
+            <Card
+              key={cluster.id}
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+            >
+              <Group position="apart">
+                <Text weight={500}>{cluster.name}</Text>
+              </Group>
+              <Text size="sm" color="dimmed">
+                {cluster.description}
+              </Text>
+              <Link
+                href={`/cluster/${cluster.id}`}
+                style={{ textDecoration: 'none' }}
+                passHref
+              >
+                <Button
+                  variant="light"
+                  color="blue"
+                  fullWidth
+                  mt="md"
+                  radius="md"
+                >
+                  Show Spores
+                </Button>
+              </Link>
+            </Card>
+          ))}
+        </SimpleGrid>
+      </Box>
     </Layout>
   );
 }

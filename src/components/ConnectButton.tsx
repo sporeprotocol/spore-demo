@@ -1,7 +1,7 @@
 import useCkbAddress from '@/hooks/useCkbAddress';
-import { Button, Tooltip } from '@mantine/core';
+import { Button } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAccount, useConnect } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 
@@ -9,20 +9,29 @@ export default function ConnectButton() {
   const { connect } = useConnect({
     connector: new InjectedConnector(),
   });
-  const { address: ethAddress, isConnected } = useAccount();
-  const { address } = useCkbAddress(ethAddress);
+  const { isConnected } = useAccount();
+  const { address } = useCkbAddress();
   const clipboard = useClipboard({ timeout: 500 });
-
+  console.log(address);
   const displayAddress = useMemo(() => {
-    return isConnected
-      ? `${address?.slice(0, 8)}...${address?.slice(-8)}`
-      : '';
+    return isConnected ? `${address?.slice(0, 8)}...${address?.slice(-8)}` : '';
   }, [address, isConnected]);
+
+  useEffect(() => {
+    const connected = localStorage.getItem('wagmi.connected');
+    if (connected && !isConnected) {
+      connect();
+    }
+  }, []);
 
   return (
     <div>
       {isConnected ? (
-        <Button w={200} variant="outline" onClick={() => clipboard.copy(address)}>
+        <Button
+          w={200}
+          variant="outline"
+          onClick={() => clipboard.copy(address)}
+        >
           {displayAddress}
         </Button>
       ) : (
