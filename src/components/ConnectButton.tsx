@@ -22,6 +22,7 @@ export default function ConnectButton() {
     if (connected && !isConnected) {
       connect();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
