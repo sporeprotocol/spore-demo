@@ -84,7 +84,7 @@ export default function ClusterPage(props: ClusterPageProps) {
                   onClick={open}
                   loading={isLoading}
                 >
-                  Add
+                  Add Spore
                 </Button>
               </Box>
             )}

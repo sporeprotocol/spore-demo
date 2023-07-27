@@ -45,6 +45,11 @@ export async function getSpores(clusterId?: string) {
   return spores;
 }
 
+export async function getSpore(id: string) {
+  const spores = await getSpores();
+  return spores.find((spore) => spore.id === id);
+}
+
 export async function createSpore(...args: Parameters<typeof _createSpore>) {
   const { txSkeleton } = await _createSpore(...args);
   const txHash = await sendTransaction(txSkeleton);
