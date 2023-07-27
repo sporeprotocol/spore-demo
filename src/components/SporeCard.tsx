@@ -1,7 +1,15 @@
 import useConnect from '@/hooks/useConnect';
 import { Spore } from '@/spore';
-import { helpers } from '@ckb-lumos/lumos';
-import { AspectRatio, Button, Card, Group, Image, Flex } from '@mantine/core';
+import { BI, helpers } from '@ckb-lumos/lumos';
+import {
+  Text,
+  AspectRatio,
+  Button,
+  Card,
+  Group,
+  Image,
+  Flex,
+} from '@mantine/core';
 import { useMemo } from 'react';
 import SporeTransferModal from './SporeTransferModal';
 import SporeDestroyModal from './SporeDestroyModal';
@@ -30,6 +38,9 @@ export default function SporeCard({ spore }: SporeCardProps) {
                 imageProps={{ onLoad: () => URL.revokeObjectURL(url) }}
               />
             </AspectRatio>
+            <Text mx="md" mt="sm" size="sm">
+              {BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8} CKB
+            </Text>
           </Card.Section>
 
           <Group spacing="sm">
