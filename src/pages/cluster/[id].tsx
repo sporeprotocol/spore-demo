@@ -69,8 +69,11 @@ export default function ClusterPage(props: ClusterPageProps) {
     <Layout>
       <Flex direction="row" justify="space-between" align="end">
         <Flex direction="column">
-          <Title order={1}>{cluster?.name}</Title>
-          <Text>{cluster?.description}</Text>
+          <Title order={1}>{cluster.name}</Title>
+          <Text>{cluster.description}</Text>
+          <Text size="sm" color="gray">
+            by {helpers.encodeToAddress(cluster.cell.cellOutput.lock)}
+          </Text>
         </Flex>
         {cluster && ownedCluster && (
           <SporeAddModal clusterId={cluster.id}>
