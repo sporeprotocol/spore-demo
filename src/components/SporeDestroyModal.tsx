@@ -34,17 +34,25 @@ export default function SporeDestroyModal(props: SporeDestroyModalProps) {
     if (!address) {
       return;
     }
-    await destroyMutaion.mutateAsync({
-      sporeOutPoint: spore.cell.outPoint!,
-      fromInfos: [address],
-      config: predefinedSporeConfigs.Aggron4,
-    });
-    notifications.show({
-      color: 'green',
-      title: 'Farewell!',
-      message: `Your spore has been destroyed.`,
-    });
-    close();
+    try {
+      await destroyMutaion.mutateAsync({
+        sporeOutPoint: spore.cell.outPoint!,
+        fromInfos: [address],
+        config: predefinedSporeConfigs.Aggron4,
+      });
+      notifications.show({
+        color: 'green',
+        title: 'Farewell!',
+        message: `Your spore has been destroyed.`,
+      });
+      close();
+    } catch (e) {
+      notifications.show({
+        color: 'red',
+        title: 'Error!',
+        message: (e as Error).message,
+      });
+    }
   }, [address, spore.cell.outPoint, close, destroyMutaion]);
 
   return (

@@ -56,23 +56,31 @@ export default function SporeAddModal(props: SporeAddModalProps) {
       return;
     }
 
-    const contentBuffer = await content.arrayBuffer();
-    await createMutation.mutateAsync({
-      sporeData: {
-        contentType: content.type,
-        content: new Uint8Array(contentBuffer),
-        clusterId,
-      },
-      fromInfos: [address],
-      toLock: lock,
-      config: predefinedSporeConfigs.Aggron4,
-    });
-    close();
-    notifications.show({
-      color: 'green',
-      title: 'Congratulations!',
-      message: 'Your spore has been successfully minted.',
-    });
+    try {
+      const contentBuffer = await content.arrayBuffer();
+      await createMutation.mutateAsync({
+        sporeData: {
+          contentType: content.type,
+          content: new Uint8Array(contentBuffer),
+          clusterId,
+        },
+        fromInfos: [address],
+        toLock: lock,
+        config: predefinedSporeConfigs.Aggron4,
+      });
+      notifications.show({
+        color: 'green',
+        title: 'Congratulations!',
+        message: 'Your spore has been successfully minted.',
+      });
+      close();
+    } catch (e) {
+      notifications.show({
+        color: 'red',
+        title: 'Error!',
+        message: (e as Error).message,
+      });
+    }
   }, [content, createMutation, clusterId, address, lock, close]);
 
   return (

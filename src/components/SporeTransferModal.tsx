@@ -47,32 +47,36 @@ export default function SporeTransferModal(props: SporeTransferModalProps) {
       if (!address || !values.to) {
         return;
       }
-      await transferMutaion.mutateAsync({
-        sporeOutPoint: spore.cell.outPoint!,
-        fromInfos: [address],
-        toLock: helpers.parseAddress(values.to),
-        config: predefinedSporeConfigs.Aggron4,
-      });
-      notifications.show({
-        color: 'green',
-        title: 'Transaction successful!',
-        message: `Your spore has been transfer to ${values.to.slice(
-          0,
-          6,
-        )}...${values.to.slice(-6)}.`,
-      });
-      close();
+      try {
+        await transferMutaion.mutateAsync({
+          sporeOutPoint: spore.cell.outPoint!,
+          fromInfos: [address],
+          toLock: helpers.parseAddress(values.to),
+          config: predefinedSporeConfigs.Aggron4,
+        });
+        notifications.show({
+          color: 'green',
+          title: 'Transaction successful!',
+          message: `Your spore has been transfer to ${values.to.slice(
+            0,
+            6,
+          )}...${values.to.slice(-6)}.`,
+        });
+        close();
+      } catch (e) {
+        notifications.show({
+          color: 'red',
+          title: 'Error!',
+          message: (e as Error).message,
+        });
+      }
     },
     [address, spore.cell.outPoint, close, transferMutaion],
   );
 
   return (
     <>
-      <Modal
-        opened={opened}
-        onClose={close}
-        title="Create Cluster"
-      >
+      <Modal opened={opened} onClose={close} title="Create Cluster">
         <form onSubmit={form.onSubmit(handleTransfer)}>
           <TextInput
             withAsterisk

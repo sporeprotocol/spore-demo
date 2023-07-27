@@ -92,7 +92,7 @@ export default function HomePage(props: HomePageProps) {
         return;
       }
       try {
-        const txHash = await createMutaion.mutateAsync({
+        await createMutaion.mutateAsync({
           clusterData: {
             name: values.name,
             description: values.description,
@@ -101,13 +101,17 @@ export default function HomePage(props: HomePageProps) {
           toLock: lock,
           config: predefinedSporeConfigs.Aggron4,
         });
-        console.log(txHash);
+        notifications.show({
+          color: 'green',
+          title: 'Congratulations!',
+          message: 'Your cluster has been created.',
+        });
         close();
       } catch (e) {
         notifications.show({
           color: 'red',
-          title: 'Failed',
-          message: (e as Error).message || `Failed to create cluster`,
+          title: 'Error!',
+          message: (e as Error).message,
         });
       }
     },
