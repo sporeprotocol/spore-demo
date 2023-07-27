@@ -12,22 +12,37 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { useCallback } from 'react';
-import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
-import { useAccount } from 'wagmi';
-import useCkbAddress from '@/hooks/useCkbAddress';
-import useSendTransaction from '@/hooks/useSendTransaction';
+import { useCallback, useMemo } from 'react';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { notifications } from '@mantine/notifications';
-import useClusterCollector, { Cluster } from '@/hooks/useClusterCollector';
 import { IconPlus } from '@tabler/icons-react';
 import Link from 'next/link';
+import { Cluster, createCluster, getClusters } from '@/cluster';
+import useConnect from '@/hooks/useConnect';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 
-export default function HomePage() {
-  const { isConnected } = useAccount();
-  const { address, lock } = useCkbAddress();
-  const { sendTransaction } = useSendTransaction();
+export async function getStaticProps() {
+  const clusters = await getClusters();
+  return { props: { clusters } };
+}
+
+export default function HomePage(props: { clusters: Cluster[] }) {
+  const queryClient = useQueryClient();
+  const { address, lock, isConnected } = useConnect();
   const [opened, { open, close }] = useDisclosure(false);
-  const { clusters } = useClusterCollector();
+  const clustersQuery = useQuery(['clusters'], getClusters, {
+    initialData: props.clusters,
+  });
+  const createMutaion = useMutation(createCluster, {
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
+  const clusters = useMemo(
+    () => clustersQuery.data || [],
+    [clustersQuery.data],
+  );
 
   const form = useForm({
     initialValues: {
@@ -43,11 +58,11 @@ export default function HomePage() {
 
   const handleSubmit = useCallback(
     async (values: { name: string; description: string }) => {
-      if (!address) {
+      if (!address || !lock) {
         return;
       }
       try {
-        let { txSkeleton } = await createCluster({
+        const txHash = await createMutaion.mutateAsync({
           clusterData: {
             name: values.name,
             description: values.description,
@@ -56,7 +71,6 @@ export default function HomePage() {
           toLock: lock,
           config: predefinedSporeConfigs.Aggron4,
         });
-        const txHash = await sendTransaction(txSkeleton);
         console.log(txHash);
         close();
       } catch (e) {
@@ -67,7 +81,7 @@ export default function HomePage() {
         });
       }
     },
-    [address, lock, sendTransaction, close],
+    [address, lock, createMutaion, close],
   );
 
   return (

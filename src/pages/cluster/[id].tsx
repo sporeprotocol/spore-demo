@@ -1,5 +1,4 @@
 import Layout from '@/components/Layout';
-import useClusterCollector from '@/hooks/useClusterCollector';
 import {
   Title,
   Text,
@@ -16,27 +15,56 @@ import { useDisclosure } from '@mantine/hooks';
 import { useRouter } from 'next/router';
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
-import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
-import useCkbAddress from '@/hooks/useCkbAddress';
-import useSendTransaction from '@/hooks/useSendTransaction';
-import useSporeCollector from '@/hooks/useSporeCollector';
-import { useAccount } from 'wagmi';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
+import { GetServerSideProps } from 'next';
+import { Spore, createSpore, getSpores } from '@/spore';
+import { Cluster, getCluster } from '@/cluster';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import useConnect from '@/hooks/useConnect';
 
-export default function ClusterPage() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59',
+  );
+
+  const { id } = context.query;
+  const cluster = await getCluster(id as string);
+  const spores = await getSpores(id as string);
+  return {
+    props: { cluster, spores },
+  };
+};
+
+export type ClusterPageProps = {
+  cluster: Cluster;
+  spores: Spore[];
+};
+
+export default function ClusterPage(props: ClusterPageProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id } = router.query;
-  const { isConnected } = useAccount();
-  const { address, lock } = useCkbAddress();
+  const { address, lock, isConnected } = useConnect();
   const [opened, { open, close }] = useDisclosure(false);
   const [content, setContent] = useState<Blob | null>(null);
-  const { sendTransaction } = useSendTransaction();
 
-  const { clusters } = useClusterCollector();
-  const cluster = useMemo(
-    () => clusters.find((c) => c.id === id),
-    [clusters, id],
+  const { data: cluster } = useQuery(
+    ['cluster', id],
+    () => getCluster(id as string),
+    { initialData: props.cluster },
   );
-  const { spores } = useSporeCollector(cluster?.id);
+  const { data: spores = [] } = useQuery(
+    ['spores', id],
+    () => getSpores(id as string),
+    { initialData: props.spores },
+  );
+
+  const createMutation = useMutation(createSpore, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['spores', id]);
+    },
+  });
 
   const imageUrl = useMemo(() => {
     if (!content) {
@@ -57,36 +85,24 @@ export default function ClusterPage() {
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!content || !address) {
+    if (!content || !address || !lock) {
       return;
     }
 
     const contentBuffer = await content.arrayBuffer();
-
-    const { txSkeleton } = await createSpore({
+    const txHash = await createMutation.mutateAsync({
       sporeData: {
         contentType: content.type,
         content: new Uint8Array(contentBuffer),
-        clusterId: cluster?.cell.cellOutput.type?.args,
+        clusterId: cluster?.id,
       },
       fromInfos: [address],
       toLock: lock,
       config: predefinedSporeConfigs.Aggron4,
     });
-    console.log({
-      sporeData: {
-        contentType: content.type,
-        content: new Uint8Array(contentBuffer),
-        clusterId: cluster?.cell.cellOutput.type?.args,
-      },
-      fromInfos: [address],
-      toLock: lock,
-      config: predefinedSporeConfigs.Aggron4,
-    });
-    const txHash = await sendTransaction(txSkeleton);
     console.log(txHash);
     close();
-  }, [content, cluster, address, lock, sendTransaction, close]);
+  }, [content, createMutation, cluster, address, lock, close]);
 
   if (!cluster) {
     return null;

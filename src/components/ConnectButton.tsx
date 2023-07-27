@@ -1,18 +1,11 @@
-import useCkbAddress from '@/hooks/useCkbAddress';
+import useConnect from '@/hooks/useConnect';
 import { Button } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { useEffect, useMemo } from 'react';
-import { useAccount, useConnect } from 'wagmi';
-import { InjectedConnector } from 'wagmi/connectors/injected';
 
 export default function ConnectButton() {
-  const { connect } = useConnect({
-    connector: new InjectedConnector(),
-  });
-  const { isConnected } = useAccount();
-  const { address } = useCkbAddress();
+  const { address, connect, isConnected } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
-  console.log(address);
   const displayAddress = useMemo(() => {
     return isConnected ? `${address?.slice(0, 8)}...${address?.slice(-8)}` : '';
   }, [address, isConnected]);

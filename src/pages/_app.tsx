@@ -3,6 +3,8 @@ import { MantineProvider } from '@mantine/core';
 import { WagmiConfig, configureChains, createConfig, mainnet } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
 import { Notifications } from '@mantine/notifications';
+import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
+import { useState } from 'react';
 
 const { publicClient } = configureChains([mainnet], [publicProvider()]);
 
@@ -12,6 +14,7 @@ const config = createConfig({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [queryClient] = useState(() => new QueryClient());
   return (
     <MantineProvider
       withGlobalStyles
@@ -20,10 +23,14 @@ export default function App({ Component, pageProps }: AppProps) {
         colorScheme: 'light',
       }}
     >
-      <WagmiConfig config={config}>
-        <Notifications />
-        <Component {...pageProps} />
-      </WagmiConfig>
+      <QueryClientProvider client={queryClient}>
+        <Hydrate state={pageProps.dehydratedState}>
+          <WagmiConfig config={config}>
+            <Notifications />
+            <Component {...pageProps} />
+          </WagmiConfig>
+        </Hydrate>
+      </QueryClientProvider>
     </MantineProvider>
   );
 }
