@@ -9,18 +9,21 @@ import {
   Box,
   Image,
   SimpleGrid,
+  Alert,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useDisclosure } from '@mantine/hooks';
 import { useRouter } from 'next/router';
 import { useMemo, useState, useCallback, useEffect } from 'react';
-import { IconPhoto, IconUpload } from '@tabler/icons-react';
+import { IconAlertCircle, IconPhoto, IconUpload } from '@tabler/icons-react';
 import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { GetServerSideProps } from 'next';
 import { Spore, createSpore, getSpores } from '@/spore';
 import { Cluster, getCluster } from '@/cluster';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import useConnect from '@/hooks/useConnect';
+import { helpers } from '@ckb-lumos/lumos';
+import SporeCard from '@/components/SporeCard';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   context.res.setHeader(
@@ -30,9 +33,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const { id } = context.query;
   const cluster = await getCluster(id as string);
-  const spores = await getSpores(id as string);
   return {
-    props: { cluster, spores },
+    props: { cluster, spores: [] },
   };
 };
 
@@ -59,6 +61,15 @@ export default function ClusterPage(props: ClusterPageProps) {
     () => getSpores(id as string),
     { initialData: props.spores },
   );
+
+  const ownedCluster = useMemo(() => {
+    if (cluster && address) {
+      return helpers.encodeToAddress(cluster.cell.cellOutput.lock) === address;
+    }
+    return false;
+  }, [cluster, address]);
+
+  console.log(cluster!.cell.cellOutput.lock, lock);
 
   const createMutation = useMutation(createSpore, {
     onSuccess: () => {
@@ -146,26 +157,25 @@ export default function ClusterPage(props: ClusterPageProps) {
           <Title order={1}>{cluster?.name}</Title>
           <Text>{cluster?.description}</Text>
         </Flex>
-        <Box style={{ cursor: isConnected ? 'pointer' : 'not-allowed' }}>
-          <Button disabled={!isConnected} onClick={open}>
-            Create
-          </Button>
-        </Box>
+        {cluster && ownedCluster && (
+          <Box style={{ cursor: isConnected ? 'pointer' : 'not-allowed' }}>
+            <Button disabled={!isConnected} onClick={open}>
+              Mint!
+            </Button>
+          </Box>
+        )}
       </Flex>
+
+      {!ownedCluster && (
+        <Alert mt="md" icon={<IconAlertCircle size="1rem" />}>
+          This cluster does not belong to you, so you cannot mint a spore.
+        </Alert>
+      )}
 
       <Box mt={20}>
         <SimpleGrid cols={4}>
           {spores.map((spore) => {
-            const url = URL.createObjectURL(spore.content);
-
-            return (
-              <Image
-                key={spore.id}
-                alt={spore.id}
-                src={url}
-                imageProps={{ onLoad: () => URL.revokeObjectURL(url) }}
-              />
-            );
+            return <SporeCard key={spore.id} spore={spore} />;
           })}
         </SimpleGrid>
       </Box>

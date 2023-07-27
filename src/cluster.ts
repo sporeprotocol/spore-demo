@@ -1,4 +1,4 @@
-import { Indexer } from '@ckb-lumos/lumos';
+import { Cell, Indexer, Script } from '@ckb-lumos/lumos';
 import {
   ClusterData,
   predefinedSporeConfigs,
@@ -14,6 +14,7 @@ export interface Cluster {
   id: string;
   name: string;
   description: string;
+  cell: Cell;
 }
 
 export async function getClusters() {
@@ -30,6 +31,7 @@ export async function getClusters() {
       id: cell.cellOutput.type!.args,
       name: hex2String(unpacked.name.slice(2)),
       description: hex2String(unpacked.description.slice(2)),
+      cell,
     };
     clusters.push(cluster);
   }

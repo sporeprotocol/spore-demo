@@ -1,4 +1,4 @@
-import { Indexer } from '@ckb-lumos/lumos';
+import { Cell, Indexer } from '@ckb-lumos/lumos';
 import {
   SporeData,
   predefinedSporeConfigs,
@@ -15,6 +15,7 @@ export interface Spore {
   id: string;
   clusterId: string | undefined;
   content: Blob;
+  cell: Cell;
 }
 
 export async function getSpores(clusterId?: string) {
@@ -31,11 +32,15 @@ export async function getSpores(clusterId?: string) {
       id: cell.cellOutput.type!.args,
       content: hex2Blob(unpacked.content.slice(2)),
       clusterId: unpacked.clusterId,
+      cell,
     };
     spores.push(spore);
   }
 
-  return spores.filter((spore) => spore.clusterId === clusterId);
+  if (clusterId) {
+    return spores.filter((spore) => spore.clusterId === clusterId);
+  }
+  return spores;
 }
 
 export async function createSpore(...args: Parameters<typeof _createSpore>) {

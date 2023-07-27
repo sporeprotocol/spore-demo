@@ -3,7 +3,7 @@ import { Button } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { useEffect, useMemo } from 'react';
 
-export default function ConnectButton() {
+export default function Connect() {
   const { address, connect, isConnected } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
   const displayAddress = useMemo(() => {

@@ -1,6 +1,6 @@
 import { AppShell, Container, Flex, Header } from '@mantine/core';
 import Logo from './Logo';
-import ConnectButton from './ConnectButton';
+import Connect from './Connect';
 
 export default function Layout({ children }: React.PropsWithChildren<{}>) {
   return (
@@ -11,7 +11,7 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
           <Container>
             <Flex justify="space-between" align="center">
               <Logo />
-              <ConnectButton />
+              <Connect />
             </Flex>
           </Container>
         </Header>
