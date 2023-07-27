@@ -4,7 +4,7 @@ import { helpers } from '@ckb-lumos/lumos';
 import { AspectRatio, Button, Card, Group, Image, Flex } from '@mantine/core';
 import { useMemo } from 'react';
 import SporeTransferModal from './SporeTransferModal';
-import SporeDestroyModal from './SporeDestroyModel';
+import SporeDestroyModal from './SporeDestroyModal';
 
 export interface SporeCardProps {
   spore: Spore;
