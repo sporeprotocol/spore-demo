@@ -70,7 +70,7 @@ export default function SporeCard({ spore }: SporeCardProps) {
                   disabled={!isOwned}
                   fullWidth
                 >
-                  destroy
+                  Destroy
                 </Button>
               )}
             </SporeDestroyModal>

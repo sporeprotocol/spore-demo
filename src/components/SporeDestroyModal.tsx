@@ -57,7 +57,7 @@ export default function SporeDestroyModal(props: SporeDestroyModalProps) {
 
   return (
     <>
-      <Modal opened={opened} onClose={close} radius="md" title="destroy Spore">
+      <Modal opened={opened} onClose={close} radius="md" title="Destroy Spore">
         <Text mb="md">Do you want to destroy this spore?</Text>
 
         <Flex direction="row" justify="flex-end">

@@ -76,7 +76,7 @@ export default function SporeTransferModal(props: SporeTransferModalProps) {
 
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Create Cluster">
+      <Modal opened={opened} onClose={close} title="Transfer Spore">
         <form onSubmit={form.onSubmit(handleTransfer)}>
           <TextInput
             withAsterisk
