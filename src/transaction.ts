@@ -31,11 +31,26 @@ export async function sendTransaction(
     }),
   );
 
-  tx = tx.update('witnesses', (witnesses) =>
-    witnesses.set(0, signedWitness),
-  );
+  tx = tx.update('witnesses', (witnesses) => witnesses.set(0, signedWitness));
 
   const signedTx = helpers.createTransactionFromSkeleton(tx);
   const hash = await rpc.sendTransaction(signedTx, 'passthrough');
+  await waitForTranscation(hash);
   return hash;
+}
+
+export async function waitForTranscation(txHash: string) {
+  const rpc = new RPC(predefinedSporeConfigs.Aggron4.ckbNodeUrl);
+
+  return new Promise(async (resolve) => {
+    const transaction = await rpc.getTransaction(txHash);
+    const { status } = transaction.txStatus;
+    if (status === 'committed') {
+      resolve(txHash);
+    } else {
+      setTimeout(() => {
+        resolve(waitForTranscation(txHash));
+      }, 1000);
+    }
+  });
 }

@@ -21,7 +21,7 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
         passHref
       >
         <Button variant="light" color="blue" fullWidth mt="md" radius="md">
-          Show Spores
+          More
         </Button>
       </Link>
     </Card>

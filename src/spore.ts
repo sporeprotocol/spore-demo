@@ -3,6 +3,8 @@ import {
   SporeData,
   predefinedSporeConfigs,
   createSpore as _createSpore,
+  transferSpore as _transferSpore,
+  destroySpore as _destroySpore,
 } from '@spore-sdk/core';
 import { sendTransaction } from './transaction';
 
@@ -45,6 +47,18 @@ export async function getSpores(clusterId?: string) {
 
 export async function createSpore(...args: Parameters<typeof _createSpore>) {
   const { txSkeleton } = await _createSpore(...args);
+  const txHash = await sendTransaction(txSkeleton);
+  return txHash;
+}
+
+export async function transferSpore(...args: Parameters<typeof _transferSpore>) {
+  const { txSkeleton } = await _transferSpore(...args);
+  const txHash = await sendTransaction(txSkeleton);
+  return txHash;
+}
+
+export async function destroySpore(...args: Parameters<typeof _destroySpore>) {
+  const { txSkeleton } = await _destroySpore(...args);
   const txHash = await sendTransaction(txSkeleton);
   return txHash;
 }

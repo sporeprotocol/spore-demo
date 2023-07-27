@@ -24,6 +24,7 @@ import { helpers } from '@ckb-lumos/lumos';
 import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
+import SporeAddModal from '@/components/SporeAddModal';
 
 export async function getStaticProps() {
   const clusters = await getClusters();
@@ -40,6 +41,7 @@ export default function HomePage(props: HomePageProps) {
   const { address, lock, isConnected } = useConnect();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
+
   const clustersQuery = useQuery(['clusters'], getClusters, {
     initialData: props.clusters,
   });
@@ -48,7 +50,7 @@ export default function HomePage(props: HomePageProps) {
   });
   const createMutaion = useMutation(createCluster, {
     onSuccess: () => {
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries(['clusters']);
     },
   });
 
@@ -169,6 +171,28 @@ export default function HomePage(props: HomePageProps) {
         <Box mt="md">
           <Title order={2}>Spores</Title>
           <SimpleGrid cols={4} mt="sm">
+            <Card shadow="sm" padding="lg" radius="md" withBorder>
+              <SporeAddModal>
+                {({ open }) => (
+                  <Box
+                    sx={{
+                      height: '100%',
+                      cursor: isConnected ? 'pointer' : 'not-allowed',
+                    }}
+                    onClick={() => isConnected && open()}
+                  >
+                    <Flex
+                      direction="row"
+                      h="100%"
+                      justify="center"
+                      align="center"
+                    >
+                      <IconPlus size={50} color="gray" />
+                    </Flex>
+                  </Box>
+                )}
+              </SporeAddModal>
+            </Card>
             {spores.map((spore: Spore) => (
               <SporeCard key={spore.id} spore={spore} />
             ))}
