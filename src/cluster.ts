@@ -16,6 +16,17 @@ export interface Cluster {
   cell: Cell;
 }
 
+export function getClusterFromCell(cell: Cell): Cluster {
+  const unpacked = ClusterData.unpack(cell.data);
+  const cluster = {
+    id: cell.cellOutput.type!.args,
+    name: hex2String(unpacked.name.slice(2)),
+    description: hex2String(unpacked.description.slice(2)),
+    cell,
+  };
+  return cluster;
+}
+
 export async function getClusters() {
   const config = predefinedSporeConfigs.Aggron4;
   const indexer = new Indexer(config.ckbIndexerUrl);
@@ -25,13 +36,7 @@ export async function getClusters() {
 
   const clusters: Cluster[] = [];
   for await (const cell of collector.collect()) {
-    const unpacked = ClusterData.unpack(cell.data);
-    const cluster = {
-      id: cell.cellOutput.type!.args,
-      name: hex2String(unpacked.name.slice(2)),
-      description: hex2String(unpacked.description.slice(2)),
-      cell,
-    };
+    const cluster = getClusterFromCell(cell);
     clusters.push(cluster);
   }
 

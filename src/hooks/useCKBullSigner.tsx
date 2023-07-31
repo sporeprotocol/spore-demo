@@ -73,7 +73,10 @@ function SignInModalContent(props: ModalContentProps) {
 }
 
 function TransactionModalContent(
-  props: ModalContentProps & { txSkeleton: helpers.TransactionSkeletonType, onSignedTransaction(tx: Transaction): void },
+  props: ModalContentProps & {
+    txSkeleton: helpers.TransactionSkeletonType;
+    onSignedTransaction(tx: Transaction): void;
+  },
 ) {
   const { opened, setOpened, txSkeleton, onSignedTransaction } = props;
   const [signInToken] = useLocalStorage({ key: 'spore.ckbull.signInToken' });
@@ -139,21 +142,25 @@ export default function useCKBullSigner() {
   const [signTransactionOpened, setSignTransactionOpened] = useState(false);
 
   useEffect(() => {
-    if (!signInOpened) {
+    if (signInOpened) {
+      modals.open({
+        modalId: 'ckbull-sign-in',
+        title: 'Sign In with CKBull',
+        children: (
+          <SignInModalContent
+            opened={signInOpened}
+            setOpened={setSignInOpened}
+          />
+        ),
+      });
+    } else {
       modals.close('ckbull-sign-in');
     }
   }, [signInOpened]);
 
   const connect = useCallback(() => {
     setSignInOpened(true);
-    modals.open({
-      modalId: 'ckbull-sign-in',
-      title: 'Sign In with CKBull',
-      children: (
-        <SignInModalContent opened={signInOpened} setOpened={setSignInOpened} />
-      ),
-    });
-  }, [signInOpened]);
+  }, []);
 
   const signTransaction = useCallback(
     (txSkeleton: helpers.TransactionSkeletonType) => {
