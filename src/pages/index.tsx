@@ -1,30 +1,16 @@
 import Layout from '@/components/Layout';
-import {
-  Button,
-  Card,
-  Group,
-  Modal,
-  TextInput,
-  SimpleGrid,
-  Box,
-  Flex,
-  Switch,
-  Title,
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { isNotEmpty, useForm } from '@mantine/form';
-import { useCallback, useMemo, useState } from 'react';
-import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { notifications } from '@mantine/notifications';
+import { Card, SimpleGrid, Box, Flex, Switch, Title } from '@mantine/core';
+import { useMemo, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
-import { Cluster, createCluster, getClusters } from '@/cluster';
-import useConnect from '@/hooks/useConnect';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { Cluster, getClusters } from '@/cluster';
+import { useQuery } from 'react-query';
 import { helpers } from '@ckb-lumos/lumos';
 import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
-import SporeAddModal from '@/components/SporeAddModal';
+import useWalletConnect from '@/hooks/useWalletConnect';
+import useAddClusterModal from '@/hooks/useAddClusterModal';
+import useAddSporeModal from '@/hooks/useAddSporeModal';
 
 export async function getStaticProps() {
   const clusters = await getClusters();
@@ -37,21 +23,16 @@ export interface HomePageProps {
 }
 
 export default function HomePage(props: HomePageProps) {
-  const queryClient = useQueryClient();
-  const { address, lock, isConnected } = useConnect();
+  const { address, connected } = useWalletConnect();
   const [showOnlyMine, setShowOnlyMine] = useState(false);
-  const [opened, { open, close }] = useDisclosure(false);
+  const addClusterModal = useAddClusterModal();
+  const addSporeModal = useAddSporeModal();
 
   const clustersQuery = useQuery(['clusters'], getClusters, {
     initialData: props.clusters,
   });
   const sporesQuery = useQuery(['spores'], () => getSpores(), {
     initialData: props.spores,
-  });
-  const createMutaion = useMutation(createCluster, {
-    onSuccess: () => {
-      queryClient.invalidateQueries(['clusters']);
-    },
   });
 
   const clusters = useMemo(() => {
@@ -74,92 +55,29 @@ export default function HomePage(props: HomePageProps) {
     return allSpores;
   }, [address, showOnlyMine, sporesQuery.data]);
 
-  const form = useForm({
-    initialValues: {
-      name: '',
-      description: '',
-    },
-
-    validate: {
-      name: isNotEmpty('Name cannot be empty'),
-      description: isNotEmpty('description cannot be empty'),
-    },
-  });
-
-  const handleSubmit = useCallback(
-    async (values: { name: string; description: string }) => {
-      if (!address || !lock) {
-        return;
-      }
-      try {
-        await createMutaion.mutateAsync({
-          clusterData: {
-            name: values.name,
-            description: values.description,
-          },
-          fromInfos: [address],
-          toLock: lock,
-          config: predefinedSporeConfigs.Aggron4,
-        });
-        notifications.show({
-          color: 'green',
-          title: 'Congratulations!',
-          message: 'Your cluster has been created.',
-        });
-        close();
-      } catch (e) {
-        notifications.show({
-          color: 'red',
-          title: 'Error!',
-          message: (e as Error).message,
-        });
-      }
-    },
-    [address, lock, createMutaion, close],
-  );
-
   return (
     <Layout>
-      <Modal opened={opened} onClose={close} title="Create Cluster">
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <TextInput
-            withAsterisk
-            label="Name"
-            placeholder="Your Cluster Name"
-            {...form.getInputProps('name')}
-          />
-
-          <TextInput
-            withAsterisk
-            label="Description"
-            {...form.getInputProps('description')}
-          />
-
-          <Group position="right" mt="md">
-            <Button type="submit">Submit</Button>
-          </Group>
-        </form>
-      </Modal>
-
       <Box mt="md">
-        <Box>
-          <Switch
-            label="Only show what I own"
-            checked={showOnlyMine}
-            onClick={() => setShowOnlyMine(!showOnlyMine)}
-          />
-        </Box>
+        {connected && (
+          <Box mb="md">
+            <Switch
+              label="Only Mine"
+              checked={showOnlyMine}
+              onClick={() => setShowOnlyMine(!showOnlyMine)}
+            />
+          </Box>
+        )}
 
-        <Box mt="md">
+        <Box>
           <Title order={2}>Clusters</Title>
           <SimpleGrid cols={4} mt="sm">
             <Card shadow="sm" padding="lg" radius="md" withBorder>
               <Box
                 sx={{
                   height: '100%',
-                  cursor: isConnected ? 'pointer' : 'not-allowed',
+                  cursor: connected ? 'pointer' : 'not-allowed',
                 }}
-                onClick={() => isConnected && open()}
+                onClick={() => connected && addClusterModal.open()}
               >
                 <Flex direction="row" h="100%" justify="center" align="center">
                   <IconPlus size={50} color="gray" />
@@ -176,26 +94,17 @@ export default function HomePage(props: HomePageProps) {
           <Title order={2}>Spores</Title>
           <SimpleGrid cols={4} mt="sm">
             <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <SporeAddModal>
-                {({ open }) => (
-                  <Box
-                    sx={{
-                      height: '100%',
-                      cursor: isConnected ? 'pointer' : 'not-allowed',
-                    }}
-                    onClick={() => isConnected && open()}
-                  >
-                    <Flex
-                      direction="row"
-                      h="100%"
-                      justify="center"
-                      align="center"
-                    >
-                      <IconPlus size={50} color="gray" />
-                    </Flex>
-                  </Box>
-                )}
-              </SporeAddModal>
+              <Box
+                sx={{
+                  height: '100%',
+                  cursor: connected ? 'pointer' : 'not-allowed',
+                }}
+                onClick={() => connected && addSporeModal.open()}
+              >
+                <Flex direction="row" h="100%" justify="center" align="center">
+                  <IconPlus size={50} color="gray" />
+                </Flex>
+              </Box>
             </Card>
             {spores.map((spore: Spore) => (
               <SporeCard key={spore.id} spore={spore} />

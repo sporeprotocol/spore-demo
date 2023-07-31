@@ -1,26 +1,53 @@
-import useConnect from '@/hooks/useConnect';
-import { Button } from '@mantine/core';
-import { useClipboard } from '@mantine/hooks';
+import { Button, Flex, Modal } from '@mantine/core';
+import { useClipboard, useDisclosure } from '@mantine/hooks';
+import useCKBullSigner from '@/hooks/useCKBullSigner';
+import useWalletConnect from '@/hooks/useWalletConnect';
 import { useEffect, useMemo } from 'react';
+import useMetaMask from '@/hooks/useMetaMask';
 
 export default function Connect() {
-  const { address, connect, isConnected } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
+  const [opened, { open, close }] = useDisclosure(false);
+  const { address, connected } = useWalletConnect();
+  const ckbullSigner = useCKBullSigner();
+  const metaMask = useMetaMask();
+
   const displayAddress = useMemo(() => {
-    return isConnected ? `${address?.slice(0, 8)}...${address?.slice(-8)}` : '';
-  }, [address, isConnected]);
+    return connected ? `${address?.slice(0, 8)}...${address?.slice(-8)}` : '';
+  }, [address, connected]);
 
   useEffect(() => {
-    const connected = localStorage.getItem('wagmi.connected');
-    if (connected && !isConnected) {
-      connect();
+    if (connected) {
+      close();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [close, connected]);
 
   return (
-    <div>
-      {isConnected ? (
+    <>
+      <Modal opened={opened} onClose={close} title="Connect Wallet">
+        <Flex direction="column" gap={10}>
+          <Button
+            variant="light"
+            color="orange"
+            radius="md"
+            onClick={metaMask.connect}
+            fullWidth
+          >
+            MetaMask
+          </Button>
+          <Button
+            variant="light"
+            color="green"
+            radius="md"
+            onClick={ckbullSigner.connect}
+            fullWidth
+          >
+            CKBull
+          </Button>
+        </Flex>
+      </Modal>
+
+      {connected ? (
         <Button
           w={200}
           variant="outline"
@@ -29,8 +56,8 @@ export default function Connect() {
           {displayAddress}
         </Button>
       ) : (
-        <Button onClick={() => connect()}>Connect</Button>
+        <Button onClick={open}>Connect</Button>
       )}
-    </div>
+    </>
   );
 }

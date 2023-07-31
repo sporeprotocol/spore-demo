@@ -1,10 +1,9 @@
-import { Cell, Indexer, Script } from '@ckb-lumos/lumos';
+import { Cell, Indexer } from '@ckb-lumos/lumos';
 import {
   ClusterData,
   predefinedSporeConfigs,
   createCluster as _createCluster,
 } from '@spore-sdk/core';
-import { sendTransaction } from './transaction';
 
 const hex2String = (hex: string) => {
   return Buffer.from(hex, 'hex').toString('utf-8');
@@ -42,12 +41,4 @@ export async function getClusters() {
 export async function getCluster(id: string) {
   const clusters = await getClusters();
   return clusters.find((cluster) => cluster.id === id);
-}
-
-export async function createCluster(
-  ...args: Parameters<typeof _createCluster>
-) {
-  const { txSkeleton } = await _createCluster(...args);
-  const txHash = await sendTransaction(txSkeleton);
-  return txHash;
 }
