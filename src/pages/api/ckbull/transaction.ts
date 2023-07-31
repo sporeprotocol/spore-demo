@@ -7,23 +7,19 @@ const router = createRouter<NextApiRequest, NextApiResponse>();
 router
   .get(async (req: NextApiRequest, res: NextApiResponse) => {
     const { transactionToken } = req.query;
-    const response = await fetch(
-      `${process.env.CKBULL_API_URL}/transaction-request/${transactionToken}`,
+    const data = await fetch(
+      `${process.env.CKBULL_API_URL}/transaction-request/${encodeURIComponent(transactionToken as string)}`,
       {
         method: 'GET',
         // @ts-ignore
         headers: getAuthentication(),
       },
-    );
-    console.log(
-      `${process.env.CKBULL_API_URL}/sign-in-requests/${transactionToken}`,
-    );
-    const data = await response.json();
-    res.status(response.status).json(data);
+    ).then((res) => res.json());
+    res.status(200).json(data);
   })
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
     const { signInToken, transaction } = JSON.parse(req.body);
-    const { transactionToken } = await fetch(
+    const data = await fetch(
       `${process.env.CKBULL_API_URL}/transaction-request`,
       {
         method: 'POST',
@@ -33,9 +29,7 @@ router
       },
     ).then((res) => res.json());
 
-    res.status(200).json({
-      transactionToken,
-    });
+    res.status(200).json(data);
   });
 
 export default router.handler();

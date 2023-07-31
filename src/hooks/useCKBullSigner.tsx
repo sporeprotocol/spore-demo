@@ -2,10 +2,11 @@ import { useQuery } from 'react-query';
 import { useWalletStore } from './useWalletConnect';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { modals } from '@mantine/modals';
-import { Box, Flex, LoadingOverlay } from '@mantine/core';
+import { Text, Box, Flex, LoadingOverlay } from '@mantine/core';
 import QRCode from 'react-qr-code';
 import { Transaction, helpers } from '@ckb-lumos/lumos';
 import { useLocalStorage } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications';
 
 const fetcher = (url: string, init?: RequestInit) =>
   fetch(url, init).then((res) => res.json());
@@ -72,74 +73,9 @@ function SignInModalContent(props: ModalContentProps) {
   );
 }
 
-function TransactionModalContent(
-  props: ModalContentProps & {
-    txSkeleton: helpers.TransactionSkeletonType;
-    onSignedTransaction(tx: Transaction): void;
-  },
-) {
-  const { opened, setOpened, txSkeleton, onSignedTransaction } = props;
-  const [signInToken] = useLocalStorage({ key: 'spore.ckbull.signInToken' });
-
-  const signTransactionQuery = useQuery(
-    ['ckbull-transaction-request'],
-    () =>
-      fetcher('/api/ckbull/transaction', {
-        method: 'POST',
-        body: JSON.stringify({
-          signInToken,
-          transaction: helpers.transactionSkeletonToObject(txSkeleton),
-        }),
-      }),
-    { enabled: !!signInToken },
-  );
-  const transactionToken = useMemo(
-    () => signTransactionQuery.data?.transactionToken,
-    [signTransactionQuery.data],
-  );
-
-  const pollingQuery = useQuery(
-    ['ckbull-transaction-polling', transactionToken],
-    () =>
-      fetcher(
-        `/api/ckbull/transaction?transactionToken=${encodeURIComponent(
-          transactionToken,
-        )}`,
-      ),
-    {
-      refetchInterval: !opened ? false : 1000,
-      enabled: !!transactionToken,
-    },
-  );
-
-  useEffect(() => {
-    if (pollingQuery.data) {
-      const { status, transaction } = pollingQuery.data;
-      if (status === 'signed') {
-        onSignedTransaction(transaction);
-        setOpened(false);
-      }
-    }
-  }, [pollingQuery.data, setOpened, onSignedTransaction]);
-
-  return (
-    <Flex my="md" direction="row" justify="center">
-      <Box w="256px" h="256px" pos="relative">
-        <LoadingOverlay
-          visible={
-            signTransactionQuery.isLoading || signTransactionQuery.isRefetching
-          }
-          overlayBlur={2}
-        />
-        {transactionToken && <QRCode value={transactionToken} />}
-      </Box>
-    </Flex>
-  );
-}
-
 export default function useCKBullSigner() {
   const [signInOpened, setSignInOpened] = useState(false);
-  const [signTransactionOpened, setSignTransactionOpened] = useState(false);
+  const [signInToken] = useLocalStorage({ key: 'spore.ckbull.signInToken' });
 
   useEffect(() => {
     if (signInOpened) {
@@ -163,24 +99,38 @@ export default function useCKBullSigner() {
   }, []);
 
   const signTransaction = useCallback(
-    (txSkeleton: helpers.TransactionSkeletonType) => {
-      setSignTransactionOpened(true);
-      return new Promise<Transaction>((resolve) => {
-        modals.open({
-          modalId: 'ckbull-transaction',
-          title: 'Sign Transaction with CKBull',
-          children: (
-            <TransactionModalContent
-              opened={signTransactionOpened}
-              setOpened={setSignTransactionOpened}
-              txSkeleton={txSkeleton}
-              onSignedTransaction={resolve}
-            />
-          ),
-        });
+    async (txSkeleton: helpers.TransactionSkeletonType) => {
+      const { transactionToken } = await fetcher('/api/ckbull/transaction', {
+        method: 'POST',
+        body: JSON.stringify({
+          signInToken,
+          transaction: txSkeleton.toJSON(),
+        }),
+      });
+
+      notifications.show({
+        title: 'Sending Transaction!',
+        message:
+          'Please open the Activity in the CKBull and sign the transaction.',
+      });
+
+      await new Promise((resolve) => {
+        const polling = async () => {
+          const { status } = await fetcher(
+            `/api/ckbull/transaction?transactionToken=${encodeURIComponent(
+              transactionToken,
+            )}`,
+          );
+          if (status === 'signed') {
+            resolve(null);
+          } else {
+            setTimeout(polling, 1000);
+          }
+        };
+        polling();
       });
     },
-    [signTransactionOpened],
+    [signInToken],
   );
 
   return {

@@ -36,14 +36,12 @@ export default function useAddSporeModal(clusterId?: string) {
     },
   });
 
-  const loading = useMemo(() => addSporeMutation.isLoading, [addSporeMutation.isLoading]);
+  const loading = useMemo(
+    () => addSporeMutation.isLoading,
+    [addSporeMutation.isLoading],
+  );
 
-  const imageUrl = useMemo(() => {
-    if (!content) {
-      return '';
-    }
-    return URL.createObjectURL(content);
-  }, [content]);
+  const imageUrl = content ? URL.createObjectURL(content) : '';
 
   useEffect(() => {
     if (opened) {
@@ -133,7 +131,14 @@ export default function useAddSporeModal(clusterId?: string) {
     } else {
       modals.close('add-spore');
     }
-  }, [addSporeMutation.isLoading, content, handleDrop, handleSubmit, imageUrl, opened]);
+  }, [
+    addSporeMutation.isLoading,
+    content,
+    handleDrop,
+    handleSubmit,
+    imageUrl,
+    opened,
+  ]);
 
   return {
     open,
