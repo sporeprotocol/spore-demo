@@ -1,8 +1,8 @@
 import { getCluster } from '@/cluster';
 import Layout from '@/components/Layout';
-import SporeDestroyModal from '@/components/SporeDestroyModal';
-import SporeTransferModal from '@/components/SporeTransferModal';
-import useConnect from '@/hooks/useConnect';
+import useDestroySporeModal from '@/hooks/useDestorySporeModal';
+import useTransferSporeModal from '@/hooks/useTransferSporeModal';
+import useWalletConnect from '@/hooks/useWalletConnect';
 import { getSpore } from '@/spore';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
@@ -12,7 +12,6 @@ import {
   Card,
   Flex,
   Title,
-  Group,
   Button,
   Box,
 } from '@mantine/core';
@@ -24,7 +23,7 @@ import { useQuery } from 'wagmi';
 export default function SporePage() {
   const router = useRouter();
   const { id } = router.query;
-  const { address } = useConnect();
+  const { address } = useWalletConnect();
   const { data: spore } = useQuery(['spore', id], () => getSpore(id as string));
   const { data: cluster } = useQuery(
     ['cluster', spore?.clusterId],
@@ -33,6 +32,9 @@ export default function SporePage() {
       enabled: !!spore,
     },
   );
+
+  const transferSporeModal = useTransferSporeModal(spore);
+  const destroySporeModal = useDestroySporeModal(spore);
 
   const isOwned = useMemo(() => {
     if (!spore || !address) {
@@ -96,32 +98,26 @@ export default function SporePage() {
 
           {isOwned && (
             <Flex direction="row" justify="end" gap="md">
-              <SporeTransferModal spore={spore}>
-                {({ open }) => (
-                  <Button
-                    size="sm"
-                    variant="light"
-                    color="blue"
-                    radius="md"
-                    onClick={open}
-                  >
-                    Transfer
-                  </Button>
-                )}
-              </SporeTransferModal>
-              <SporeDestroyModal spore={spore}>
-                {({ open }) => (
+              <Button
+                size="sm"
+                variant="light"
+                color="blue"
+                radius="md"
+                onClick={transferSporeModal.open}
+                loading={transferSporeModal.loading}
+              >
+                Transfer
+              </Button>
                   <Button
                     size="sm"
                     variant="light"
                     color="red"
                     radius="md"
-                    onClick={open}
+                    onClick={destroySporeModal.open}
+                    loading={destroySporeModal.loading}
                   >
                     Destroy
                   </Button>
-                )}
-              </SporeDestroyModal>
             </Flex>
           )}
         </Flex>

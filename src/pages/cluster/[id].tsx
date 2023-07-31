@@ -15,10 +15,10 @@ import { GetServerSideProps } from 'next';
 import { Spore, getSpores } from '@/spore';
 import { Cluster, getCluster } from '@/cluster';
 import { useQuery } from 'react-query';
-import useConnect from '@/hooks/useConnect';
 import { helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
-import SporeAddModal from '@/components/SporeAddModal';
+import useWalletConnect from '@/hooks/useWalletConnect';
+import useAddSporeModal from '@/hooks/useAddSporeModal';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   context.res.setHeader(
@@ -41,7 +41,8 @@ export type ClusterPageProps = {
 export default function ClusterPage(props: ClusterPageProps) {
   const router = useRouter();
   const { id } = router.query;
-  const { address, isConnected } = useConnect();
+  const { address, connected } = useWalletConnect();
+  const addSporeModal = useAddSporeModal(id as string);
 
   const { data: cluster } = useQuery(
     ['cluster', id],
@@ -76,19 +77,15 @@ export default function ClusterPage(props: ClusterPageProps) {
           </Text>
         </Flex>
         {cluster && ownedCluster && (
-          <SporeAddModal clusterId={cluster.id}>
-            {({ open, isLoading }) => (
-              <Box style={{ cursor: isConnected ? 'pointer' : 'not-allowed' }}>
-                <Button
-                  disabled={!isConnected}
-                  onClick={open}
-                  loading={isLoading}
-                >
-                  Add Spore
-                </Button>
-              </Box>
-            )}
-          </SporeAddModal>
+          <Box style={{ cursor: connected ? 'pointer' : 'not-allowed' }}>
+            <Button
+              disabled={!connected}
+              onClick={addSporeModal.open}
+              loading={addSporeModal.loading}
+            >
+              Add Spore
+            </Button>
+          </Box>
         )}
       </Flex>
 
