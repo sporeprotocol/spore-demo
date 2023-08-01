@@ -37,17 +37,12 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       queryClient.invalidateQueries('spores');
     },
   });
-
-  const loading = useMemo(
-    () => transferSporeMutation.isLoading,
-    [transferSporeMutation.isLoading],
-  );
+  const loading = transferSporeMutation.isLoading;
 
   const form = useForm({
     initialValues: {
       to: '',
     },
-
     validate: {
       to: isNotEmpty('address cannot be empty'),
     },

@@ -5,7 +5,7 @@ import {
 import useWalletConnect from './useWalletConnect';
 import { RPC } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
 import { useDisclosure } from '@mantine/hooks';
@@ -37,17 +37,12 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
       queryClient.invalidateQueries('spores');
     },
   });
-
-  const loading = useMemo(
-    () => destroySporeMutation.isLoading,
-    [destroySporeMutation.isLoading],
-  );
+  const loading = destroySporeMutation.isLoading;
 
   const form = useForm({
     initialValues: {
       to: '',
     },
-
     validate: {
       to: isNotEmpty('address cannot be empty'),
     },

@@ -45,6 +45,7 @@ export default function useAddClusterModal() {
       queryClient.invalidateQueries('clusters');
     },
   });
+  const loading = addClusterMutation.isLoading;
 
   const handleSubmit = useCallback(
     async (values: { name: string; description: string }) => {
@@ -115,5 +116,6 @@ export default function useAddClusterModal() {
   return {
     open,
     close,
+    loading,
   };
 }

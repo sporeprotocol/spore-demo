@@ -2,7 +2,7 @@ import { useQuery } from 'react-query';
 import { useWalletStore } from './useWalletConnect';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { modals } from '@mantine/modals';
-import { Text, Box, Flex, LoadingOverlay } from '@mantine/core';
+import { Box, Flex, LoadingOverlay } from '@mantine/core';
 import QRCode from 'react-qr-code';
 import { Transaction, helpers } from '@ckb-lumos/lumos';
 import { useLocalStorage } from '@mantine/hooks';
@@ -114,21 +114,23 @@ export default function useCKBullSigner() {
           'Please open the Activity in the CKBull and sign the transaction.',
       });
 
-      await new Promise((resolve) => {
+      const transaction = await new Promise<Transaction>((resolve) => {
         const polling = async () => {
-          const { status } = await fetcher(
+          const { status, transaction } = await fetcher(
             `/api/ckbull/transaction?transactionToken=${encodeURIComponent(
               transactionToken,
             )}`,
           );
           if (status === 'signed') {
-            resolve(null);
+            resolve(transaction as Transaction);
           } else {
             setTimeout(polling, 1000);
           }
         };
         polling();
       });
+
+      return transaction;
     },
     [signInToken],
   );

@@ -51,10 +51,7 @@ export default function useWalletConnect() {
 
   const lock = useMemo(() => {
     config.initializeConfig(config.predefined.AGGRON4);
-    if (address) {
-      return helpers.parseAddress(address);
-    }
-    return undefined;
+    return address ? helpers.parseAddress(address) : undefined;
   }, [address]);
 
   const connector: Connector = useMemo(

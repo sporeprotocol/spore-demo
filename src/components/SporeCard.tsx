@@ -1,5 +1,6 @@
-import { getCluster } from '@/cluster';
+import { Cluster } from '@/cluster';
 import { Spore } from '@/spore';
+import { hexToBlob } from '@/utils';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -11,21 +12,14 @@ import {
   Title,
 } from '@mantine/core';
 import Link from 'next/link';
-import { useQuery } from 'react-query';
 
 export interface SporeCardProps {
+  cluster: Cluster | undefined;
   spore: Spore;
 }
 
-export default function SporeCard({ spore }: SporeCardProps) {
-  const { data: cluster } = useQuery(['cluster', spore.clusterId], () => {
-    if (!spore.clusterId) {
-      return null;
-    }
-    return getCluster(spore.clusterId);
-  });
-
-  const url = URL.createObjectURL(spore.content);
+export default function SporeCard({ cluster, spore }: SporeCardProps) {
+  const url = spore.content ? URL.createObjectURL(hexToBlob(spore.content.slice(2))) : '';
 
   return (
     <Link

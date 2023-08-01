@@ -1,5 +1,6 @@
 import { Cluster } from '@/cluster';
-import { getSpores } from '@/spore';
+import { Spore } from '@/spore';
+import { hexToBlob } from '@/utils';
 import {
   Text,
   Image,
@@ -11,17 +12,13 @@ import {
 import { IconPhoto } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { useQuery } from 'wagmi';
 
 export interface ClusterCardProps {
   cluster: Cluster;
+  spores: Spore[];
 }
 
-export default function ClusterCard({ cluster }: ClusterCardProps) {
-  const { data: spores = [] } = useQuery(['spores', cluster.id], () =>
-    getSpores(cluster.id),
-  );
-
+export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
   const cols = useMemo(() => {
     if (spores.length > 4) {
       return 2;
@@ -37,11 +34,12 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
         passHref
       >
         <Card.Section mb="md">
-          {spores.length > 0 &&
-          spores.every(({ content }) => content instanceof Blob) ? (
+          {spores.length > 0 ? (
             <SimpleGrid cols={cols}>
               {spores.slice(0, cols * cols).map((spore) => {
-                const url = URL.createObjectURL(spore.content);
+                const url = URL.createObjectURL(
+                  hexToBlob(spore.content.slice(2)),
+                );
                 return (
                   <AspectRatio ratio={1} key={spore.id}>
                     <Image
