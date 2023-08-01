@@ -1,9 +1,12 @@
-import { getCluster } from '@/cluster';
+import { Cluster, getCluster } from '@/cluster';
 import Layout from '@/components/Layout';
+import useClusterByIdQuery from '@/hooks/useClusterByIdQuery';
 import useDestroySporeModal from '@/hooks/useDestorySporeModal';
+import useSporeByIdQuery from '@/hooks/useSporeByIdQuery';
 import useTransferSporeModal from '@/hooks/useTransferSporeModal';
 import useWalletConnect from '@/hooks/useWalletConnect';
-import { getSpore } from '@/spore';
+import { Spore, getSpore } from '@/spore';
+import { hexToBlob } from '@/utils';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -15,22 +18,38 @@ import {
   Button,
   Box,
 } from '@mantine/core';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
-import { useQuery } from 'wagmi';
 
-export default function SporePage() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59',
+  );
+
+  const { id } = context.query;
+  const spore = await getSpore(id as string);
+  const cluster = await getCluster(spore?.clusterId as string);
+  return {
+    props: { cluster, spore },
+  };
+};
+
+export type SporePageProps = {
+  cluster: Cluster;
+  spore: Spore;
+};
+
+export default function SporePage(props: SporePageProps) {
   const router = useRouter();
   const { id } = router.query;
   const { address } = useWalletConnect();
-  const { data: spore } = useQuery(['spore', id], () => getSpore(id as string));
-  const { data: cluster } = useQuery(
-    ['cluster', spore?.clusterId],
-    () => getCluster(spore!.clusterId as string),
-    {
-      enabled: !!spore,
-    },
+  const { data: spore } = useSporeByIdQuery(id as string, props.spore);
+  const { data: cluster } = useClusterByIdQuery(
+    spore?.clusterId || undefined,
+    props.cluster,
   );
 
   const transferSporeModal = useTransferSporeModal(spore);
@@ -43,12 +62,9 @@ export default function SporePage() {
     return helpers.encodeToAddress(spore.cell.cellOutput.lock) === address;
   }, [spore, address]);
 
-  const url = useMemo(() => {
-    if (spore?.content instanceof Blob) {
-      return URL.createObjectURL(spore.content);
-    }
-    return null;
-  }, [spore]);
+  const url = spore?.content
+    ? URL.createObjectURL(hexToBlob(spore.content.slice(2)))
+    : '';
 
   if (!spore) {
     return null;
@@ -108,16 +124,16 @@ export default function SporePage() {
               >
                 Transfer
               </Button>
-                  <Button
-                    size="sm"
-                    variant="light"
-                    color="red"
-                    radius="md"
-                    onClick={destroySporeModal.open}
-                    loading={destroySporeModal.loading}
-                  >
-                    Destroy
-                  </Button>
+              <Button
+                size="sm"
+                variant="light"
+                color="red"
+                radius="md"
+                onClick={destroySporeModal.open}
+                loading={destroySporeModal.loading}
+              >
+                Destroy
+              </Button>
             </Flex>
           )}
         </Flex>

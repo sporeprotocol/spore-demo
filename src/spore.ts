@@ -7,15 +7,10 @@ import {
   destroySpore as _destroySpore,
 } from '@spore-sdk/core';
 
-const hex2Blob = (hex: string) => {
-  const buffer = Buffer.from(hex, 'hex');
-  return new Blob([buffer]);
-};
-
 export interface Spore {
   id: string;
-  clusterId: string | undefined;
-  content: Blob;
+  clusterId: string | null;
+  content: string;
   cell: Cell;
 }
 
@@ -23,8 +18,8 @@ export function getSporeFromCell(cell: Cell): Spore {
   const unpacked = SporeData.unpack(cell.data);
   return {
     id: cell.cellOutput.type!.args,
-    content: hex2Blob(unpacked.content.slice(2)),
-    clusterId: unpacked.clusterId,
+    content: unpacked.content,
+    clusterId: unpacked.clusterId ?? null,
     cell,
   };
 }

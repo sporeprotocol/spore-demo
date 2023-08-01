@@ -17,6 +17,13 @@ export default function useAddSporeModal(clusterId?: string) {
   const { address, lock, signTransaction } = useWalletConnect();
   const queryClient = useQueryClient();
   const [content, setContent] = useState<Blob | null>(null);
+  const imageUrl = content ? URL.createObjectURL(content) : '';
+
+  useEffect(() => {
+    if (opened) {
+      setContent(null);
+    }
+  }, [opened]);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -35,19 +42,7 @@ export default function useAddSporeModal(clusterId?: string) {
       queryClient.invalidateQueries('spores');
     },
   });
-
-  const loading = useMemo(
-    () => addSporeMutation.isLoading,
-    [addSporeMutation.isLoading],
-  );
-
-  const imageUrl = content ? URL.createObjectURL(content) : '';
-
-  useEffect(() => {
-    if (opened) {
-      setContent(null);
-    }
-  }, [opened]);
+  const loading = addSporeMutation.isLoading;
 
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;

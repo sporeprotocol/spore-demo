@@ -14,11 +14,12 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { GetServerSideProps } from 'next';
 import { Spore, getSpores } from '@/spore';
 import { Cluster, getCluster } from '@/cluster';
-import { useQuery } from 'react-query';
 import { helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import useAddSporeModal from '@/hooks/useAddSporeModal';
+import useSporeByClusterQuery from '@/hooks/useSporeByClusterQuery';
+import useClusterByIdQuery from '@/hooks/useClusterByIdQuery';
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   context.res.setHeader(
@@ -28,8 +29,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   const { id } = context.query;
   const cluster = await getCluster(id as string);
+  const spores = await getSpores(id as string);
   return {
-    props: { cluster, spores: [] },
+    props: { cluster, spores },
   };
 };
 
@@ -44,16 +46,8 @@ export default function ClusterPage(props: ClusterPageProps) {
   const { address, connected } = useWalletConnect();
   const addSporeModal = useAddSporeModal(id as string);
 
-  const { data: cluster } = useQuery(
-    ['cluster', id],
-    () => getCluster(id as string),
-    { initialData: props.cluster },
-  );
-  const { data: spores = [] } = useQuery(
-    ['spores', id],
-    () => getSpores(id as string),
-    { initialData: props.spores },
-  );
+  const { data: cluster } = useClusterByIdQuery(id as string, props.cluster);
+  const { data: spores = [] } = useSporeByClusterQuery(id as string, props.spores);
 
   const ownedCluster = useMemo(() => {
     if (cluster && address) {
@@ -98,7 +92,7 @@ export default function ClusterPage(props: ClusterPageProps) {
       <Box mt={20}>
         <SimpleGrid cols={4}>
           {spores.map((spore) => {
-            return <SporeCard key={spore.id} spore={spore} />;
+            return <SporeCard key={spore.id} spore={spore} cluster={cluster} />;
           })}
         </SimpleGrid>
       </Box>

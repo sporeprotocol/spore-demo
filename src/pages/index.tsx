@@ -3,7 +3,6 @@ import { Card, SimpleGrid, Box, Flex, Switch, Title } from '@mantine/core';
 import { useMemo, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { Cluster, getClusters } from '@/cluster';
-import { useQuery } from 'react-query';
 import { helpers } from '@ckb-lumos/lumos';
 import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
@@ -11,11 +10,20 @@ import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import useAddClusterModal from '@/hooks/useAddClusterModal';
 import useAddSporeModal from '@/hooks/useAddSporeModal';
+import { GetServerSideProps } from 'next';
+import useClustersQuery from '@/hooks/useClustersQuery';
+import useSporesQuery from '@/hooks/useSporesQuery';
 
-export async function getStaticProps() {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59',
+  );
+
   const clusters = await getClusters();
-  return { props: { clusters, spores: [] } };
-}
+  const spores = await getSpores();
+  return { props: { clusters, spores } };
+};
 
 export interface HomePageProps {
   clusters: Cluster[];
@@ -28,12 +36,8 @@ export default function HomePage(props: HomePageProps) {
   const addClusterModal = useAddClusterModal();
   const addSporeModal = useAddSporeModal();
 
-  const clustersQuery = useQuery(['clusters'], getClusters, {
-    initialData: props.clusters,
-  });
-  const sporesQuery = useQuery(['spores'], () => getSpores(), {
-    initialData: props.spores,
-  });
+  const clustersQuery = useClustersQuery(props.clusters);
+  const sporesQuery = useSporesQuery(props.spores);
 
   const clusters = useMemo(() => {
     const allClusters = clustersQuery.data || [];
@@ -85,7 +89,11 @@ export default function HomePage(props: HomePageProps) {
               </Box>
             </Card>
             {clusters.map((cluster: Cluster) => (
-              <ClusterCard key={cluster.id} cluster={cluster} />
+              <ClusterCard
+                key={cluster.id}
+                cluster={cluster}
+                spores={spores.filter((s) => s.clusterId === cluster.id)}
+              />
             ))}
           </SimpleGrid>
         </Box>
@@ -107,7 +115,11 @@ export default function HomePage(props: HomePageProps) {
               </Box>
             </Card>
             {spores.map((spore: Spore) => (
-              <SporeCard key={spore.id} spore={spore} />
+              <SporeCard
+                key={spore.id}
+                spore={spore}
+                cluster={clusters.find((c) => c.id === spore.clusterId)}
+              />
             ))}
           </SimpleGrid>
         </Box>
