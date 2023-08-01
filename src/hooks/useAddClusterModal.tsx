@@ -86,6 +86,7 @@ export default function useAddClusterModal() {
       modals.open({
         modalId: 'add-cluster',
         title: 'Add New Cluster',
+        onClose: close,
         children: (
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
@@ -111,7 +112,7 @@ export default function useAddClusterModal() {
     } else {
       modals.close('add-cluster');
     }
-  }, [addClusterMutation.isLoading, form, handleSubmit, opened]);
+  }, [addClusterMutation.isLoading, form, handleSubmit, opened, close]);
 
   return {
     open,

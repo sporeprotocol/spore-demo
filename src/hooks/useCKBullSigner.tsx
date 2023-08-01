@@ -122,7 +122,7 @@ export default function useCKBullSigner() {
             )}`,
           );
           if (status === 'signed') {
-            resolve(transaction as Transaction);
+            resolve(transaction);
           } else {
             setTimeout(polling, 1000);
           }

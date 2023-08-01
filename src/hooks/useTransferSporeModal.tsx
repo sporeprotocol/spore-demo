@@ -85,6 +85,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       modals.open({
         modalId: 'transfer-spore',
         title: 'Transfer spore',
+        onClose: close,
         children: (
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput
@@ -104,7 +105,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
     } else {
       modals.close('transfer-spore');
     }
-  }, [transferSporeMutation.isLoading, handleSubmit, opened, form]);
+  }, [transferSporeMutation.isLoading, handleSubmit, opened, form, close]);
 
   return {
     open,

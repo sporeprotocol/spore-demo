@@ -78,6 +78,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
       modals.open({
         modalId: 'destroy-spore',
         title: 'Destroy spore',
+        onClose: close,
         children: (
           <>
             <Text mb="md">Do you want to destroy this spore?</Text>

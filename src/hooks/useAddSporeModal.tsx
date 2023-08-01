@@ -86,6 +86,7 @@ export default function useAddSporeModal(clusterId?: string) {
       modals.open({
         modalId: 'add-spore',
         title: 'Add New spore',
+        onClose: close,
         children: (
           <>
             {content ? (
@@ -133,6 +134,7 @@ export default function useAddSporeModal(clusterId?: string) {
     handleSubmit,
     imageUrl,
     opened,
+    close,
   ]);
 
   return {
