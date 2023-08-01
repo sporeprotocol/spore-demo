@@ -11,9 +11,9 @@ import {
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { GetServerSideProps } from 'next';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import { Spore, getSpores } from '@/spore';
-import { Cluster, getCluster } from '@/cluster';
+import { Cluster, getCluster, getClusters } from '@/cluster';
 import { helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
@@ -21,23 +21,43 @@ import useAddSporeModal from '@/hooks/useAddSporeModal';
 import useSporeByClusterQuery from '@/hooks/useSporeByClusterQuery';
 import useClusterByIdQuery from '@/hooks/useClusterByIdQuery';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  context.res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59',
-  );
+export type ClusterPageProps = {
+  cluster: Cluster | undefined;
+  spores: Spore[];
+};
 
-  const { id } = context.query;
+export type ClusterPageParams = {
+  id: string;
+};
+
+export const getStaticPaths: GetStaticPaths<ClusterPageParams> = async () => {
+  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
+
+  const clusters = await getClusters();
+  const paths = clusters.map(({ id }) => ({
+    params: { id },
+  }));
+  return {
+    paths,
+    fallback: false,
+  };
+};
+
+export const getStaticProps: GetStaticProps<
+  ClusterPageProps,
+  ClusterPageParams
+> = async (context) => {
+  const { id } = context.params!;
   const cluster = await getCluster(id as string);
   const spores = await getSpores(id as string);
   return {
     props: { cluster, spores },
   };
-};
-
-export type ClusterPageProps = {
-  cluster: Cluster;
-  spores: Spore[];
 };
 
 export default function ClusterPage(props: ClusterPageProps) {
@@ -47,7 +67,10 @@ export default function ClusterPage(props: ClusterPageProps) {
   const addSporeModal = useAddSporeModal(id as string);
 
   const { data: cluster } = useClusterByIdQuery(id as string, props.cluster);
-  const { data: spores = [] } = useSporeByClusterQuery(id as string, props.spores);
+  const { data: spores = [] } = useSporeByClusterQuery(
+    id as string,
+    props.spores,
+  );
 
   const ownedCluster = useMemo(() => {
     if (cluster && address) {

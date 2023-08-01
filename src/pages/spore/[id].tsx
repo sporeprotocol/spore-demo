@@ -5,7 +5,7 @@ import useDestroySporeModal from '@/hooks/useDestorySporeModal';
 import useSporeByIdQuery from '@/hooks/useSporeByIdQuery';
 import useTransferSporeModal from '@/hooks/useTransferSporeModal';
 import useWalletConnect from '@/hooks/useWalletConnect';
-import { Spore, getSpore } from '@/spore';
+import { Spore, getSpore, getSpores } from '@/spore';
 import { hexToBlob } from '@/utils';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
@@ -18,28 +18,53 @@ import {
   Button,
   Box,
 } from '@mantine/core';
-import { GetServerSideProps } from 'next';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  context.res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59',
-  );
+export type SporePageProps = {
+  cluster?: Cluster;
+  spore: Spore | undefined;
+};
 
-  const { id } = context.query;
-  const spore = await getSpore(id as string);
-  const cluster = await getCluster(spore?.clusterId as string);
+export type SporePageParams = {
+  id: string;
+};
+
+export const getStaticPaths: GetStaticPaths<SporePageParams> = async () => {
+  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
+    return {
+      paths: [],
+      fallback: 'blocking',
+    };
+  }
+
+  const spores = await getSpores();
+  const paths = spores.map(({ id }) => ({
+    params: { id },
+  }));
   return {
-    props: { cluster, spore },
+    paths,
+    fallback: false,
   };
 };
 
-export type SporePageProps = {
-  cluster: Cluster;
-  spore: Spore;
+export const getStaticProps: GetStaticProps<
+  SporePageProps,
+  SporePageParams
+> = async (context) => {
+  const { id } = context.params!;
+  const spore = await getSpore(id as string);
+  const cluster = await getCluster(spore?.clusterId as string);
+  if (cluster) {
+    return {
+      props: { cluster, spore },
+    };
+  }
+  return {
+    props: { spore },
+  };
 };
 
 export default function SporePage(props: SporePageProps) {
