@@ -90,8 +90,9 @@ export default function SporePage(props: SporePageProps) {
           <Box>
             <Link
               href={`/cluster/${spore.clusterId}`}
-              passHref
               style={{ textDecoration: 'none' }}
+              prefetch
+              passHref
             >
               <Title order={5} color="blue">
                 {cluster?.name}

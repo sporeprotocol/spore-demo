@@ -10,25 +10,20 @@ import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import useAddClusterModal from '@/hooks/useAddClusterModal';
 import useAddSporeModal from '@/hooks/useAddSporeModal';
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import useClustersQuery from '@/hooks/useClustersQuery';
 import useSporesQuery from '@/hooks/useSporesQuery';
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  context.res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59',
-  );
-
-  const clusters = await getClusters();
-  const spores = await getSpores();
-  return { props: { clusters, spores } };
-};
 
 export interface HomePageProps {
   clusters: Cluster[];
   spores: Spore[];
 }
+
+export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
+  const clusters = await getClusters();
+  const spores = await getSpores();
+  return { props: { clusters, spores } };
+};
 
 export default function HomePage(props: HomePageProps) {
   const { address, connected } = useWalletConnect();
