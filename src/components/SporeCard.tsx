@@ -1,6 +1,5 @@
 import { Cluster } from '@/cluster';
 import { Spore } from '@/spore';
-import { hexToBlob } from '@/utils';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -19,8 +18,6 @@ export interface SporeCardProps {
 }
 
 export default function SporeCard({ cluster, spore }: SporeCardProps) {
-  const url = spore.content ? URL.createObjectURL(hexToBlob(spore.content.slice(2))) : '';
-
   return (
     <Link
       href={`/spore/${spore.id}`}
@@ -32,11 +29,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
         <Flex h="100%" direction="column" justify="space-between">
           <Card.Section mb="md">
             <AspectRatio ratio={1}>
-              <Image
-                alt={spore.id}
-                src={url}
-                imageProps={{ onLoad: () => URL.revokeObjectURL(url) }}
-              />
+              <Image alt={spore.id} src={`/api/media/${spore.id}`} />
             </AspectRatio>
           </Card.Section>
           <Group>

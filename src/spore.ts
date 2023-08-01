@@ -11,6 +11,7 @@ export interface Spore {
   id: string;
   clusterId: string | null;
   content: string;
+  contentType: string;
   cell: Cell;
 }
 
@@ -19,6 +20,7 @@ export function getSporeFromCell(cell: Cell): Spore {
   return {
     id: cell.cellOutput.type!.args,
     content: unpacked.content,
+    contentType: Buffer.from(unpacked.contentType.slice(2), 'hex').toString(),
     clusterId: unpacked.clusterId ?? null,
     cell,
   };

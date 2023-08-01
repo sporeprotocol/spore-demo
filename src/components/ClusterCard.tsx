@@ -1,6 +1,5 @@
 import { Cluster } from '@/cluster';
 import { Spore } from '@/spore';
-import { hexToBlob } from '@/utils';
 import {
   Text,
   Image,
@@ -38,16 +37,9 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
           {spores.length > 0 ? (
             <SimpleGrid cols={cols}>
               {spores.slice(0, cols * cols).map((spore) => {
-                const url = URL.createObjectURL(
-                  hexToBlob(spore.content.slice(2)),
-                );
                 return (
                   <AspectRatio ratio={1} key={spore.id}>
-                    <Image
-                      src={url}
-                      alt={spore.id}
-                      imageProps={{ onLoad: () => URL.revokeObjectURL(url) }}
-                    />
+                    <Image src={`/api/media/${spore.id}`} alt={spore.id} />
                   </AspectRatio>
                 );
               })}

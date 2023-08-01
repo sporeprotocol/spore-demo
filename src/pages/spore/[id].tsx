@@ -6,7 +6,6 @@ import useSporeByIdQuery from '@/hooks/useSporeByIdQuery';
 import useTransferSporeModal from '@/hooks/useTransferSporeModal';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import { Spore, getSpore, getSpores } from '@/spore';
-import { hexToBlob } from '@/utils';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -87,10 +86,6 @@ export default function SporePage(props: SporePageProps) {
     return helpers.encodeToAddress(spore.cell.cellOutput.lock) === address;
   }, [spore, address]);
 
-  const url = spore?.content
-    ? URL.createObjectURL(hexToBlob(spore.content.slice(2)))
-    : '';
-
   if (!spore) {
     return null;
   }
@@ -102,11 +97,10 @@ export default function SporePage(props: SporePageProps) {
       <Flex direction="row">
         <Card withBorder radius="md" mr="md">
           <AspectRatio ratio={1} w="30vw">
-            {url && (
+            {spore && (
               <Image
-                alt={spore!.id}
-                src={url}
-                imageProps={{ onLoad: () => URL.revokeObjectURL(url) }}
+                alt={spore.id}
+                src={`/api/media/${spore.id}`}
               />
             )}
           </AspectRatio>
