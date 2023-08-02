@@ -1,10 +1,15 @@
 import { Title } from '@mantine/core';
 import Link from 'next/link';
+import { Caveat_Brush } from 'next/font/google';
+
+const caveatBrush = Caveat_Brush({ subsets: ['latin'], weight: ['400'] });
 
 export default function Logo() {
   return (
     <Link href="/" style={{ textDecoration: 'none', color: '#0a0a0a' }}>
-      <Title order={2}>SporeDemo</Title>
+      <Title className={caveatBrush.className} order={2}>
+        Spore Protocol Demo
+      </Title>
     </Link>
   );
 }

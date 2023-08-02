@@ -45,7 +45,7 @@ export const getStaticPaths: GetStaticPaths<SporePageParams> = async () => {
   }));
   return {
     paths,
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 

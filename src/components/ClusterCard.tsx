@@ -7,8 +7,10 @@ import {
   Group,
   AspectRatio,
   SimpleGrid,
+  Flex,
+  Title,
+  Box,
 } from '@mantine/core';
-import { IconPhoto } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useMemo } from 'react';
 
@@ -26,7 +28,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
   }, [spores]);
 
   return (
-    <Card shadow="sm" radius="md" withBorder>
+    <Card pt="0" shadow="sm" radius="md" withBorder>
       <Link
         href={`/cluster/${cluster.id}`}
         style={{ textDecoration: 'none' }}
@@ -38,7 +40,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
             <SimpleGrid cols={cols}>
               {spores.slice(0, cols * cols).map((spore) => {
                 return (
-                  <AspectRatio ratio={1} key={spore.id}>
+                  <AspectRatio key={spore.id} ratio={1}>
                     <Image src={`/api/media/${spore.id}`} alt={spore.id} />
                   </AspectRatio>
                 );
@@ -46,7 +48,11 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
             </SimpleGrid>
           ) : (
             <AspectRatio ratio={1}>
-              <IconPhoto stroke={1.5} color="gray" style={{ opacity: 0.3 }} />
+              <Flex justify="center" align="center" bg="gray.1">
+                <Title color="gray.4" order={2}>
+                  No Spores
+                </Title>
+              </Flex>
             </AspectRatio>
           )}
         </Card.Section>

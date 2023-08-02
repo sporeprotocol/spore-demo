@@ -44,7 +44,7 @@ export const getStaticPaths: GetStaticPaths<ClusterPageParams> = async () => {
   }));
   return {
     paths,
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 
