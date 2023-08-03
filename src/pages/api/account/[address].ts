@@ -14,7 +14,7 @@ router.get(async (req: NextApiRequest, res: NextApiResponse) => {
   const config = predefinedSporeConfigs.Aggron4;
   const indexer = new Indexer(config.ckbIndexerUrl);
   const collector = indexer.collector({
-    lock: helpers.parseAddress(address as string),
+    lock: helpers.parseAddress(address as string, { config: config.lumos }),
     data: '0x',
   });
 
