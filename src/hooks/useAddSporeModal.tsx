@@ -110,8 +110,9 @@ export default function useAddSporeModal(id?: string) {
         modalId,
         title: 'Add New spore',
         onClose: () => {
-          setClusterId(undefined);
+          setClusterId(id);
           setContent(null);
+          setDataUrl(null);
           close();
         },
         closeOnEscape: !addSporeMutation.isLoading,
