@@ -1,6 +1,6 @@
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import useWalletConnect from './useWalletConnect';
-import { RPC } from '@ckb-lumos/lumos';
+import { RPC, Script, commons, config, helpers } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
@@ -8,7 +8,7 @@ import { useQueryClient } from 'react-query';
 import { useDisclosure } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { Button, Group, TextInput } from '@mantine/core';
+import { Button, Checkbox, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 
 export default function useAddClusterModal() {
@@ -20,6 +20,7 @@ export default function useAddClusterModal() {
     initialValues: {
       name: '',
       description: '',
+      public: false,
     },
 
     validate: {
@@ -48,18 +49,29 @@ export default function useAddClusterModal() {
   const loading = addClusterMutation.isLoading;
 
   const handleSubmit = useCallback(
-    async (values: { name: string; description: string }) => {
+    async (values: { name: string; description: string; public: boolean }) => {
       if (!address || !lock) {
         return;
       }
       try {
+        let toLock = lock;
+        if (values.public) {
+          const anyoneCanPayScript =
+            config.predefined.AGGRON4.SCRIPTS['ANYONE_CAN_PAY'];
+          toLock = {
+            codeHash: anyoneCanPayScript.CODE_HASH,
+            hashType: anyoneCanPayScript.HASH_TYPE,
+            args: lock.args,
+          } as Script;
+        }
+
         await addClusterMutation.mutateAsync({
           clusterData: {
             name: values.name,
             description: values.description,
           },
           fromInfos: [address],
-          toLock: lock,
+          toLock,
           config: predefinedSporeConfigs.Aggron4,
         });
 
@@ -99,6 +111,12 @@ export default function useAddClusterModal() {
               withAsterisk
               label="Description"
               {...form.getInputProps('description')}
+            />
+
+            <Checkbox
+              mt="md"
+              label="Make the cluster public so that others can create it."
+              {...form.getInputProps('public', { type: 'checkbox' })}
             />
 
             <Group position="right" mt="md">

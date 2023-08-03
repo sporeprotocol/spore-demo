@@ -17,19 +17,14 @@ export default function useAddSporeModal(clusterId?: string) {
   const { address, lock, signTransaction } = useWalletConnect();
   const queryClient = useQueryClient();
   const [content, setContent] = useState<Blob | null>(null);
-  const imageUrl = content ? URL.createObjectURL(content) : '';
-
-  useEffect(() => {
-    if (opened) {
-      setContent(null);
-    }
-  }, [opened]);
+  const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
       const rpc = new RPC(predefinedSporeConfigs.Aggron4.ckbNodeUrl);
       const { txSkeleton } = await createSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
+      console.log(signedTx);
       const hash = await rpc.sendTransaction(signedTx, 'passthrough');
       await waitForTranscation(hash);
       return hash;
@@ -47,6 +42,11 @@ export default function useAddSporeModal(clusterId?: string) {
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
     setContent(file);
+    const reader = new window.FileReader();
+    reader.readAsDataURL(file);
+    reader.onloadend = () => {
+      setDataUrl(reader.result);
+    };
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -89,12 +89,8 @@ export default function useAddSporeModal(clusterId?: string) {
         onClose: close,
         children: (
           <>
-            {content ? (
-              <Image
-                src={imageUrl}
-                alt="preview"
-                imageProps={{ onLoad: () => URL.revokeObjectURL(imageUrl) }}
-              />
+            {dataUrl ? (
+              <Image src={dataUrl} alt="preview" />
             ) : (
               <Dropzone onDrop={handleDrop} accept={IMAGE_MIME_TYPE}>
                 <Group position="center" spacing="xl">
@@ -132,7 +128,7 @@ export default function useAddSporeModal(clusterId?: string) {
     content,
     handleDrop,
     handleSubmit,
-    imageUrl,
+    dataUrl,
     opened,
     close,
   ]);

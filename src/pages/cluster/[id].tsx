@@ -14,7 +14,7 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { Spore, getSpores } from '@/spore';
 import { Cluster, getCluster, getClusters } from '@/cluster';
-import { helpers } from '@ckb-lumos/lumos';
+import { config, helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import useAddSporeModal from '@/hooks/useAddSporeModal';
@@ -79,6 +79,18 @@ export default function ClusterPage(props: ClusterPageProps) {
     return false;
   }, [cluster, address]);
 
+  const publicCluster = useMemo(() => {
+    if (cluster) {
+      return (
+        cluster.cell.cellOutput.lock.codeHash ===
+        config.predefined.AGGRON4.SCRIPTS['ANYONE_CAN_PAY'].CODE_HASH
+      );
+    }
+    return false;
+  }, [cluster]);
+
+  const canCreate = ownedCluster || publicCluster;
+
   if (!cluster) {
     return null;
   }
@@ -93,7 +105,7 @@ export default function ClusterPage(props: ClusterPageProps) {
             by {helpers.encodeToAddress(cluster.cell.cellOutput.lock)}
           </Text>
         </Flex>
-        {cluster && ownedCluster && (
+        {canCreate && (
           <Box style={{ cursor: connected ? 'pointer' : 'not-allowed' }}>
             <Button
               disabled={!connected}
@@ -106,7 +118,7 @@ export default function ClusterPage(props: ClusterPageProps) {
         )}
       </Flex>
 
-      {!ownedCluster && (
+      {!canCreate && (
         <Alert mt="md" icon={<IconAlertCircle size="1rem" />}>
           This cluster does not belong to you, so you cannot mint a spore.
         </Alert>

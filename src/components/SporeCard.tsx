@@ -25,7 +25,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
       prefetch
       passHref
     >
-      <Card key={spore.id} shadow="sm" radius="md" withBorder>
+      <Card key={spore.id} shadow="sm" radius="md" pt="0" withBorder>
         <Flex h="100%" direction="column" justify="space-between">
           <Card.Section mb="md">
             <AspectRatio ratio={1}>

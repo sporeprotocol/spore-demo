@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout';
-import { Card, SimpleGrid, Box, Flex, Switch, Title } from '@mantine/core';
+import { Card, SimpleGrid, Box, Flex, Switch, Title, Group, Button } from '@mantine/core';
 import { useMemo, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { Cluster, getClusters } from '@/cluster';
@@ -68,21 +68,13 @@ export default function HomePage(props: HomePageProps) {
         )}
 
         <Box>
-          <Title order={2}>Clusters</Title>
+          <Flex justify="space-between">
+            <Title order={2}>All Cluster</Title>
+            <Group>
+              <Button onClick={addClusterModal.open}>Create</Button>
+            </Group>
+          </Flex>
           <SimpleGrid cols={4} mt="sm">
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Box
-                sx={{
-                  height: '100%',
-                  cursor: connected ? 'pointer' : 'not-allowed',
-                }}
-                onClick={() => connected && addClusterModal.open()}
-              >
-                <Flex direction="row" h="100%" justify="center" align="center">
-                  <IconPlus size={50} color="gray" />
-                </Flex>
-              </Box>
-            </Card>
             {clusters.map((cluster: Cluster) => (
               <ClusterCard
                 key={cluster.id}
@@ -92,23 +84,14 @@ export default function HomePage(props: HomePageProps) {
             ))}
           </SimpleGrid>
         </Box>
-
-        <Box mt="md">
-          <Title order={2}>Spores</Title>
+        <Box mt="xl">
+          <Flex justify="space-between">
+            <Title order={2}>All Spore</Title>
+            <Group>
+              <Button onClick={addSporeModal.open}>Create</Button>
+            </Group>
+          </Flex>
           <SimpleGrid cols={4} mt="sm">
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-              <Box
-                sx={{
-                  height: '100%',
-                  cursor: connected ? 'pointer' : 'not-allowed',
-                }}
-                onClick={() => connected && addSporeModal.open()}
-              >
-                <Flex direction="row" h="100%" justify="center" align="center">
-                  <IconPlus size={50} color="gray" />
-                </Flex>
-              </Box>
-            </Card>
             {spores.map((spore: Spore) => (
               <SporeCard
                 key={spore.id}
