@@ -5,7 +5,7 @@ import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { Button, Group, Text, Image, Select } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -20,6 +20,7 @@ export default function useAddSporeModal(id?: string) {
   const [content, setContent] = useState<Blob | null>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(id);
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
+  const modalId = useId();
 
   useEffect(() => {
     console.log(opened);
@@ -106,7 +107,7 @@ export default function useAddSporeModal(id?: string) {
   useEffect(() => {
     if (opened) {
       modals.open({
-        modalId: 'add-spore',
+        modalId,
         title: 'Add New spore',
         onClose: () => {
           setClusterId(undefined);
@@ -168,16 +169,17 @@ export default function useAddSporeModal(id?: string) {
                 onClick={handleSubmit}
                 loading={addSporeMutation.isLoading}
               >
-                Mint
+                Submit
               </Button>
             </Group>
           </>
         ),
       });
     } else {
-      modals.close('add-spore');
+      modals.close(modalId);
     }
   }, [
+    modalId,
     addSporeMutation.isLoading,
     selectableQuerys,
     content,

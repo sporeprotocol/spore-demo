@@ -5,10 +5,10 @@ import {
 import useWalletConnect from './useWalletConnect';
 import { RPC, helpers } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -16,6 +16,7 @@ import { isNotEmpty, useForm } from '@mantine/form';
 import { Spore } from '@/spore';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
+  const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useWalletConnect();
   const queryClient = useQueryClient();
@@ -84,7 +85,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
   useEffect(() => {
     if (opened) {
       modals.open({
-        modalId: 'transfer-spore',
+        modalId,
         title: 'Transfer spore',
         onClose: close,
         closeOnEscape: !transferSporeMutation.isLoading,
@@ -107,9 +108,16 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         ),
       });
     } else {
-      modals.close('transfer-spore');
+      modals.close(modalId);
     }
-  }, [transferSporeMutation.isLoading, handleSubmit, opened, form, close]);
+  }, [
+    transferSporeMutation.isLoading,
+    handleSubmit,
+    opened,
+    form,
+    close,
+    modalId,
+  ]);
 
   return {
     open,

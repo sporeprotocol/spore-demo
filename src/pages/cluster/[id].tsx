@@ -119,7 +119,7 @@ export default function ClusterPage(props: ClusterPageProps) {
               onClick={addSporeModal.open}
               loading={addSporeModal.loading}
             >
-              Add Spore
+              Mint Spore
             </Button>
           </Box>
         )}

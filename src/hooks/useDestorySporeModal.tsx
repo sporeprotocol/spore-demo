@@ -8,7 +8,7 @@ import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { Button, Flex, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -17,6 +17,7 @@ import { Spore } from '@/spore';
 import { useRouter } from 'next/router';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
+  const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useWalletConnect();
   const queryClient = useQueryClient();
@@ -84,7 +85,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
   useEffect(() => {
     if (opened) {
       modals.open({
-        modalId: 'destroy-spore',
+        modalId,
         title: 'Destroy spore',
         onClose: close,
         closeOnEscape: !destroySporeMutation.isLoading,
@@ -118,9 +119,16 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
         ),
       });
     } else {
-      modals.close('destroy-spore');
+      modals.close(modalId);
     }
-  }, [destroySporeMutation.isLoading, handleSubmit, opened, form, close]);
+  }, [
+    modalId,
+    destroySporeMutation.isLoading,
+    handleSubmit,
+    opened,
+    form,
+    close,
+  ]);
 
   return {
     open,

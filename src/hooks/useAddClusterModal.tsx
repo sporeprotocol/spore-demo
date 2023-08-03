@@ -5,7 +5,7 @@ import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { Button, Checkbox, Group, TextInput } from '@mantine/core';
@@ -15,6 +15,7 @@ export default function useAddClusterModal() {
   const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, lock, signTransaction } = useWalletConnect();
+  const modalId = useId();
 
   const form = useForm({
     initialValues: {
@@ -81,7 +82,6 @@ export default function useAddClusterModal() {
           message: 'Your cluster has been created.',
         });
         close();
-
       } catch (e) {
         console.log(e);
         notifications.show({
@@ -97,7 +97,7 @@ export default function useAddClusterModal() {
   useEffect(() => {
     if (opened) {
       modals.open({
-        modalId: 'add-cluster',
+        modalId,
         title: 'Add New Cluster',
         onClose: close,
         closeOnEscape: !addClusterMutation.isLoading,
@@ -132,9 +132,16 @@ export default function useAddClusterModal() {
         ),
       });
     } else {
-      modals.close('add-cluster');
+      modals.close(modalId);
     }
-  }, [addClusterMutation.isLoading, form, handleSubmit, opened, close]);
+  }, [
+    modalId,
+    addClusterMutation.isLoading,
+    form,
+    handleSubmit,
+    opened,
+    close,
+  ]);
 
   return {
     open,
