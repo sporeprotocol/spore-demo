@@ -90,7 +90,7 @@ export default function useAddSporeModal(clusterId?: string) {
         children: (
           <>
             {dataUrl ? (
-              <Image src={dataUrl} alt="preview" />
+              <Image src={dataUrl.toString()} alt="preview" />
             ) : (
               <Dropzone onDrop={handleDrop} accept={IMAGE_MIME_TYPE}>
                 <Group position="center" spacing="xl">
