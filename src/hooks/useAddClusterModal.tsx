@@ -1,6 +1,6 @@
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import useWalletConnect from './useWalletConnect';
-import { RPC, Script, commons, config, helpers } from '@ckb-lumos/lumos';
+import { RPC, Script, config } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
@@ -81,6 +81,7 @@ export default function useAddClusterModal() {
           message: 'Your cluster has been created.',
         });
         close();
+
       } catch (e) {
         console.log(e);
         notifications.show({
@@ -99,6 +100,9 @@ export default function useAddClusterModal() {
         modalId: 'add-cluster',
         title: 'Add New Cluster',
         onClose: close,
+        closeOnEscape: !addClusterMutation.isLoading,
+        closeOnClickOutside: !addClusterMutation.isLoading,
+        withCloseButton: !addClusterMutation.isLoading,
         children: (
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput

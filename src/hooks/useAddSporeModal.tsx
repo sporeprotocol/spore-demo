@@ -1,23 +1,44 @@
 import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
 import useWalletConnect from './useWalletConnect';
-import { RPC } from '@ckb-lumos/lumos';
+import { RPC, config, helpers } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
 import { useDisclosure } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { Button, Group, Text, Image } from '@mantine/core';
+import { Button, Group, Text, Image, Select } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
+import useClustersQuery from './useClustersQuery';
 
-export default function useAddSporeModal(clusterId?: string) {
+export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, lock, signTransaction } = useWalletConnect();
   const queryClient = useQueryClient();
   const [content, setContent] = useState<Blob | null>(null);
+  const [clusterId, setClusterId] = useState<string | undefined>(id);
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
+
+  useEffect(() => {
+    console.log(opened);
+  }, [opened]);
+
+  const clustersQuery = useClustersQuery();
+  const selectableQuerys = useMemo(() => {
+    if (!clustersQuery.data) {
+      return [];
+    }
+    return clustersQuery.data.filter(({ cell }) => {
+      const anyoneCanPayScript =
+        config.predefined.AGGRON4.SCRIPTS['ANYONE_CAN_PAY'];
+      return (
+        cell.cellOutput.lock.codeHash === anyoneCanPayScript.CODE_HASH ||
+        helpers.encodeToAddress(cell.cellOutput.lock) === address
+      );
+    });
+  }, [clustersQuery, address]);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -35,6 +56,7 @@ export default function useAddSporeModal(clusterId?: string) {
   const addSporeMutation = useMutation(addSpore, {
     onSuccess: () => {
       queryClient.invalidateQueries('spores');
+      queryClient.invalidateQueries(['account', address]);
     },
   });
   const loading = addSporeMutation.isLoading;
@@ -79,20 +101,52 @@ export default function useAddSporeModal(clusterId?: string) {
         message: (e as Error).message,
       });
     }
-  }, [content, address, lock, addSporeMutation, clusterId, close]);
+  }, [content, address, lock, addSporeMutation, close, clusterId]);
 
   useEffect(() => {
     if (opened) {
       modals.open({
         modalId: 'add-spore',
         title: 'Add New spore',
-        onClose: close,
+        onClose: () => {
+          setClusterId(undefined);
+          setContent(null);
+          close();
+        },
+        closeOnEscape: !addSporeMutation.isLoading,
+        withCloseButton: !addSporeMutation.isLoading,
+        closeOnClickOutside: !addSporeMutation.isLoading,
         children: (
           <>
+            <Select
+              mb="md"
+              dropdownPosition="bottom"
+              maxDropdownHeight={400}
+              placeholder="Choose Cluster"
+              data={selectableQuerys.map(({ id, name }) => ({
+                value: id,
+                label: name,
+              }))}
+              value={clusterId}
+              onChange={(id) => setClusterId(id || undefined)}
+            />
+
             {dataUrl ? (
               <Image src={dataUrl.toString()} alt="preview" />
             ) : (
-              <Dropzone onDrop={handleDrop} accept={IMAGE_MIME_TYPE}>
+              <Dropzone
+                onDrop={handleDrop}
+                accept={IMAGE_MIME_TYPE}
+                onReject={() => {
+                  notifications.show({
+                    color: 'red',
+                    title: 'Error!',
+                    message:
+                      'Only image files are supported, and the size cannot exceed 300KB.',
+                  });
+                }}
+                maxSize={300_000}
+              >
                 <Group position="center" spacing="xl">
                   <Dropzone.Accept>
                     <IconUpload size="3.2rem" stroke={1.5} />
@@ -125,12 +179,14 @@ export default function useAddSporeModal(clusterId?: string) {
     }
   }, [
     addSporeMutation.isLoading,
+    selectableQuerys,
     content,
     handleDrop,
     handleSubmit,
     dataUrl,
     opened,
     close,
+    clusterId,
   ]);
 
   return {

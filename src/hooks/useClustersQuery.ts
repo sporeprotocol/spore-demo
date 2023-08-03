@@ -1,7 +1,7 @@
 import { Cluster } from "@/cluster";
 import { useQuery } from "react-query";
 
-export default function useClustersQuery(initialData: Cluster[]) {
+export default function useClustersQuery(initialData?: Cluster[]) {
   const clustersQuery = useQuery(
     ['clusters'],
     async () => {

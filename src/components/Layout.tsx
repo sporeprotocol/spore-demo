@@ -1,8 +1,12 @@
-import { AppShell, Container, Flex, Header } from '@mantine/core';
+import { AppShell, Container, Flex, Group, Header } from '@mantine/core';
 import Logo from './Logo';
 import Connect from './Connect';
+import useWalletConnect from '@/hooks/useWalletConnect';
+import CreateButton from './CreateButton';
 
 export default function Layout({ children }: React.PropsWithChildren<{}>) {
+  const { connected } = useWalletConnect();
+
   return (
     <AppShell
       padding="md"
@@ -11,7 +15,10 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
           <Container>
             <Flex justify="space-between" align="center">
               <Logo />
-              <Connect />
+              <Group>
+                <Connect />
+                {connected && <CreateButton />}
+              </Group>
             </Flex>
           </Container>
         </Header>

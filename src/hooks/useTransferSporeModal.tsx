@@ -35,6 +35,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
   const transferSporeMutation = useMutation(transferSpore, {
     onSuccess: () => {
       queryClient.invalidateQueries('spores');
+      queryClient.invalidateQueries(['account', address]);
     },
   });
   const loading = transferSporeMutation.isLoading;
@@ -86,6 +87,9 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         modalId: 'transfer-spore',
         title: 'Transfer spore',
         onClose: close,
+        closeOnEscape: !transferSporeMutation.isLoading,
+        withCloseButton: !transferSporeMutation.isLoading,
+        closeOnClickOutside: !transferSporeMutation.isLoading,
         children: (
           <form onSubmit={form.onSubmit(handleSubmit)}>
             <TextInput

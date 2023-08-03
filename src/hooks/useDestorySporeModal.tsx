@@ -14,11 +14,13 @@ import { Button, Flex, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { Spore } from '@/spore';
+import { useRouter } from 'next/router';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useWalletConnect();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const destroySpore = useCallback(
     async (...args: Parameters<typeof _destroySpore>) => {
@@ -35,6 +37,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
   const destroySporeMutation = useMutation(destroySpore, {
     onSuccess: () => {
       queryClient.invalidateQueries('spores');
+      queryClient.invalidateQueries(['account', address]);
     },
   });
   const loading = destroySporeMutation.isLoading;
@@ -63,6 +66,11 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
         title: 'Farewell!',
         message: `Your spore has been destroyed.`,
       });
+      if (spore.clusterId) {
+        router.push(`/cluster/${spore.clusterId}`);
+      } else {
+        router.push('/');
+      }
       close();
     } catch (e) {
       notifications.show({
@@ -71,7 +79,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
         message: (e as Error).message,
       });
     }
-  }, [address, spore, destroySporeMutation, close]);
+  }, [address, spore, destroySporeMutation, close, router]);
 
   useEffect(() => {
     if (opened) {
@@ -79,6 +87,9 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
         modalId: 'destroy-spore',
         title: 'Destroy spore',
         onClose: close,
+        closeOnEscape: !destroySporeMutation.isLoading,
+        withCloseButton: !destroySporeMutation.isLoading,
+        closeOnClickOutside: !destroySporeMutation.isLoading,
         children: (
           <>
             <Text mb="md">Do you want to destroy this spore?</Text>

@@ -7,6 +7,7 @@ import {
   Box,
   SimpleGrid,
   Alert,
+  Tooltip,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
@@ -20,6 +21,7 @@ import useWalletConnect from '@/hooks/useWalletConnect';
 import useAddSporeModal from '@/hooks/useAddSporeModal';
 import useSporeByClusterQuery from '@/hooks/useSporeByClusterQuery';
 import useClusterByIdQuery from '@/hooks/useClusterByIdQuery';
+import Link from 'next/link';
 
 export type ClusterPageProps = {
   cluster: Cluster | undefined;
@@ -72,12 +74,12 @@ export default function ClusterPage(props: ClusterPageProps) {
     props.spores,
   );
 
-  const ownedCluster = useMemo(() => {
-    if (cluster && address) {
-      return helpers.encodeToAddress(cluster.cell.cellOutput.lock) === address;
+  const ownerAddress = useMemo(() => {
+    if (cluster) {
+      return helpers.encodeToAddress(cluster.cell.cellOutput.lock);
     }
-    return false;
-  }, [cluster, address]);
+    return '';
+  }, [cluster]);
 
   const publicCluster = useMemo(() => {
     if (cluster) {
@@ -89,7 +91,7 @@ export default function ClusterPage(props: ClusterPageProps) {
     return false;
   }, [cluster]);
 
-  const canCreate = ownedCluster || publicCluster;
+  const canCreate = ownerAddress === address || publicCluster;
 
   if (!cluster) {
     return null;
@@ -101,9 +103,14 @@ export default function ClusterPage(props: ClusterPageProps) {
         <Flex direction="column">
           <Title order={1}>{cluster.name}</Title>
           <Text>{cluster.description}</Text>
-          <Text size="sm" color="gray">
-            by {helpers.encodeToAddress(cluster.cell.cellOutput.lock)}
-          </Text>
+          <Link
+            href={`/account/${ownerAddress}`}
+            style={{ textDecoration: 'none' }}
+          >
+            <Text size="sm" color="gray">
+              by {`${ownerAddress?.slice(0, 20)}...${ownerAddress?.slice(-20)}`}
+            </Text>
+          </Link>
         </Flex>
         {canCreate && (
           <Box style={{ cursor: connected ? 'pointer' : 'not-allowed' }}>
