@@ -190,6 +190,7 @@ export default function useAddSporeModal(id?: string) {
     opened,
     close,
     clusterId,
+    id,
   ]);
 
   return {

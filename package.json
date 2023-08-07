@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "analyze": "cross-env SKIP_BUILD_STATIC_GENERATION=true ANALYZE=true next build"
   },
   "dependencies": {
     "@ckb-lumos/lumos": "^0.20.0",
@@ -35,5 +36,9 @@
     "typescript": "5.1.6",
     "viem": "^1.4.1",
     "wagmi": "^1.3.9"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^13.4.13",
+    "cross-env": "^7.0.3"
   }
 }
