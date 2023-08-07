@@ -102,6 +102,9 @@ export default function useCKBullSigner() {
     async (txSkeleton: helpers.TransactionSkeletonType) => {
       const { transactionToken } = await fetcher('/api/ckbull/transaction', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           signInToken,
           transaction: txSkeleton.toJSON(),

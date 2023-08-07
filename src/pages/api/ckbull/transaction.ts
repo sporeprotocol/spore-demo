@@ -18,7 +18,7 @@ router
     res.status(200).json(data);
   })
   .post(async (req: NextApiRequest, res: NextApiResponse) => {
-    const { signInToken, transaction } = JSON.parse(req.body);
+    const { signInToken, transaction } = req.body;
     const data = await fetch(
       `${process.env.CKBULL_API_URL}/transaction-request`,
       {

@@ -1,6 +1,6 @@
 import { Text, Button, Flex, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-// import useCKBullSigner from '@/hooks/useCKBullSigner';
+import useCKBullSigner from '@/hooks/useCKBullSigner';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import { useEffect, useMemo } from 'react';
 import useMetaMask from '@/hooks/useMetaMask';
@@ -13,7 +13,7 @@ export default function Connect() {
   const { address, connected } = useWalletConnect();
   const router = useRouter();
 
-  // const ckbullSigner = useCKBullSigner();
+  const ckbullSigner = useCKBullSigner();
   const metaMask = useMetaMask();
 
   const accountQuery = useAccountQuery();
@@ -49,7 +49,7 @@ export default function Connect() {
             variant="light"
             color="green"
             radius="md"
-            disabled
+            onClick={ckbullSigner.connect}
             fullWidth
           >
             CKBull
