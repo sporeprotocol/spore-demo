@@ -67,7 +67,7 @@ export default function useAddClusterModal() {
         }
 
         await addClusterMutation.mutateAsync({
-          clusterData: {
+          data: {
             name: values.name,
             description: values.description,
           },

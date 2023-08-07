@@ -57,7 +57,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       }
       try {
         await transferSporeMutation.mutateAsync({
-          sporeOutPoint: spore.cell.outPoint!,
+          outPoint: spore.cell.outPoint!,
           fromInfos: [address],
           toLock: helpers.parseAddress(values.to),
           config: predefinedSporeConfigs.Aggron4,

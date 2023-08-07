@@ -80,7 +80,7 @@ export default function useAddSporeModal(id?: string) {
     try {
       const contentBuffer = await content.arrayBuffer();
       await addSporeMutation.mutateAsync({
-        sporeData: {
+        data: {
           contentType: content.type,
           content: new Uint8Array(contentBuffer),
           clusterId,

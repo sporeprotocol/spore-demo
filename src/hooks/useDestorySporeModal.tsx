@@ -58,7 +58,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
     }
     try {
       await destroySporeMutation.mutateAsync({
-        sporeOutPoint: spore.cell.outPoint!,
+        outPoint: spore.cell.outPoint!,
         fromInfos: [address],
         config: predefinedSporeConfigs.Aggron4,
       });
