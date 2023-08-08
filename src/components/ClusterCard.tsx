@@ -1,5 +1,5 @@
-import { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
+import { Cluster } from '@/utils/cluster';
+import { Spore } from '@/utils/spore';
 import {
   Text,
   Image,
