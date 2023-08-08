@@ -60,7 +60,7 @@ export default function useAddClusterModal() {
           toLock = {
             codeHash: anyoneCanPayScript.CODE_HASH,
             hashType: anyoneCanPayScript.HASH_TYPE,
-            args: lock.args,
+            args: '0x' + lock.args.slice(4, -2),
           } as Script;
         }
 
@@ -81,7 +81,6 @@ export default function useAddClusterModal() {
         });
         close();
       } catch (e) {
-        console.log(e);
         notifications.show({
           color: 'red',
           title: 'Error!',

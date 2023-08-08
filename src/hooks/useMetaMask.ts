@@ -23,7 +23,7 @@ export default function useMetaMask() {
   const { connect: connectMetaMask } = useWagmiConnect({
     connector: new MetaMaskConnector(),
   });
-  const { isConnected, address: ethAddress } = useWagmiAccount({
+  const { isConnected } = useWagmiAccount({
     onConnect: (opts) => {
       update({
         address: toCKBAddress(opts.address!),
@@ -41,14 +41,6 @@ export default function useMetaMask() {
   });
 
   useEffect(() => {
-    if (ethAddress) {
-      update({
-        address: toCKBAddress(ethAddress),
-      })
-    }
-  },[ethAddress, update]);
-
-  useEffect(() => {
     if (connectorType === 'metamask' && connected && !isConnected) {
       connectMetaMask();
     }
@@ -64,7 +56,7 @@ export default function useMetaMask() {
       config.initializeConfig(config.predefined.AGGRON4);
 
       let tx = commons.omnilock.prepareSigningEntries(txSkeleton);
-      const { message } = tx.signingEntries.get(0)!;
+      const { message, index } = tx.signingEntries.get(0)!;
       // TODO: remove raw message type until wagmi fix it
       let signature = await signMessage({
         message: { raw: message } as any,
@@ -86,9 +78,9 @@ export default function useMetaMask() {
         }),
       );
 
-      tx = tx.update('witnesses', (witnesses) =>
-        witnesses.set(0, signedWitness),
-      );
+      tx = tx.update('witnesses', (witnesses) => {
+        return witnesses.set(index, signedWitness);
+      });
 
       const signedTx = helpers.createTransactionFromSkeleton(tx);
       return signedTx;

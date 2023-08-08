@@ -23,10 +23,6 @@ export default function useAddSporeModal(id?: string) {
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
   const modalId = useId();
 
-  useEffect(() => {
-    console.log(opened);
-  }, [opened]);
-
   const clustersQuery = useClustersQuery();
   const selectableQuerys = useMemo(() => {
     if (!clustersQuery.data) {
@@ -43,13 +39,23 @@ export default function useAddSporeModal(id?: string) {
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
-      const { txSkeleton } = await createSpore(...args);
+      let { txSkeleton, cluster: sporeCluster } = await createSpore(...args);
+
+      const cluster = selectableQuerys.find(({ id }) => id === clusterId);
+      const anyoneCanPayScript = getScript('ANYONE_CAN_PAY');
+      if (
+        cluster &&
+        cluster.cell.cellOutput.lock.codeHash === anyoneCanPayScript.CODE_HASH
+      ) {
+        txSkeleton = txSkeleton.update('witnesses', (witnesses) => {
+          return witnesses.set(sporeCluster!.inputIndex, '0x');
+        });
+      }
       const signedTx = await signTransaction(txSkeleton);
-      console.log(signedTx);
       const hash = await sendTransaction(signedTx);
       return hash;
     },
-    [signTransaction],
+    [signTransaction, clusterId, selectableQuerys],
   );
 
   const addSporeMutation = useMutation(addSpore, {
