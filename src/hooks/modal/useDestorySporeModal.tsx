@@ -2,8 +2,6 @@ import {
   predefinedSporeConfigs,
   destroySpore as _destroySpore,
 } from '@spore-sdk/core';
-import { RPC } from '@ckb-lumos/lumos';
-import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
@@ -12,9 +10,10 @@ import { modals } from '@mantine/modals';
 import { Button, Flex, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { Spore } from '@/spore';
 import { useRouter } from 'next/router';
 import useWalletConnect from '../useWalletConnect';
+import { Spore } from '@/utils/spore';
+import { sendTransaction } from '@/utils/transaction';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
   const modalId = useId();
@@ -25,11 +24,9 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
 
   const destroySpore = useCallback(
     async (...args: Parameters<typeof _destroySpore>) => {
-      const rpc = new RPC(predefinedSporeConfigs.Aggron4.ckbNodeUrl);
       const { txSkeleton } = await _destroySpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await rpc.sendTransaction(signedTx, 'passthrough');
-      await waitForTranscation(hash);
+      const hash = await sendTransaction(signedTx);
       return hash;
     },
     [signTransaction],

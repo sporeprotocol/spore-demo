@@ -1,11 +1,11 @@
-import { Cluster, getCluster } from '@/cluster';
 import Layout from '@/components/Layout';
 import useDestroySporeModal from '@/hooks/modal/useDestorySporeModal';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByIdQuery from '@/hooks/query/useSporeByIdQuery';
 import useWalletConnect from '@/hooks/useWalletConnect';
-import { Spore, getSpore, getSpores } from '@/spore';
+import { Cluster, getCluster } from '@/utils/cluster';
+import { Spore, getSpore, getSpores } from '@/utils/spore';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,

@@ -1,6 +1,6 @@
+import { getSpore } from '@/utils/spore';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { getSpore } from '@/spore';
 
 const router = createRouter<NextApiRequest, NextApiResponse>();
 

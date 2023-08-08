@@ -1,8 +1,6 @@
 import Layout from '@/components/Layout';
 import { SimpleGrid, Box, Title, Tabs, Tooltip } from '@mantine/core';
 import { useMemo } from 'react';
-import { Cluster, getClusters } from '@/cluster';
-import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
 import { Cell, helpers } from '@ckb-lumos/lumos';
@@ -11,6 +9,8 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import useClustersQuery from '@/hooks/query/useClustersQuery';
 import useSporesQuery from '@/hooks/query/useSporesQuery';
+import { Cluster, getClusters } from '@/utils/cluster';
+import { Spore, getSpores } from '@/utils/spore';
 
 export type AccountPageProps = {
   clusters: Cluster[];

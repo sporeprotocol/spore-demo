@@ -12,8 +12,6 @@ import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { GetStaticPaths, GetStaticProps } from 'next';
-import { Spore, getSpores } from '@/spore';
-import { Cluster, getCluster, getClusters } from '@/cluster';
 import { config, helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
@@ -21,6 +19,8 @@ import Link from 'next/link';
 import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByClusterQuery from '@/hooks/query/useSporeByClusterQuery';
+import { Cluster, getCluster, getClusters } from '@/utils/cluster';
+import { Spore, getSpores } from '@/utils/spore';
 
 export type ClusterPageProps = {
   cluster: Cluster | undefined;

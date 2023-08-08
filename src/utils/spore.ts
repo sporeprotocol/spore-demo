@@ -6,6 +6,7 @@ import {
   transferSpore as _transferSpore,
   destroySpore as _destroySpore,
 } from '@spore-sdk/core';
+import { Network } from './network';
 
 export interface Spore {
   id: string;
@@ -26,8 +27,8 @@ export function getSporeFromCell(cell: Cell): Spore {
   };
 }
 
-export async function getSpores(clusterId?: string) {
-  const config = predefinedSporeConfigs.Aggron4;
+export async function getSpores(clusterId?: string, network: Network = 'Aggron4') {
+  const config = predefinedSporeConfigs[network];
   const indexer = new Indexer(config.ckbIndexerUrl);
   const collector = indexer.collector({
     type: { ...config.scripts.Spore.script, args: '0x' },

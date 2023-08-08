@@ -1,6 +1,5 @@
 import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
-import { RPC, config, helpers } from '@ckb-lumos/lumos';
-import { waitForTranscation } from '@/transaction';
+import { helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
@@ -12,6 +11,8 @@ import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import useWalletConnect from '../useWalletConnect';
 import useClustersQuery from '../query/useClustersQuery';
+import { sendTransaction } from '@/utils/transaction';
+import { getScript } from '@/utils/script';
 
 export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -32,8 +33,7 @@ export default function useAddSporeModal(id?: string) {
       return [];
     }
     return clustersQuery.data.filter(({ cell }) => {
-      const anyoneCanPayScript =
-        config.predefined.AGGRON4.SCRIPTS['ANYONE_CAN_PAY'];
+      const anyoneCanPayScript = getScript('ANYONE_CAN_PAY');
       return (
         cell.cellOutput.lock.codeHash === anyoneCanPayScript.CODE_HASH ||
         helpers.encodeToAddress(cell.cellOutput.lock) === address
@@ -43,12 +43,10 @@ export default function useAddSporeModal(id?: string) {
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
-      const rpc = new RPC(predefinedSporeConfigs.Aggron4.ckbNodeUrl);
       const { txSkeleton } = await createSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
       console.log(signedTx);
-      const hash = await rpc.sendTransaction(signedTx, 'passthrough');
-      await waitForTranscation(hash);
+      const hash = await sendTransaction(signedTx);
       return hash;
     },
     [signTransaction],

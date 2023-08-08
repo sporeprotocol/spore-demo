@@ -1,13 +1,13 @@
 import Layout from '@/components/Layout';
 import { SimpleGrid, Box, Title } from '@mantine/core';
 import { useMemo } from 'react';
-import { Cluster, getClusters } from '@/cluster';
-import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
 import { GetStaticProps } from 'next';
 import useClustersQuery from '@/hooks/query/useClustersQuery';
 import useSporesQuery from '@/hooks/query/useSporesQuery';
+import { Cluster, getClusters } from '@/utils/cluster';
+import { Spore, getSpores } from '@/utils/spore';
 
 export interface HomePageProps {
   clusters: Cluster[];

@@ -2,8 +2,7 @@ import {
   predefinedSporeConfigs,
   transferSpore as _transferSpore,
 } from '@spore-sdk/core';
-import { RPC, helpers } from '@ckb-lumos/lumos';
-import { waitForTranscation } from '@/transaction';
+import { helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
@@ -12,8 +11,9 @@ import { modals } from '@mantine/modals';
 import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { Spore } from '@/spore';
 import useWalletConnect from '../useWalletConnect';
+import { sendTransaction } from '@/utils/transaction';
+import { Spore } from '@/utils/spore';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();
@@ -23,11 +23,9 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
 
   const transferSpore = useCallback(
     async (...args: Parameters<typeof _transferSpore>) => {
-      const rpc = new RPC(predefinedSporeConfigs.Aggron4.ckbNodeUrl);
       const { txSkeleton } = await _transferSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await rpc.sendTransaction(signedTx, 'passthrough');
-      await waitForTranscation(hash);
+      const hash = await sendTransaction(signedTx);
       return hash;
     },
     [signTransaction],

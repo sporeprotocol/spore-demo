@@ -1,6 +1,5 @@
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
-import { RPC, Script, config } from '@ckb-lumos/lumos';
-import { waitForTranscation } from '@/transaction';
+import { Script } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useMutation } from 'wagmi';
 import { useQueryClient } from 'react-query';
@@ -10,6 +9,8 @@ import { isNotEmpty, useForm } from '@mantine/form';
 import { Button, Checkbox, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import useWalletConnect from '../useWalletConnect';
+import { sendTransaction } from '@/utils/transaction';
+import { getScript } from '@/utils/script';
 
 export default function useAddClusterModal() {
   const queryClient = useQueryClient();
@@ -32,11 +33,9 @@ export default function useAddClusterModal() {
 
   const addCluster = useCallback(
     async (...args: Parameters<typeof createCluster>) => {
-      const rpc = new RPC(predefinedSporeConfigs.Aggron4.ckbNodeUrl);
       const { txSkeleton } = await createCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await rpc.sendTransaction(signedTx, 'passthrough');
-      await waitForTranscation(hash);
+      const hash = sendTransaction(signedTx);
       return hash;
     },
     [signTransaction],
@@ -57,8 +56,7 @@ export default function useAddClusterModal() {
       try {
         let toLock = lock;
         if (values.public) {
-          const anyoneCanPayScript =
-            config.predefined.AGGRON4.SCRIPTS['ANYONE_CAN_PAY'];
+          const anyoneCanPayScript = getScript('ANYONE_CAN_PAY');
           toLock = {
             codeHash: anyoneCanPayScript.CODE_HASH,
             hashType: anyoneCanPayScript.HASH_TYPE,

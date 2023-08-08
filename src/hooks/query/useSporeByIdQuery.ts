@@ -1,4 +1,4 @@
-import { Spore } from '@/spore';
+import { Spore } from '@/utils/spore';
 import { useQuery } from 'react-query';
 
 export default function useSporeByIdQuery(

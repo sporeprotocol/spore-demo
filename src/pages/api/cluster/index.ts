@@ -1,6 +1,6 @@
+import { getClusters } from '@/utils/cluster';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { getClusters } from '@/cluster';
 
 const router = createRouter<NextApiRequest, NextApiResponse>();
 
