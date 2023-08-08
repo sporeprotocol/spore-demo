@@ -1,71 +1,51 @@
 import { commons, config, helpers } from '@ckb-lumos/lumos';
 import { bytes } from '@ckb-lumos/codec';
 import { blockchain } from '@ckb-lumos/base';
-import { useMemo, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import {
   useAccount as useWagmiAccount,
   useConnect as useWagmiConnect,
-  useDisconnect as useWagmiDisconnect,
 } from 'wagmi';
 import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
 import { useWalletStore } from './useWalletConnect';
 import { signMessage } from 'wagmi/actions';
 
+function toCKBAddress(address: `0x${string}`) {
+  config.initializeConfig(config.predefined.AGGRON4);
+  const lock = commons.omnilock.createOmnilockScript({
+    auth: { flag: 'ETHEREUM', content: address ?? '0x' },
+  });
+  return helpers.encodeToAddress(lock);
+}
+
 export default function useMetaMask() {
-  const { update } = useWalletStore();
-  const { connect: connectMetaMask } = useWagmiConnect({
+  const { connected, connectorType, update } = useWalletStore();
+  const { connect } = useWagmiConnect({
     connector: new MetaMaskConnector(),
   });
-  const { address: ethAddress, isConnected } = useWagmiAccount();
-
-  useWagmiDisconnect({
-    onSuccess: () => {
+  const { isConnected } = useWagmiAccount({
+    onConnect: (opts) => {
+      update({
+        address: toCKBAddress(opts.address!),
+        connected: true,
+        connectorType: 'metamask',
+      });
+    },
+    onDisconnect: () => {
       update({
         address: '',
         connected: false,
         connectorType: 'metamask',
       });
-    }
-  })
-
-  const address = useMemo(() => {
-    if (ethAddress) {
-      config.initializeConfig(config.predefined.AGGRON4);
-      const lock = commons.omnilock.createOmnilockScript({
-        auth: { flag: 'ETHEREUM', content: ethAddress ?? '0x' },
-      });
-      return helpers.encodeToAddress(lock);
-    }
-    return '';
-  }, [ethAddress]);
+    },
+  });
 
   useEffect(() => {
-    const connected = localStorage.getItem('wagmi.connected');
-    if (connected && !isConnected) {
-      connectMetaMask();
+    if (connectorType === 'metamask' && connected && !isConnected) {
+      connect();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (isConnected) {
-      update({
-        address,
-        connected: isConnected,
-        connectorType: 'metamask',
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, isConnected]);
-
-  const connect = useCallback(() => {
-    connectMetaMask();
-    update({
-      address,
-      connected: isConnected,
-      connectorType: 'metamask',
-    });
-  }, [address, connectMetaMask, isConnected, update]);
+  }, [connected, connectorType]);
 
   const signTransaction = useCallback(
     async (txSkeleton: helpers.TransactionSkeletonType) => {
