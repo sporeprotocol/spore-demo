@@ -5,8 +5,8 @@ import useWalletConnect from '@/hooks/useWalletConnect';
 import { useEffect, useMemo } from 'react';
 import useMetaMask from '@/hooks/useMetaMask';
 import { useRouter } from 'next/router';
-import useAccountQuery from '@/hooks/useAccountQuery';
 import { BI } from '@ckb-lumos/lumos';
+import useAccountQuery from '@/hooks/query/useAccountQuery';
 
 export default function Connect() {
   const [opened, { open, close }] = useDisclosure(false);

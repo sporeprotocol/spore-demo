@@ -1,9 +1,9 @@
 import { Cluster, getCluster } from '@/cluster';
 import Layout from '@/components/Layout';
-import useClusterByIdQuery from '@/hooks/useClusterByIdQuery';
-import useDestroySporeModal from '@/hooks/useDestorySporeModal';
-import useSporeByIdQuery from '@/hooks/useSporeByIdQuery';
-import useTransferSporeModal from '@/hooks/useTransferSporeModal';
+import useDestroySporeModal from '@/hooks/modal/useDestorySporeModal';
+import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
+import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
+import useSporeByIdQuery from '@/hooks/query/useSporeByIdQuery';
 import useWalletConnect from '@/hooks/useWalletConnect';
 import { Spore, getSpore, getSpores } from '@/spore';
 import { BI, helpers } from '@ckb-lumos/lumos';

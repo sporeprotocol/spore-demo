@@ -2,7 +2,6 @@ import {
   predefinedSporeConfigs,
   destroySpore as _destroySpore,
 } from '@spore-sdk/core';
-import useWalletConnect from './useWalletConnect';
 import { RPC } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
@@ -15,6 +14,7 @@ import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { Spore } from '@/spore';
 import { useRouter } from 'next/router';
+import useWalletConnect from '../useWalletConnect';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
   const modalId = useId();

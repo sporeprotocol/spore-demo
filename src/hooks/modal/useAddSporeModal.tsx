@@ -1,5 +1,4 @@
 import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
-import useWalletConnect from './useWalletConnect';
 import { RPC, config, helpers } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -11,7 +10,8 @@ import { Button, Group, Text, Image, Select } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
-import useClustersQuery from './useClustersQuery';
+import useWalletConnect from '../useWalletConnect';
+import useClustersQuery from '../query/useClustersQuery';
 
 export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);

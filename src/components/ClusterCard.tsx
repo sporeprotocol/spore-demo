@@ -9,7 +9,6 @@ import {
   SimpleGrid,
   Flex,
   Title,
-  Box,
 } from '@mantine/core';
 import Link from 'next/link';
 import { useMemo } from 'react';

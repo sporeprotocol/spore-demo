@@ -1,5 +1,4 @@
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
-import useWalletConnect from './useWalletConnect';
 import { RPC, Script, config } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
@@ -10,6 +9,7 @@ import { modals } from '@mantine/modals';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { Button, Checkbox, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import useWalletConnect from '../useWalletConnect';
 
 export default function useAddClusterModal() {
   const queryClient = useQueryClient();

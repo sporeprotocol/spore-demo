@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
-import useWalletConnect from "./useWalletConnect";
 import { BI } from "@ckb-lumos/lumos";
+import useWalletConnect from "../useWalletConnect";
 
 export type AccountInfo = {
   capacities: string;

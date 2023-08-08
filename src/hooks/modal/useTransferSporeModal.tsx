@@ -2,7 +2,6 @@ import {
   predefinedSporeConfigs,
   transferSpore as _transferSpore,
 } from '@spore-sdk/core';
-import useWalletConnect from './useWalletConnect';
 import { RPC, helpers } from '@ckb-lumos/lumos';
 import { waitForTranscation } from '@/transaction';
 import { useCallback, useEffect } from 'react';
@@ -14,6 +13,7 @@ import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { Spore } from '@/spore';
+import useWalletConnect from '../useWalletConnect';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();

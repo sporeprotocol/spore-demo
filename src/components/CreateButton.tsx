@@ -1,5 +1,5 @@
-import useAddClusterModal from '@/hooks/useAddClusterModal';
-import useAddSporeModal from '@/hooks/useAddSporeModal';
+import useAddClusterModal from '@/hooks/modal/useAddClusterModal';
+import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
 import { Button, Menu } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 

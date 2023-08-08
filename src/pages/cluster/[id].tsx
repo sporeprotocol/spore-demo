@@ -7,7 +7,6 @@ import {
   Box,
   SimpleGrid,
   Alert,
-  Tooltip,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
@@ -18,10 +17,10 @@ import { Cluster, getCluster, getClusters } from '@/cluster';
 import { config, helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
 import useWalletConnect from '@/hooks/useWalletConnect';
-import useAddSporeModal from '@/hooks/useAddSporeModal';
-import useSporeByClusterQuery from '@/hooks/useSporeByClusterQuery';
-import useClusterByIdQuery from '@/hooks/useClusterByIdQuery';
 import Link from 'next/link';
+import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
+import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
+import useSporeByClusterQuery from '@/hooks/query/useSporeByClusterQuery';
 
 export type ClusterPageProps = {
   cluster: Cluster | undefined;

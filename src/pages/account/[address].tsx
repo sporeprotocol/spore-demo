@@ -5,12 +5,12 @@ import { Cluster, getClusters } from '@/cluster';
 import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
-import useClustersQuery from '@/hooks/useClustersQuery';
-import useSporesQuery from '@/hooks/useSporesQuery';
 import { Cell, helpers } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
+import useClustersQuery from '@/hooks/query/useClustersQuery';
+import useSporesQuery from '@/hooks/query/useSporesQuery';
 
 export type AccountPageProps = {
   clusters: Cluster[];

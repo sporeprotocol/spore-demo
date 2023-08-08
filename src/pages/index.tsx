@@ -6,8 +6,8 @@ import { Spore, getSpores } from '@/spore';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
 import { GetStaticProps } from 'next';
-import useClustersQuery from '@/hooks/useClustersQuery';
-import useSporesQuery from '@/hooks/useSporesQuery';
+import useClustersQuery from '@/hooks/query/useClustersQuery';
+import useSporesQuery from '@/hooks/query/useSporesQuery';
 
 export interface HomePageProps {
   clusters: Cluster[];
