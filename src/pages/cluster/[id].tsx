@@ -7,6 +7,7 @@ import {
   Box,
   SimpleGrid,
   Alert,
+  Group,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
@@ -21,6 +22,7 @@ import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByClusterQuery from '@/hooks/query/useSporeByClusterQuery';
 import { Cluster, getCluster, getClusters } from '@/utils/cluster';
 import { Spore, getSpores } from '@/utils/spore';
+import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 
 export type ClusterPageProps = {
   cluster: Cluster | undefined;
@@ -65,13 +67,15 @@ export default function ClusterPage(props: ClusterPageProps) {
   const router = useRouter();
   const { id } = router.query;
   const { address, connected } = useWalletConnect();
-  const addSporeModal = useAddSporeModal(id as string);
 
   const { data: cluster } = useClusterByIdQuery(id as string, props.cluster);
   const { data: spores = [] } = useSporeByClusterQuery(
     id as string,
     props.spores,
   );
+
+  const addSporeModal = useAddSporeModal(id as string);
+  const transferClusterModal = useTransferClusterModal(cluster);
 
   const ownerAddress = useMemo(() => {
     if (cluster) {
@@ -111,17 +115,26 @@ export default function ClusterPage(props: ClusterPageProps) {
             </Text>
           </Link>
         </Flex>
-        {canCreate && (
-          <Box style={{ cursor: connected ? 'pointer' : 'not-allowed' }}>
-            <Button
-              disabled={!connected}
-              onClick={addSporeModal.open}
-              loading={addSporeModal.loading}
-            >
-              Mint Spore
-            </Button>
-          </Box>
+        <Group>
+        {ownerAddress === address && (
+          <Button
+            disabled={!connected}
+            onClick={transferClusterModal.open}
+            loading={transferClusterModal.loading}
+          >
+            Transter
+          </Button>
         )}
+        {canCreate && (
+          <Button
+            disabled={!connected}
+            onClick={addSporeModal.open}
+            loading={addSporeModal.loading}
+          >
+            Mint
+          </Button>
+        )}
+        </Group>
       </Flex>
 
       {!canCreate && (

@@ -23,7 +23,7 @@ export default function useMetaMask() {
   const { connect: connectMetaMask } = useWagmiConnect({
     connector: new MetaMaskConnector(),
   });
-  const { isConnected } = useWagmiAccount({
+  const { isConnected, address: ethAddress } = useWagmiAccount({
     onConnect: (opts) => {
       update({
         address: toCKBAddress(opts.address!),
@@ -39,6 +39,14 @@ export default function useMetaMask() {
       });
     },
   });
+
+  useEffect(() => {
+    if (ethAddress) {
+      update({
+        address: toCKBAddress(ethAddress),
+      })
+    }
+  },[ethAddress, update]);
 
   useEffect(() => {
     if (connectorType === 'metamask' && connected && !isConnected) {
