@@ -1,8 +1,6 @@
-import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useMutation } from 'wagmi';
-import { useQueryClient } from 'react-query';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { Button, Group, Text, Image, Select } from '@mantine/core';
@@ -11,13 +9,12 @@ import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import useWalletConnect from '../useWalletConnect';
 import useClustersQuery from '../query/useClustersQuery';
-import { sendTransaction } from '@/utils/transaction';
 import { getScript } from '@/utils/script';
+import useAddSporeMutation from '../mutation/useAddSporeMutation';
 
 export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock, signTransaction } = useWalletConnect();
-  const queryClient = useQueryClient();
+  const { address, lock } = useWalletConnect();
   const [content, setContent] = useState<Blob | null>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(id);
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
@@ -37,34 +34,12 @@ export default function useAddSporeModal(id?: string) {
     });
   }, [clustersQuery, address]);
 
-  const addSpore = useCallback(
-    async (...args: Parameters<typeof createSpore>) => {
-      let { txSkeleton, cluster: sporeCluster } = await createSpore(...args);
-
-      const cluster = selectableQuerys.find(({ id }) => id === clusterId);
-      const anyoneCanPayScript = getScript('ANYONE_CAN_PAY');
-      if (
-        cluster &&
-        cluster.cell.cellOutput.lock.codeHash === anyoneCanPayScript.CODE_HASH
-      ) {
-        txSkeleton = txSkeleton.update('witnesses', (witnesses) => {
-          return witnesses.set(sporeCluster!.inputIndex, '0x');
-        });
-      }
-      const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
-    },
-    [signTransaction, clusterId, selectableQuerys],
+  const cluster = useMemo(
+    () => selectableQuerys.find(({ id }) => id === clusterId),
+    [selectableQuerys, clusterId],
   );
-
-  const addSporeMutation = useMutation(addSpore, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('spores');
-      queryClient.invalidateQueries(['account', address]);
-    },
-  });
-  const loading = addSporeMutation.isLoading;
+  const addSporeMutation = useAddSporeMutation(cluster);
+  const loading = addSporeMutation.isLoading && !addSporeMutation.isError;
 
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;

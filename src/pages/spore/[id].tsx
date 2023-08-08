@@ -1,5 +1,5 @@
 import Layout from '@/components/Layout';
-import useDestroySporeModal from '@/hooks/modal/useDestorySporeModal';
+import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByIdQuery from '@/hooks/query/useSporeByIdQuery';

@@ -4,40 +4,23 @@ import {
 } from '@spore-sdk/core';
 import { helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
-import { useMutation } from 'wagmi';
-import { useQueryClient } from 'react-query';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
 import useWalletConnect from '../useWalletConnect';
-import { sendTransaction } from '@/utils/transaction';
 import { Cluster } from '@/utils/cluster';
+import useTransferClusterMutation from '../mutation/useTransferClusterMutation';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, signTransaction } = useWalletConnect();
-  const queryClient = useQueryClient();
+  const { address } = useWalletConnect();
 
-  const transferCluster = useCallback(
-    async (...args: Parameters<typeof _transferCluster>) => {
-      const { txSkeleton } = await _transferCluster(...args);
-      const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
-    },
-    [signTransaction],
-  );
-
-  const transferClusterMutation = useMutation(transferCluster, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('clusters');
-      queryClient.invalidateQueries(['cluster', cluster?.id]);
-    },
-  });
-  const loading = transferClusterMutation.isLoading;
+  const transferClusterMutation = useTransferClusterMutation(cluster);
+  const loading =
+    transferClusterMutation.isLoading && !transferClusterMutation.isError;
 
   const form = useForm({
     initialValues: {

@@ -1,21 +1,18 @@
-import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { Script } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
-import { useMutation } from 'wagmi';
-import { useQueryClient } from 'react-query';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { Button, Checkbox, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import useWalletConnect from '../useWalletConnect';
-import { sendTransaction } from '@/utils/transaction';
 import { getScript } from '@/utils/script';
+import { useAddClusterMutation } from '../mutation/useAddClusterMutation';
 
 export default function useAddClusterModal() {
-  const queryClient = useQueryClient();
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock, signTransaction } = useWalletConnect();
+  const { address, lock } = useWalletConnect();
   const modalId = useId();
 
   const form = useForm({
@@ -31,22 +28,8 @@ export default function useAddClusterModal() {
     },
   });
 
-  const addCluster = useCallback(
-    async (...args: Parameters<typeof createCluster>) => {
-      const { txSkeleton } = await createCluster(...args);
-      const signedTx = await signTransaction(txSkeleton);
-      const hash = sendTransaction(signedTx);
-      return hash;
-    },
-    [signTransaction],
-  );
-
-  const addClusterMutation = useMutation(addCluster, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('clusters');
-    },
-  });
-  const loading = addClusterMutation.isLoading;
+  const addClusterMutation = useAddClusterMutation();
+  const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { name: string; description: string; public: boolean }) => {

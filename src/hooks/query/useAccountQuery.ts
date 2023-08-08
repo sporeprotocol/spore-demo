@@ -1,10 +1,10 @@
-import { useQuery } from "react-query";
-import { BI } from "@ckb-lumos/lumos";
-import useWalletConnect from "../useWalletConnect";
+import { useQuery } from 'react-query';
+import { BI } from '@ckb-lumos/lumos';
+import useWalletConnect from '../useWalletConnect';
 
 export type AccountInfo = {
   capacities: string;
-}
+};
 
 export default function useAccountQuery() {
   const { address } = useWalletConnect();

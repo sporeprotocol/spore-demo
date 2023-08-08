@@ -1,7 +1,10 @@
 import { Spore } from '@/utils/spore';
 import { useQuery } from 'react-query';
 
-export default function useSporeByClusterQuery(clusterId: string | undefined, initialData?: Spore[]) {
+export default function useSporeByClusterQuery(
+  clusterId: string | undefined,
+  initialData?: Spore[],
+) {
   const sporesQuery = useQuery(
     ['spores', clusterId],
     async () => {

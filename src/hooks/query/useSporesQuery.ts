@@ -1,5 +1,5 @@
-import { Spore } from "@/utils/spore";
-import { useQuery } from "react-query";
+import { Spore } from '@/utils/spore';
+import { useQuery } from 'react-query';
 
 export default function useSporesQuery(initialData: Spore[]) {
   const sporesQuery = useQuery(

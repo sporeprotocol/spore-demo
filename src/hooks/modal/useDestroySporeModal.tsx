@@ -3,8 +3,6 @@ import {
   destroySpore as _destroySpore,
 } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
-import { useMutation } from 'wagmi';
-import { useQueryClient } from 'react-query';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { Button, Flex, Group, Text } from '@mantine/core';
@@ -13,31 +11,15 @@ import { isNotEmpty, useForm } from '@mantine/form';
 import { useRouter } from 'next/router';
 import useWalletConnect from '../useWalletConnect';
 import { Spore } from '@/utils/spore';
-import { sendTransaction } from '@/utils/transaction';
+import useDestroySporeMutation from '../mutation/useDestroySporeMutation';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, signTransaction } = useWalletConnect();
-  const queryClient = useQueryClient();
+  const { address } = useWalletConnect();
   const router = useRouter();
 
-  const destroySpore = useCallback(
-    async (...args: Parameters<typeof _destroySpore>) => {
-      const { txSkeleton } = await _destroySpore(...args);
-      const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
-    },
-    [signTransaction],
-  );
-
-  const destroySporeMutation = useMutation(destroySpore, {
-    onSuccess: () => {
-      queryClient.invalidateQueries('spores');
-      queryClient.invalidateQueries(['account', address]);
-    },
-  });
+  const destroySporeMutation = useDestroySporeMutation();
   const loading = destroySporeMutation.isLoading;
 
   const form = useForm({
