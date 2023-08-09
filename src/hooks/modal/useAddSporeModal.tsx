@@ -126,7 +126,7 @@ export default function useAddSporeModal(id?: string) {
                       'Only image files are supported, and the size cannot exceed 300KB.',
                   });
                 }}
-                maxSize={300_000}
+                maxSize={parseInt(process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300', 10) * 1000}
               >
                 <Group position="center" spacing="xl">
                   <Dropzone.Accept>
