@@ -19,11 +19,11 @@ function toCKBAddress(address: `0x${string}`) {
 }
 
 export default function useMetaMask() {
-  const { connected, connectorType, update } = useWalletStore();
+  const { address, connected, connectorType, update } = useWalletStore();
   const { connect: connectMetaMask } = useWagmiConnect({
     connector: new MetaMaskConnector(),
   });
-  const { isConnected } = useWagmiAccount({
+  const { address: ethAddress, isConnected } = useWagmiAccount({
     onConnect: (opts) => {
       update({
         address: toCKBAddress(opts.address!),
@@ -46,6 +46,17 @@ export default function useMetaMask() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected, connectorType]);
+
+  useEffect(() => {
+    if (connectorType === 'metamask' && isConnected && ethAddress) {
+      const addr = toCKBAddress(ethAddress);
+      if (addr !== address) {
+        update({
+          address: addr,
+        });
+      }
+    }
+  }, [address, connectorType, ethAddress, isConnected, update]);
 
   const connect = useCallback(() => {
     connectMetaMask();
