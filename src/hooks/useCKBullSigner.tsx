@@ -50,7 +50,6 @@ function SignInModalContent(props: ModalContentProps) {
       const { status, metadata } = pollingQuery.data;
       if (status === 'signed') {
         update({
-          connected: true,
           address: metadata.address,
           connectorType: 'ckbull',
         });
