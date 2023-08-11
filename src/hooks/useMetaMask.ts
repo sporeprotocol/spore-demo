@@ -65,9 +65,7 @@ export default function useMetaMask() {
       config.initializeConfig(config.predefined.AGGRON4);
 
       let tx = commons.omnilock.prepareSigningEntries(txSkeleton);
-      const index = tx.get('witnesses').findIndex((w) => w !== '0x');
-
-      const { message } = tx.signingEntries.get(index)!;
+      const { message, index } = tx.signingEntries.get(0)!;
       // TODO: remove raw message type until wagmi fix it
       let signature = await signMessage({
         message: { raw: message } as any,
