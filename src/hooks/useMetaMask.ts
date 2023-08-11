@@ -27,14 +27,12 @@ export default function useMetaMask() {
     onConnect: (opts) => {
       update({
         address: toCKBAddress(opts.address!),
-        connected: true,
         connectorType: 'metamask',
       });
     },
     onDisconnect: () => {
       update({
         address: '',
-        connected: false,
         connectorType: 'metamask',
       });
     },
@@ -67,7 +65,9 @@ export default function useMetaMask() {
       config.initializeConfig(config.predefined.AGGRON4);
 
       let tx = commons.omnilock.prepareSigningEntries(txSkeleton);
-      const { message, index } = tx.signingEntries.get(0)!;
+      const index = tx.get('witnesses').findIndex((w) => w !== '0x');
+
+      const { message } = tx.signingEntries.get(index)!;
       // TODO: remove raw message type until wagmi fix it
       let signature = await signMessage({
         message: { raw: message } as any,

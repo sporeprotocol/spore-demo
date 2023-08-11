@@ -7,7 +7,6 @@ import useMetaMask from './useMetaMask';
 
 const defaultValue = {
   address: '',
-  connected: false,
   connectorType: 'metamask' as 'metamask' | 'ckbull',
 };
 
@@ -27,7 +26,7 @@ export function useWalletStore() {
       str === undefined ? defaultValue : superjson.parse(str),
   });
 
-  const { address, connected, connectorType } = wallet;
+  const { address, connectorType } = wallet;
 
   const update = useCallback((values: Partial<typeof defaultValue>) => {
     setWallet({
@@ -35,6 +34,8 @@ export function useWalletStore() {
       ...values,
     });
   }, [setWallet, wallet])
+
+  const connected = useMemo(() => !!address, [address]);
 
   return {
     address,
