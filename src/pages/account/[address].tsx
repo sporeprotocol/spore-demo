@@ -53,14 +53,14 @@ export const getStaticProps: GetStaticProps<
   const clusters = await getClusters();
   const spores = await getSpores();
 
-  const isOwned = (cell: Cell) => {
-    return helpers.encodeToAddress(cell.cellOutput.lock) === address;
-  };
-
   return {
     props: {
-      clusters: clusters.filter(({ cell }) => isOwned(cell)),
-      spores: spores.filter(({ cell }) => isOwned(cell)),
+      clusters: clusters.filter(
+        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
+      ),
+      spores: spores.filter(
+        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
+      ),
     },
   };
 };

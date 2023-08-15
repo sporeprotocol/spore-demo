@@ -6,13 +6,13 @@ const router = createRouter<NextApiRequest, NextApiResponse>();
 
 router.get(async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
-  const spore = await getSpore(id as string);
+  const spore = await getSpore(id as string, { includeContent: true });
   if (!spore) {
     res.status(404).end();
     return;
   }
 
-  const buffer = Buffer.from(spore.content.slice(2), 'hex');
+  const buffer = Buffer.from(spore.content!.slice(2), 'hex');
   res.setHeader('Content-Type', spore.contentType);
   res.setHeader(
     'Cache-Control',
