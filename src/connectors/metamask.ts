@@ -11,12 +11,12 @@ import { publicProvider } from '@wagmi/core/providers/public';
 import { bytes } from '@ckb-lumos/codec';
 import { blockchain } from '@ckb-lumos/base';
 import { InjectedConnector } from '@wagmi/core/connectors/injected';
-import Connector from './base';
+import CKBConnector from './base';
 import { Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 
-export default class MetaMaskConnector extends Connector {
-  public type = 'metamask';
+export default class MetaMaskConnector extends CKBConnector {
+  public type = 'MetaMask';
   private listeners: Array<() => void> = [];
   public config: any;
 
@@ -45,7 +45,7 @@ export default class MetaMaskConnector extends Connector {
     const address = helpers.encodeToAddress(lock);
     this.store.set(walletAtom, {
       address,
-      connectorType: this.type,
+      connectorType: this.type.toLowerCase(),
     });
   }
 

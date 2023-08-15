@@ -1,10 +1,10 @@
-import Connector from '@/connectors/base';
+import CKBConnector from '@/connectors/base';
 import { walletAtom } from '@/state/wallet';
 import { Transaction, config, helpers } from '@ckb-lumos/lumos';
 import { useAtomValue } from 'jotai';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-export const ConnectContext = createContext<{ connectors: Connector[] }>({
+export const ConnectContext = createContext<{ connectors: CKBConnector[] }>({
   connectors: [],
 });
 
@@ -33,7 +33,8 @@ export const useConnect = () => {
       txSkeleton: helpers.TransactionSkeletonType,
     ): Promise<Transaction> => {
       const connector = connectors.find(
-        (connector) => connector.type === connectorType,
+        (connector) =>
+          connector.type.toLowerCase() === connectorType.toLowerCase(),
       );
       if (!connector) {
         throw new Error(`Connector ${connectorType} not found`);
