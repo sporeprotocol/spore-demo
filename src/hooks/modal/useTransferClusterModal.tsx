@@ -9,14 +9,14 @@ import { modals } from '@mantine/modals';
 import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
-import useWalletConnect from '../useWalletConnect';
 import { Cluster } from '@/utils/cluster';
 import useTransferClusterMutation from '../mutation/useTransferClusterMutation';
+import { useConnect } from '../useConnect';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
-  const { address } = useWalletConnect();
+  const { address } = useConnect();
 
   const transferClusterMutation = useTransferClusterMutation(cluster);
   const loading =

@@ -7,14 +7,14 @@ import { Button, Group, Text, Image, Select } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
-import useWalletConnect from '../useWalletConnect';
 import useClustersQuery from '../query/useClustersQuery';
 import { getScript } from '@/utils/script';
 import useAddSporeMutation from '../mutation/useAddSporeMutation';
+import { useConnect } from '../useConnect';
 
 export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock } = useWalletConnect();
+  const { address, lock } = useConnect();
   const [content, setContent] = useState<Blob | null>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(id);
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);

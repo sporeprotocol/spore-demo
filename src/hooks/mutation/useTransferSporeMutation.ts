@@ -1,11 +1,11 @@
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useMutation, useQueryClient } from 'react-query';
-import useWalletConnect from '../useWalletConnect';
 import { useCallback } from 'react';
 import { sendTransaction } from '@/utils/transaction';
+import { useConnect } from '../useConnect';
 
 export default function useTransferSporeMutation() {
-  const { address, signTransaction } = useWalletConnect();
+  const { address, signTransaction } = useConnect();
   const queryClient = useQueryClient();
 
   const transferSpore = useCallback(

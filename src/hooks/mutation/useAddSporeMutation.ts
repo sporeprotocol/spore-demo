@@ -2,13 +2,13 @@ import { Cluster } from '@/utils/cluster';
 import { getScript } from '@/utils/script';
 import { createSpore } from '@spore-sdk/core';
 import { useCallback } from 'react';
-import useWalletConnect from '../useWalletConnect';
 import { useMutation, useQueryClient } from 'react-query';
 import { sendTransaction } from '@/utils/transaction';
+import { useConnect } from '../useConnect';
 
 export default function useAddSporeMutation(cluster: Cluster | undefined) {
   const queryClient = useQueryClient();
-  const { address, signTransaction } = useWalletConnect();
+  const { address, signTransaction } = useConnect();
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {

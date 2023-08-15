@@ -1,12 +1,12 @@
 import { Text, Button } from '@mantine/core';
-import useWalletConnect from '@/hooks/useWalletConnect';
 import { useRouter } from 'next/router';
 import { BI } from '@ckb-lumos/lumos';
 import useAccountQuery from '@/hooks/query/useAccountQuery';
 import { useMemo } from 'react';
+import { useConnect } from '@/hooks/useConnect';
 
 export default function Connect() {
-  const { address, connected, connect } = useWalletConnect();
+  const { address, connected, connect } = useConnect();
   const router = useRouter();
 
   const accountQuery = useAccountQuery();

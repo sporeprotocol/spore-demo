@@ -3,7 +3,7 @@ import { SimpleGrid, Box, Title, Tabs, Tooltip } from '@mantine/core';
 import { useMemo } from 'react';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
-import { Cell, helpers } from '@ckb-lumos/lumos';
+import { helpers } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';

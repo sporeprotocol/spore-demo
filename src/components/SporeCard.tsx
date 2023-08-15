@@ -22,7 +22,6 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
     <Link
       href={`/spore/${spore.id}`}
       style={{ textDecoration: 'none' }}
-      prefetch
       passHref
     >
       <Card key={spore.id} shadow="sm" radius="md" pt="0" withBorder>

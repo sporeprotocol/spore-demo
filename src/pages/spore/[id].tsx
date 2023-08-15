@@ -3,7 +3,7 @@ import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByIdQuery from '@/hooks/query/useSporeByIdQuery';
-import useWalletConnect from '@/hooks/useWalletConnect';
+import { useConnect } from '@/hooks/useConnect';
 import { Cluster, getCluster } from '@/utils/cluster';
 import { Spore, getSpore, getSpores } from '@/utils/spore';
 import { BI, helpers } from '@ckb-lumos/lumos';
@@ -69,7 +69,7 @@ export const getStaticProps: GetStaticProps<
 export default function SporePage(props: SporePageProps) {
   const router = useRouter();
   const { id } = router.query;
-  const { address } = useWalletConnect();
+  const { address } = useConnect();
   const { data: spore } = useSporeByIdQuery(id as string, props.spore);
   const { data: cluster } = useClusterByIdQuery(
     spore?.clusterId || undefined,
@@ -110,7 +110,6 @@ export default function SporePage(props: SporePageProps) {
             <Link
               href={`/cluster/${spore.clusterId}`}
               style={{ textDecoration: 'none' }}
-              prefetch
               passHref
             >
               <Title order={5} color="blue">

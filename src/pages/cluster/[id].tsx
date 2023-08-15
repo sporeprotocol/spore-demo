@@ -15,7 +15,6 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { config, helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
-import useWalletConnect from '@/hooks/useWalletConnect';
 import Link from 'next/link';
 import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
@@ -23,6 +22,7 @@ import useSporeByClusterQuery from '@/hooks/query/useSporeByClusterQuery';
 import { Cluster, getCluster, getClusters } from '@/utils/cluster';
 import { Spore, getSpores } from '@/utils/spore';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
+import { useConnect } from '@/hooks/useConnect';
 
 export type ClusterPageProps = {
   cluster: Cluster | undefined;
@@ -66,7 +66,7 @@ export const getStaticProps: GetStaticProps<
 export default function ClusterPage(props: ClusterPageProps) {
   const router = useRouter();
   const { id } = router.query;
-  const { address, connected } = useWalletConnect();
+  const { address, connected } = useConnect();
 
   const { data: cluster } = useClusterByIdQuery(id as string, props.cluster);
   const { data: spores = [] } = useSporeByClusterQuery(

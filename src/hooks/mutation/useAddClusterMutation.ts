@@ -1,12 +1,12 @@
 import { createCluster } from '@spore-sdk/core';
 import { useCallback } from 'react';
-import useWalletConnect from '../useWalletConnect';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation, useQueryClient } from 'react-query';
+import { useConnect } from '../useConnect';
 
 export function useAddClusterMutation() {
   const queryClient = useQueryClient();
-  const { signTransaction } = useWalletConnect();
+  const { signTransaction } = useConnect();
 
   const addCluster = useCallback(
     async (...args: Parameters<typeof createCluster>) => {

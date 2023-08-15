@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 import { destroySpore as _destroySpore } from '@spore-sdk/core';
-import useWalletConnect from '../useWalletConnect';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation, useQueryClient } from 'react-query';
+import { useConnect } from '../useConnect';
 
 export default function useDestroySporeMutation() {
   const queryClient = useQueryClient();
-  const { address, signTransaction } = useWalletConnect();
+  const { address, signTransaction } = useConnect();
 
   const destroySpore = useCallback(
     async (...args: Parameters<typeof _destroySpore>) => {
