@@ -97,12 +97,6 @@ export default function useAddClusterModal() {
               {...form.getInputProps('description')}
             />
 
-            <Checkbox
-              mt="md"
-              label="Make the cluster public so that others can create it."
-              {...form.getInputProps('public', { type: 'checkbox' })}
-            />
-
             <Group position="right" mt="md">
               <Button type="submit" loading={addClusterMutation.isLoading}>
                 Submit

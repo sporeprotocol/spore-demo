@@ -1,20 +1,13 @@
-import { Text, Button, Flex, Modal } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-// import useCKBullSigner from '@/hooks/useCKBullSigner';
+import { Text, Button } from '@mantine/core';
 import useWalletConnect from '@/hooks/useWalletConnect';
-import { useEffect, useMemo } from 'react';
-import useMetaMask from '@/hooks/useMetaMask';
 import { useRouter } from 'next/router';
 import { BI } from '@ckb-lumos/lumos';
 import useAccountQuery from '@/hooks/query/useAccountQuery';
+import { useMemo } from 'react';
 
 export default function Connect() {
-  const [opened, { open, close }] = useDisclosure(false);
-  const { address, connected } = useWalletConnect();
+  const { address, connected, connect } = useWalletConnect();
   const router = useRouter();
-
-  // const ckbullSigner = useCKBullSigner();
-  const metaMask = useMetaMask();
 
   const accountQuery = useAccountQuery();
   const balance = useMemo(() => {
@@ -26,37 +19,8 @@ export default function Connect() {
     return connected ? `${address?.slice(0, 5)}...${address?.slice(-5)}` : '';
   }, [address, connected]);
 
-  useEffect(() => {
-    if (connected) {
-      close();
-    }
-  }, [close, connected]);
-
   return (
     <>
-      <Modal opened={opened} onClose={close} title="Connect Wallet">
-        <Flex direction="column" gap={10}>
-          <Button
-            variant="light"
-            color="orange"
-            radius="md"
-            onClick={metaMask.connect}
-            fullWidth
-          >
-            MetaMask
-          </Button>
-          <Button
-            variant="light"
-            color="green"
-            radius="md"
-            disabled
-            fullWidth
-          >
-            CKBull
-          </Button>
-        </Flex>
-      </Modal>
-
       {connected ? (
         <Button.Group>
           <Button variant="light" color="gray">
@@ -67,7 +31,7 @@ export default function Connect() {
           </Button>
         </Button.Group>
       ) : (
-        <Button onClick={open}>Connect</Button>
+        <Button onClick={connect}>Connect</Button>
       )}
     </>
   );

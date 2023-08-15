@@ -8,7 +8,7 @@ export default function Logo() {
   return (
     <Link href="/" style={{ textDecoration: 'none', color: '#0a0a0a' }}>
       <Title className={caveatBrush.className} order={2}>
-        Spore Protocol Demo
+        Spore Demo
       </Title>
     </Link>
   );
