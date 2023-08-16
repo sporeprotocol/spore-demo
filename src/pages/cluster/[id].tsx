@@ -19,10 +19,10 @@ import Link from 'next/link';
 import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByClusterQuery from '@/hooks/query/useSporeByClusterQuery';
-import { Cluster, getCluster, getClusters } from '@/utils/cluster';
-import { Spore, getSpores } from '@/utils/spore';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
+import ClusterService, { Cluster } from '@/cluster';
+import SporeService, { Spore } from '@/spore';
 
 export type ClusterPageProps = {
   cluster: Cluster | undefined;
@@ -41,7 +41,7 @@ export const getStaticPaths: GetStaticPaths<ClusterPageParams> = async () => {
     };
   }
 
-  const clusters = await getClusters();
+  const clusters = await ClusterService.shared.list();
   const paths = clusters.map(({ id }) => ({
     params: { id },
   }));
@@ -56,8 +56,8 @@ export const getStaticProps: GetStaticProps<
   ClusterPageParams
 > = async (context) => {
   const { id } = context.params!;
-  const cluster = await getCluster(id as string);
-  const spores = await getSpores(id as string);
+  const cluster = await ClusterService.shared.get(id as string);
+  const spores = await SporeService.shared.list(id as string);
   return {
     props: { cluster, spores },
   };

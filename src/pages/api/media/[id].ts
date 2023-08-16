@@ -1,4 +1,4 @@
-import { getSpore } from '@/utils/spore';
+import SporeService from '@/spore';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
@@ -6,7 +6,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>();
 
 router.get(async (req: NextApiRequest, res: NextApiResponse) => {
   const { id } = req.query;
-  const spore = await getSpore(id as string, { includeContent: true });
+  const spore = await SporeService.shared.get(id as string, { includeContent: true });
   if (!spore) {
     res.status(404).end();
     return;

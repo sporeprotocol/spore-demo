@@ -1,11 +1,11 @@
+import ClusterService, { Cluster } from '@/cluster';
 import Layout from '@/components/Layout';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
 import useSporeByIdQuery from '@/hooks/query/useSporeByIdQuery';
 import { useConnect } from '@/hooks/useConnect';
-import { Cluster, getCluster } from '@/utils/cluster';
-import { Spore, getSpore, getSpores } from '@/utils/spore';
+import SporeService, { Spore } from '@/spore';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -39,7 +39,7 @@ export const getStaticPaths: GetStaticPaths<SporePageParams> = async () => {
     };
   }
 
-  const spores = await getSpores();
+  const spores = await SporeService.shared.list();
   const paths = spores.map(({ id }) => ({
     params: { id },
   }));
@@ -54,8 +54,8 @@ export const getStaticProps: GetStaticProps<
   SporePageParams
 > = async (context) => {
   const { id } = context.params!;
-  const spore = await getSpore(id as string);
-  const cluster = await getCluster(spore?.clusterId as string);
+  const spore = await SporeService.shared.get(id as string);
+  const cluster = await ClusterService.shared.get(spore?.clusterId as string);
   if (cluster) {
     return {
       props: { cluster, spore },

@@ -6,8 +6,8 @@ import SporeCard from '@/components/SporeCard';
 import { GetStaticProps } from 'next';
 import useClustersQuery from '@/hooks/query/useClustersQuery';
 import useSporesQuery from '@/hooks/query/useSporesQuery';
-import { Cluster, getClusters } from '@/utils/cluster';
-import { Spore, getSpores } from '@/utils/spore';
+import ClusterService, { Cluster } from '@/cluster';
+import SporeService, { Spore } from '@/spore';
 
 export interface HomePageProps {
   clusters: Cluster[];
@@ -15,8 +15,8 @@ export interface HomePageProps {
 }
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  const clusters = await getClusters();
-  const spores = await getSpores();
+  const clusters = await ClusterService.shared.list();
+  const spores = await SporeService.shared.list();
   return { props: { clusters, spores } };
 };
 
