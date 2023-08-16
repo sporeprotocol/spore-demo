@@ -36,7 +36,6 @@ export default function useAddClusterModal() {
       }
       try {
         const toLock = values.public ? getAnyoneCanPayLock() : lock;
-        console.log(toLock);
         await addClusterMutation.mutateAsync({
           data: {
             name: values.name,

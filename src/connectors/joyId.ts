@@ -45,6 +45,10 @@ export default class JoyIdConnector extends CKBConnector {
     throw new Error('Method not implemented.');
   }
 
+  isOwned(targetLock: Script): boolean {
+    throw new Error('Method not implemented.');
+  }
+
   async signTransaction(
     txSkeleton: TransactionSkeletonType,
   ): Promise<Transaction> {

@@ -1,6 +1,6 @@
 import CKBConnector from '@/connectors/base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
-import { Transaction, config, helpers } from '@ckb-lumos/lumos';
+import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
 import { useAtom } from 'jotai';
 import {
   createContext,
@@ -67,6 +67,13 @@ export const useConnect = () => {
     }
   }, [connectors]);
 
+  const isOwned = useCallback((lock: Script) => {
+    if (!connector) {
+      throw new Error(`Connector ${connectorType} not found`);
+    }
+    return connector.isOwned(lock);
+  }, [connector, connectorType]);
+
   const getAnyoneCanPayLock = useCallback(() => {
     if (!connector) {
       throw new Error(`Connector ${connectorType} not found`);
@@ -93,6 +100,7 @@ export const useConnect = () => {
     connected,
     lock,
     connect,
+    isOwned,
     getAnyoneCanPayLock,
     signTransaction,
   };

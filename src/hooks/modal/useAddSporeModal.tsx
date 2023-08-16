@@ -1,5 +1,4 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -8,9 +7,10 @@ import { notifications } from '@mantine/notifications';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
 import useClustersQuery from '../query/useClustersQuery';
-import { getScript } from '@/utils/script';
+import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import useAddSporeMutation from '../mutation/useAddSporeMutation';
 import { useConnect } from '../useConnect';
+import { BI, Cell } from '@ckb-lumos/lumos';
 
 export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -26,13 +26,9 @@ export default function useAddSporeModal(id?: string) {
       return [];
     }
     return clustersQuery.data.filter(({ cell }) => {
-      const anyoneCanPayScript = getScript('ANYONE_CAN_PAY');
-      return (
-        cell.cellOutput.lock.codeHash === anyoneCanPayScript.CODE_HASH ||
-        helpers.encodeToAddress(cell.cellOutput.lock) === address
-      );
+      return isSameScript(cell.cellOutput.lock, lock) || isAnyoneCanPay(cell.cellOutput.lock);
     });
-  }, [clustersQuery, address]);
+  }, [clustersQuery, lock]);
 
   const cluster = useMemo(
     () => selectableQuerys.find(({ id }) => id === clusterId),

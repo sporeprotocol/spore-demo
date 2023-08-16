@@ -2,7 +2,7 @@ import {
   predefinedSporeConfigs,
   transferCluster as _transferCluster,
 } from '@spore-sdk/core';
-import { helpers } from '@ckb-lumos/lumos';
+import { BI, Cell, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -39,6 +39,7 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
       try {
         await transferClusterMutation.mutateAsync({
           outPoint: cluster.cell.outPoint!,
+          useCapacityMarginAsFee: false,
           fromInfos: [address],
           toLock: helpers.parseAddress(values.to),
           config: predefinedSporeConfigs.Aggron4,

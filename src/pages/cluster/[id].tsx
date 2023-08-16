@@ -66,7 +66,7 @@ export const getStaticProps: GetStaticProps<
 export default function ClusterPage(props: ClusterPageProps) {
   const router = useRouter();
   const { id } = router.query;
-  const { address, connected } = useConnect();
+  const { connected, isOwned } = useConnect();
 
   const { data: cluster } = useClusterByIdQuery(id as string, props.cluster);
   const { data: spores = [] } = useSporeByClusterQuery(
@@ -84,17 +84,12 @@ export default function ClusterPage(props: ClusterPageProps) {
     return '';
   }, [cluster]);
 
-  const publicCluster = useMemo(() => {
-    if (cluster) {
-      return (
-        cluster.cell.cellOutput.lock.codeHash ===
-        config.predefined.AGGRON4.SCRIPTS['ANYONE_CAN_PAY'].CODE_HASH
-      );
+  const isOwnedCluster = useMemo(() => {
+    if (cluster && connected) {
+      return isOwned(cluster.cell.cellOutput.lock);
     }
     return false;
-  }, [cluster]);
-
-  const canCreate = ownerAddress === address || publicCluster;
+  }, [cluster, isOwned, connected]);
 
   if (!cluster) {
     return null;
@@ -116,7 +111,7 @@ export default function ClusterPage(props: ClusterPageProps) {
           </Link>
         </Flex>
         <Group>
-        {ownerAddress === address && (
+        {isOwnedCluster && (
           <Button
             disabled={!connected}
             onClick={transferClusterModal.open}
@@ -125,7 +120,7 @@ export default function ClusterPage(props: ClusterPageProps) {
             Transter
           </Button>
         )}
-        {canCreate && (
+        {isOwnedCluster && (
           <Button
             disabled={!connected}
             onClick={addSporeModal.open}
@@ -137,7 +132,7 @@ export default function ClusterPage(props: ClusterPageProps) {
         </Group>
       </Flex>
 
-      {!canCreate && (
+      {!isOwned && (
         <Alert mt="md" icon={<IconAlertCircle size="1rem" />}>
           This cluster does not belong to you, so you cannot mint a spore.
         </Alert>
