@@ -31,7 +31,6 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
       <Link
         href={`/cluster/${cluster.id}`}
         style={{ textDecoration: 'none' }}
-        prefetch
         passHref
       >
         <Card.Section mb="md">

@@ -1,11 +1,11 @@
 import { AppShell, Container, Flex, Group, Header } from '@mantine/core';
 import Logo from './Logo';
 import Connect from './Connect';
-import useWalletConnect from '@/hooks/useWalletConnect';
 import CreateButton from './CreateButton';
+import { useConnect } from '@/hooks/useConnect';
 
 export default function Layout({ children }: React.PropsWithChildren<{}>) {
-  const { connected } = useWalletConnect();
+  const { connected } = useConnect();
 
   return (
     <AppShell
