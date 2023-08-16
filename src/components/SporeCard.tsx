@@ -28,7 +28,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
         <Flex h="100%" direction="column" justify="space-between">
           <Card.Section mb="md">
             <AspectRatio ratio={1}>
-              <Image alt={spore.id} src={`/api/media/${spore.id}`} />
+              <Image alt={spore.id} src={`/api/v1/media/${spore.id}`} />
             </AspectRatio>
           </Card.Section>
           <Group>

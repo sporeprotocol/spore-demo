@@ -1,11 +1,10 @@
-import ClusterService, { Cluster } from '@/cluster';
 import Layout from '@/components/Layout';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
-import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
-import useSporeByIdQuery from '@/hooks/query/useSporeByIdQuery';
 import { useConnect } from '@/hooks/useConnect';
-import SporeService, { Spore } from '@/spore';
+import SporeService from '@/spore';
+import { createServerSideHelpers } from '@trpc/react-query/server';
+import superjson from 'superjson';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -17,15 +16,12 @@ import {
   Button,
   Box,
 } from '@mantine/core';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
-
-export type SporePageProps = {
-  cluster?: Cluster;
-  spore: Spore | undefined;
-};
+import { trpc } from '@/server';
+import { appRouter } from '@/server/routers';
 
 export type SporePageParams = {
   id: string;
@@ -49,31 +45,32 @@ export const getStaticPaths: GetStaticPaths<SporePageParams> = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps<
-  SporePageProps,
-  SporePageParams
-> = async (context) => {
+export const getStaticProps = async (
+  context: GetStaticPropsContext<SporePageParams>,
+) => {
   const { id } = context.params!;
-  const spore = await SporeService.shared.get(id as string);
-  const cluster = await ClusterService.shared.get(spore?.clusterId as string);
-  if (cluster) {
-    return {
-      props: { cluster, spore },
-    };
-  }
+  const trpcHelpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {},
+    transformer: superjson,
+  });
+
+  await trpcHelpers.spore.get.prefetch({ id });
   return {
-    props: { spore },
+    props: {
+      trpcState: trpcHelpers.dehydrate(),
+    },
   };
 };
 
-export default function SporePage(props: SporePageProps) {
+export default function SporePage() {
   const router = useRouter();
   const { id } = router.query;
   const { address } = useConnect();
-  const { data: spore } = useSporeByIdQuery(id as string, props.spore);
-  const { data: cluster } = useClusterByIdQuery(
-    spore?.clusterId || undefined,
-    props.cluster,
+  const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
+  const { data: cluster } = trpc.cluster.get.useQuery(
+    { id: spore?.clusterId ?? undefined },
+    { enabled: !!spore?.clusterId },
   );
 
   const transferSporeModal = useTransferSporeModal(spore);
@@ -98,10 +95,7 @@ export default function SporePage(props: SporePageProps) {
         <Card withBorder radius="md" mr="md">
           <AspectRatio ratio={1} w="30vw">
             {spore && (
-              <Image
-                alt={spore.id}
-                src={`/api/media/${spore.id}`}
-              />
+              <Image alt={spore.id} src={`/api/v1/media/${spore.id}`} />
             )}
           </AspectRatio>
         </Card>

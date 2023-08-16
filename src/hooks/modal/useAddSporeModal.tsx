@@ -6,11 +6,10 @@ import { Button, Group, Text, Image, Select } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { IconPhoto, IconUpload } from '@tabler/icons-react';
-import useClustersQuery from '../query/useClustersQuery';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import useAddSporeMutation from '../mutation/useAddSporeMutation';
 import { useConnect } from '../useConnect';
-import { BI, Cell } from '@ckb-lumos/lumos';
+import { trpc } from '@/server';
 
 export default function useAddSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -20,15 +19,13 @@ export default function useAddSporeModal(id?: string) {
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
   const modalId = useId();
 
-  const clustersQuery = useClustersQuery();
+  const { data: clusters = [] } = trpc.cluster.list.useQuery();
+
   const selectableQuerys = useMemo(() => {
-    if (!clustersQuery.data) {
-      return [];
-    }
-    return clustersQuery.data.filter(({ cell }) => {
+    return clusters.filter(({ cell }) => {
       return isSameScript(cell.cellOutput.lock, lock) || isAnyoneCanPay(cell.cellOutput.lock);
     });
-  }, [clustersQuery, lock]);
+  }, [clusters, lock]);
 
   const cluster = useMemo(
     () => selectableQuerys.find(({ id }) => id === clusterId),

@@ -1,21 +1,18 @@
 import Layout from '@/components/Layout';
 import { SimpleGrid, Box, Title, Tabs, Tooltip } from '@mantine/core';
+import { createServerSideHelpers } from '@trpc/react-query/server';
+import superjson from 'superjson';
 import { useMemo } from 'react';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
 import { helpers } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
-import { GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import { useRouter } from 'next/router';
-import useClustersQuery from '@/hooks/query/useClustersQuery';
-import useSporesQuery from '@/hooks/query/useSporesQuery';
 import ClusterService, { Cluster } from '@/cluster';
 import SporeService, { Spore } from '@/spore';
-
-export type AccountPageProps = {
-  clusters: Cluster[];
-  spores: Spore[];
-};
+import { appRouter } from '@/server/routers';
+import { trpc } from '@/server';
 
 export type AccountPageParams = {
   address: string;
@@ -48,50 +45,39 @@ export const getStaticPaths: GetStaticPaths<AccountPageParams> = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps<
-  AccountPageProps,
-  AccountPageParams
-> = async (context) => {
+export const getStaticProps = async (
+  context: GetStaticPropsContext<AccountPageParams>,
+) => {
   const { address } = context.params!;
-  const clusters = await ClusterService.shared.list();
-  const spores = await SporeService.shared.list();
+  const trpcHelpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {},
+    transformer: superjson,
+  });
+
+  await Promise.all([
+    trpcHelpers.cluster.list.prefetch({ owner: address }),
+    trpcHelpers.spore.list.prefetch({ owner: address }),
+  ]);
 
   return {
     props: {
-      clusters: clusters.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ),
-      spores: spores.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ),
+      trpcState: trpcHelpers.dehydrate(),
     },
   };
 };
 
-export default function AccountPage(props: AccountPageProps) {
+export default function AccountPage() {
   const router = useRouter();
   const { address } = router.query;
   const clipboard = useClipboard({ timeout: 500 });
-  const clustersQuery = useClustersQuery(props.clusters);
-  const sporesQuery = useSporesQuery(props.spores);
 
-  const clusters = useMemo(() => {
-    if (!address) return [];
-    return (
-      clustersQuery.data?.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ) || []
-    );
-  }, [clustersQuery.data, address]);
-
-  const spores = useMemo(() => {
-    if (!address) return [];
-    return (
-      sporesQuery.data?.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ) || []
-    );
-  }, [sporesQuery.data, address]);
+  const { data: clusters = [] } = trpc.cluster.list.useQuery({
+    owner: address as string,
+  });
+  const { data: spores = [] } = trpc.spore.list.useQuery({
+    owner: address as string,
+  });
 
   const displayAddress = useMemo(() => {
     if (!address) return '';

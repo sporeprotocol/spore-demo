@@ -39,7 +39,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
               {spores.slice(0, cols * cols).map((spore) => {
                 return (
                   <AspectRatio key={spore.id} ratio={1}>
-                    <Image src={`/api/media/${spore.id}`} alt={spore.id} />
+                    <Image src={`/api/v1/media/${spore.id}`} alt={spore.id} />
                   </AspectRatio>
                 );
               })}
