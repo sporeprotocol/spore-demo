@@ -2,6 +2,7 @@ import store from '@/state/store';
 import { Transaction, helpers } from '@ckb-lumos/lumos';
 
 export default abstract class CKBConnector {
+  public isConnected = false;
   protected store = store;
   abstract type: string;
 

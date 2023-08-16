@@ -34,6 +34,7 @@ export default class JoyIdConnector extends CKBConnector {
       connectorType: this.type.toLowerCase(),
       data: authData,
     });
+    this.isConnected = true;
   }
 
   disconnect(): Promise<void> | void {

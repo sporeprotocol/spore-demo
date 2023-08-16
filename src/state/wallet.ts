@@ -17,7 +17,7 @@ export const defaultWalletValue = {
 };
 
 export const walletAtom = atomWithStorage<WalletData>(
-  'wallet',
+  'spore.wallet',
   defaultWalletValue,
   {
     getItem(key, initialValue) {

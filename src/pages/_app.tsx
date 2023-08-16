@@ -8,7 +8,6 @@ import { useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
-import JoyIdConnector from '@/connectors/joyId';
 
 export function StateProvider({
   children,
@@ -38,7 +37,8 @@ export function UIProvider({ children }: React.PropsWithChildren<{}>) {
 }
 
 const config = {
-  connectors: [new MetaMaskConnector(), new JoyIdConnector()],
+  autoConnect: true,
+  connectors: [new MetaMaskConnector()],
 };
 
 export default function App({ Component, pageProps }: AppProps) {

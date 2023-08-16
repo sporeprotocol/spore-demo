@@ -52,6 +52,7 @@ export default class MetaMaskConnector extends CKBConnector {
   async connect() {
     const { account } = await connect({ connector: new InjectedConnector() });
     this.setAddress(account);
+    this.isConnected = true;
     this.listeners.push(
       watchAccount((account) => {
         if (account.isConnected) {
