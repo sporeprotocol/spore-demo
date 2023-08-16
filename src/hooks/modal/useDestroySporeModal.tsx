@@ -9,9 +9,9 @@ import { Button, Flex, Group, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
 import { useRouter } from 'next/router';
-import { Spore } from '@/utils/spore';
 import useDestroySporeMutation from '../mutation/useDestroySporeMutation';
 import { useConnect } from '../useConnect';
+import { Spore } from '@/spore';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
   const modalId = useId();

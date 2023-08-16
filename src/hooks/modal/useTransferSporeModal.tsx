@@ -6,9 +6,9 @@ import { modals } from '@mantine/modals';
 import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { Spore } from '@/utils/spore';
 import useTransferSporeMutation from '../mutation/useTransferSporeMutation';
 import { useConnect } from '../useConnect';
+import { Spore } from '@/spore';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();

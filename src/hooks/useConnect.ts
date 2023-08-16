@@ -67,6 +67,14 @@ export const useConnect = () => {
     }
   }, [connectors]);
 
+  const getAnyoneCanPayLock = useCallback(() => {
+    if (!connector) {
+      throw new Error(`Connector ${connectorType} not found`);
+    }
+    const lock = connector.getAnyoneCanPayLock();
+    return lock;
+  }, [connector, connectorType]);
+
   const signTransaction = useCallback(
     async (
       txSkeleton: helpers.TransactionSkeletonType,
@@ -85,6 +93,7 @@ export const useConnect = () => {
     connected,
     lock,
     connect,
+    getAnyoneCanPayLock,
     signTransaction,
   };
 };

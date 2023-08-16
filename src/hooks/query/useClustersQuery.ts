@@ -1,4 +1,4 @@
-import { Cluster } from '@/utils/cluster';
+import { Cluster } from '@/cluster';
 import { useQuery } from 'react-query';
 
 export default function useClustersQuery(initialData?: Cluster[]) {

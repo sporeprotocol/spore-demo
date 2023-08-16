@@ -53,6 +53,9 @@ export default class ClusterService {
   }
 
   public async get(id: string): Promise<Cluster | undefined> {
+    if (!id) {
+      return undefined;
+    }
     const collector = this.indexer.collector({
       type: { ...this.script, args: id },
     });

@@ -9,9 +9,9 @@ import { modals } from '@mantine/modals';
 import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { Cluster } from '@/utils/cluster';
 import useTransferClusterMutation from '../mutation/useTransferClusterMutation';
 import { useConnect } from '../useConnect';
+import { Cluster } from '@/cluster';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();

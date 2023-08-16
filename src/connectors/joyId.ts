@@ -1,5 +1,5 @@
 import { bytes } from '@ckb-lumos/codec';
-import { blockchain } from '@ckb-lumos/base';
+import { Script, blockchain } from '@ckb-lumos/base';
 import { TransactionSkeletonType } from '@ckb-lumos/helpers';
 import { Transaction, helpers } from '@ckb-lumos/lumos';
 // @ts-ignore
@@ -39,6 +39,10 @@ export default class JoyIdConnector extends CKBConnector {
 
   disconnect(): Promise<void> | void {
     this.store.set(walletAtom, defaultWalletValue);
+  }
+
+  getAnyoneCanPayLock(): Script {
+    throw new Error('Method not implemented.');
   }
 
   async signTransaction(

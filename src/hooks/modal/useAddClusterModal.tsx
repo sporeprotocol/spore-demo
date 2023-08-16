@@ -3,14 +3,14 @@ import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isNotEmpty, useForm } from '@mantine/form';
-import { Button, Group, TextInput } from '@mantine/core';
+import { Button, Checkbox, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useAddClusterMutation } from '../mutation/useAddClusterMutation';
 import { useConnect } from '../useConnect';
 
 export default function useAddClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock } = useConnect();
+  const { address, lock, getAnyoneCanPayLock } = useConnect();
   const modalId = useId();
 
   const form = useForm({
@@ -35,7 +35,8 @@ export default function useAddClusterModal() {
         return;
       }
       try {
-        let toLock = lock;
+        const toLock = values.public ? getAnyoneCanPayLock() : lock;
+        console.log(toLock);
         await addClusterMutation.mutateAsync({
           data: {
             name: values.name,
@@ -60,7 +61,7 @@ export default function useAddClusterModal() {
         });
       }
     },
-    [address, lock, addClusterMutation, close],
+    [address, lock, getAnyoneCanPayLock, addClusterMutation, close],
   );
 
   useEffect(() => {
@@ -84,6 +85,12 @@ export default function useAddClusterModal() {
               withAsterisk
               label="Description"
               {...form.getInputProps('description')}
+            />
+
+            <Checkbox
+              mt="md"
+              label="Public"
+              {...form.getInputProps('public', { type: 'checkbox' })}
             />
 
             <Group position="right" mt="md">

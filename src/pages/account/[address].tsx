@@ -9,8 +9,8 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import useClustersQuery from '@/hooks/query/useClustersQuery';
 import useSporesQuery from '@/hooks/query/useSporesQuery';
-import { Cluster, getClusters } from '@/utils/cluster';
-import { Spore, getSpores } from '@/utils/spore';
+import ClusterService, { Cluster } from '@/cluster';
+import SporeService, { Spore } from '@/spore';
 
 export type AccountPageProps = {
   clusters: Cluster[];
@@ -30,7 +30,10 @@ export const getStaticPaths: GetStaticPaths<AccountPageParams> = async () => {
   }
 
   const addresses = new Set<string>();
-  const [clusters, spores] = await Promise.all([getClusters(), getSpores()]);
+  const [clusters, spores] = await Promise.all([
+    ClusterService.shared.list(),
+    SporeService.shared.list(),
+  ]);
   const cells = [...clusters, ...spores].map(({ cell }) => cell);
   cells.forEach((cell) => {
     addresses.add(helpers.encodeToAddress(cell.cellOutput.lock));
@@ -50,8 +53,8 @@ export const getStaticProps: GetStaticProps<
   AccountPageParams
 > = async (context) => {
   const { address } = context.params!;
-  const clusters = await getClusters();
-  const spores = await getSpores();
+  const clusters = await ClusterService.shared.list();
+  const spores = await SporeService.shared.list();
 
   return {
     props: {

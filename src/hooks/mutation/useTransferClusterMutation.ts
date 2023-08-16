@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import { transferCluster as _transferCluster } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation, useQueryClient } from 'react-query';
-import { Cluster } from '@/utils/cluster';
 import { useConnect } from '../useConnect';
+import { Cluster } from '@/cluster';
 
 export default function useTransferClusterMutation(
   cluster: Cluster | undefined,

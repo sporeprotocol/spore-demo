@@ -8,12 +8,12 @@ import {
   createConfig,
 } from '@wagmi/core';
 import { publicProvider } from '@wagmi/core/providers/public';
-import { bytes } from '@ckb-lumos/codec';
+import { bytes, number } from '@ckb-lumos/codec';
 import { blockchain } from '@ckb-lumos/base';
 import { InjectedConnector } from '@wagmi/core/connectors/injected';
 import CKBConnector from './base';
-import { Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
-import { defaultWalletValue, walletAtom } from '@/state/wallet';
+import { Script, Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
+import { defaultWalletValue } from '@/state/wallet';
 
 export default class MetaMaskConnector extends CKBConnector {
   public type = 'MetaMask';
@@ -35,7 +35,7 @@ export default class MetaMaskConnector extends CKBConnector {
 
   private setAddress(account: `0x${string}` | undefined) {
     if (!account) {
-      this.store.set(walletAtom, defaultWalletValue);
+      this.setData(defaultWalletValue);
       return;
     }
     config.initializeConfig(config.predefined.AGGRON4);
@@ -43,13 +43,13 @@ export default class MetaMaskConnector extends CKBConnector {
       auth: { flag: 'ETHEREUM', content: account ?? '0x' },
     });
     const address = helpers.encodeToAddress(lock);
-    this.store.set(walletAtom, {
+    this.setData({
       address,
       connectorType: this.type.toLowerCase(),
     });
   }
 
-  async connect() {
+  public async connect() {
     const { account } = await connect({ connector: new InjectedConnector() });
     this.setAddress(account);
     this.isConnected = true;
@@ -65,19 +65,30 @@ export default class MetaMaskConnector extends CKBConnector {
     );
   }
 
-  async disconnect(): Promise<void> {
+  public async disconnect(): Promise<void> {
     await disconnect();
     this.listeners.forEach((unlisten) => unlisten());
   }
 
-  async signTransaction(
+  public getAnyoneCanPayLock(minimalCkb = 0, minimalUdt = 0): Script {
+    const { address } = this.getData();
+    config.initializeConfig(config.predefined.AGGRON4);
+    const lock = helpers.parseAddress(address);
+
+    const ckb = bytes.hexify(number.Uint8.pack(minimalCkb)).slice(2);
+    const udt = bytes.hexify(number.Uint8.pack(minimalUdt)).slice(2);
+    const args = `02${ckb}${udt}`;
+    lock.args = lock.args.slice(0, 44) + args;
+    return lock;
+  }
+
+  public async signTransaction(
     txSkeleton: helpers.TransactionSkeletonType,
   ): Promise<Transaction> {
     config.initializeConfig(config.predefined.AGGRON4);
 
     let tx = commons.omnilock.prepareSigningEntries(txSkeleton);
     const { message, index } = tx.signingEntries.get(0)!;
-    // TODO: remove raw message type until wagmi fix it
     let signature = await signMessage({
       message: { raw: message } as any,
     });

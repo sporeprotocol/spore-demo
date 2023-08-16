@@ -56,6 +56,9 @@ export default class SporeService {
     id: string,
     options?: QueryOptions,
   ): Promise<Spore | undefined> {
+    if (!id) {
+      return undefined;
+    }
     const collector = this.indexer.collector({
       type: { ...this.script, args: id },
     });
