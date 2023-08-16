@@ -1,71 +1,13 @@
 import Layout from '@/components/Layout';
 import { SimpleGrid, Box, Title, Tabs, Tooltip } from '@mantine/core';
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import superjson from 'superjson';
 import { useMemo } from 'react';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
-import { helpers } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
-import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import { useRouter } from 'next/router';
-import ClusterService, { Cluster } from '@/cluster';
-import SporeService, { Spore } from '@/spore';
-import { appRouter } from '@/server/routers';
+import { Cluster } from '@/cluster';
+import { Spore } from '@/spore';
 import { trpc } from '@/server';
-
-export type AccountPageParams = {
-  address: string;
-};
-
-export const getStaticPaths: GetStaticPaths<AccountPageParams> = async () => {
-  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-
-  const addresses = new Set<string>();
-  const [clusters, spores] = await Promise.all([
-    ClusterService.shared.list(),
-    SporeService.shared.list(),
-  ]);
-  const cells = [...clusters, ...spores].map(({ cell }) => cell);
-  cells.forEach((cell) => {
-    addresses.add(helpers.encodeToAddress(cell.cellOutput.lock));
-  });
-
-  const paths = Array.from(addresses).map((address) => ({
-    params: { address },
-  }));
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export const getStaticProps = async (
-  context: GetStaticPropsContext<AccountPageParams>,
-) => {
-  const { address } = context.params!;
-  const trpcHelpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-    transformer: superjson,
-  });
-
-  await Promise.all([
-    trpcHelpers.cluster.list.prefetch({ owner: address }),
-    trpcHelpers.spore.list.prefetch({ owner: address }),
-  ]);
-
-  return {
-    props: {
-      trpcState: trpcHelpers.dehydrate(),
-    },
-  };
-};
 
 export default function AccountPage() {
   const router = useRouter();

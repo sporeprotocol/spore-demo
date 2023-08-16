@@ -2,9 +2,6 @@ import Layout from '@/components/Layout';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import { useConnect } from '@/hooks/useConnect';
-import SporeService from '@/spore';
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import superjson from 'superjson';
 import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -16,52 +13,10 @@ import {
   Button,
   Box,
 } from '@mantine/core';
-import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { trpc } from '@/server';
-import { appRouter } from '@/server/routers';
-
-export type SporePageParams = {
-  id: string;
-};
-
-export const getStaticPaths: GetStaticPaths<SporePageParams> = async () => {
-  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-
-  const spores = await SporeService.shared.list();
-  const paths = spores.map(({ id }) => ({
-    params: { id },
-  }));
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export const getStaticProps = async (
-  context: GetStaticPropsContext<SporePageParams>,
-) => {
-  const { id } = context.params!;
-  const trpcHelpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-    transformer: superjson,
-  });
-
-  await trpcHelpers.spore.get.prefetch({ id });
-  return {
-    props: {
-      trpcState: trpcHelpers.dehydrate(),
-    },
-  };
-};
 
 export default function SporePage() {
   const router = useRouter();

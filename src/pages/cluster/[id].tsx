@@ -12,68 +12,13 @@ import {
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import { helpers } from '@ckb-lumos/lumos';
-import superjson from 'superjson';
 import SporeCard from '@/components/SporeCard';
 import Link from 'next/link';
 import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
-import ClusterService, { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import { appRouter } from '@/server/routers';
 import { trpc } from '@/server';
-
-export type ClusterPageProps = {
-  cluster: Cluster | undefined;
-  spores: Spore[];
-};
-
-export type ClusterPageParams = {
-  id: string;
-};
-
-export const getStaticPaths: GetStaticPaths<ClusterPageParams> = async () => {
-  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-
-  const clusters = await ClusterService.shared.list();
-  const paths = clusters.map(({ id }) => ({
-    params: { id },
-  }));
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export const getStaticProps = async (
-  context: GetStaticPropsContext<ClusterPageParams>,
-) => {
-  const { id } = context.params!;
-  const trpcHelpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-    transformer: superjson,
-  });
-
-  await Promise.all([
-    trpcHelpers.cluster.get.prefetch({ id }),
-    trpcHelpers.spore.list.prefetch({ clusterId: id }),
-  ]);
-
-  return {
-    props: {
-      trpcState: trpcHelpers.dehydrate(),
-    },
-  };
-};
 
 export default function ClusterPage() {
   const router = useRouter();
