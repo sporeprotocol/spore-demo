@@ -3,95 +3,23 @@ import { SimpleGrid, Box, Title, Tabs, Tooltip } from '@mantine/core';
 import { useMemo } from 'react';
 import ClusterCard from '@/components/ClusterCard';
 import SporeCard from '@/components/SporeCard';
-import { helpers } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
-import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
-import useClustersQuery from '@/hooks/query/useClustersQuery';
-import useSporesQuery from '@/hooks/query/useSporesQuery';
-import ClusterService, { Cluster } from '@/cluster';
-import SporeService, { Spore } from '@/spore';
+import { Cluster } from '@/cluster';
+import { Spore } from '@/spore';
+import { trpc } from '@/server';
 
-export type AccountPageProps = {
-  clusters: Cluster[];
-  spores: Spore[];
-};
-
-export type AccountPageParams = {
-  address: string;
-};
-
-export const getStaticPaths: GetStaticPaths<AccountPageParams> = async () => {
-  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-
-  const addresses = new Set<string>();
-  const [clusters, spores] = await Promise.all([
-    ClusterService.shared.list(),
-    SporeService.shared.list(),
-  ]);
-  const cells = [...clusters, ...spores].map(({ cell }) => cell);
-  cells.forEach((cell) => {
-    addresses.add(helpers.encodeToAddress(cell.cellOutput.lock));
-  });
-
-  const paths = Array.from(addresses).map((address) => ({
-    params: { address },
-  }));
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export const getStaticProps: GetStaticProps<
-  AccountPageProps,
-  AccountPageParams
-> = async (context) => {
-  const { address } = context.params!;
-  const clusters = await ClusterService.shared.list();
-  const spores = await SporeService.shared.list();
-
-  return {
-    props: {
-      clusters: clusters.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ),
-      spores: spores.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ),
-    },
-  };
-};
-
-export default function AccountPage(props: AccountPageProps) {
+export default function AccountPage() {
   const router = useRouter();
   const { address } = router.query;
   const clipboard = useClipboard({ timeout: 500 });
-  const clustersQuery = useClustersQuery(props.clusters);
-  const sporesQuery = useSporesQuery(props.spores);
 
-  const clusters = useMemo(() => {
-    if (!address) return [];
-    return (
-      clustersQuery.data?.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ) || []
-    );
-  }, [clustersQuery.data, address]);
-
-  const spores = useMemo(() => {
-    if (!address) return [];
-    return (
-      sporesQuery.data?.filter(
-        ({ cell }) => helpers.encodeToAddress(cell.cellOutput.lock) === address,
-      ) || []
-    );
-  }, [sporesQuery.data, address]);
+  const { data: clusters = [] } = trpc.cluster.list.useQuery({
+    owner: address as string,
+  });
+  const { data: spores = [] } = trpc.spore.list.useQuery({
+    owner: address as string,
+  });
 
   const displayAddress = useMemo(() => {
     if (!address) return '';

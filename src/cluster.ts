@@ -1,4 +1,4 @@
-import { Cell, Indexer } from '@ckb-lumos/lumos';
+import { Cell, Indexer, Script } from '@ckb-lumos/lumos';
 import {
   ClusterData,
   SporeConfig,
@@ -71,6 +71,21 @@ export default class ClusterService {
   public async list(): Promise<Cluster[]> {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
+    });
+
+    const clusters: Cluster[] = [];
+    for await (const cell of collector.collect()) {
+      const cluster = ClusterService.getClusterFromCell(cell);
+      clusters.push(cluster);
+    }
+
+    return clusters;
+  }
+
+  public async listByLock(lock: Script): Promise<Cluster[]> {
+    const collector = this.indexer.collector({
+      type: { ...this.script, args: '0x' },
+      lock,
     });
 
     const clusters: Cluster[] = [];

@@ -12,67 +12,22 @@ import {
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { GetStaticPaths, GetStaticProps } from 'next';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { helpers } from '@ckb-lumos/lumos';
 import SporeCard from '@/components/SporeCard';
 import Link from 'next/link';
 import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
-import useClusterByIdQuery from '@/hooks/query/useClusterByIdQuery';
-import useSporeByClusterQuery from '@/hooks/query/useSporeByClusterQuery';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
-import ClusterService, { Cluster } from '@/cluster';
-import SporeService, { Spore } from '@/spore';
+import { trpc } from '@/server';
 
-export type ClusterPageProps = {
-  cluster: Cluster | undefined;
-  spores: Spore[];
-};
-
-export type ClusterPageParams = {
-  id: string;
-};
-
-export const getStaticPaths: GetStaticPaths<ClusterPageParams> = async () => {
-  if (process.env.SKIP_BUILD_STATIC_GENERATION) {
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-
-  const clusters = await ClusterService.shared.list();
-  const paths = clusters.map(({ id }) => ({
-    params: { id },
-  }));
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export const getStaticProps: GetStaticProps<
-  ClusterPageProps,
-  ClusterPageParams
-> = async (context) => {
-  const { id } = context.params!;
-  const cluster = await ClusterService.shared.get(id as string);
-  const spores = await SporeService.shared.list(id as string);
-  return {
-    props: { cluster, spores },
-  };
-};
-
-export default function ClusterPage(props: ClusterPageProps) {
+export default function ClusterPage() {
   const router = useRouter();
   const { id } = router.query;
   const { connected, isOwned } = useConnect();
-
-  const { data: cluster } = useClusterByIdQuery(id as string, props.cluster);
-  const { data: spores = [] } = useSporeByClusterQuery(
-    id as string,
-    props.spores,
-  );
+  const { data: cluster } = trpc.cluster.get.useQuery({ id: id as string });
+  const { data: spores = [] } = trpc.spore.list.useQuery({
+    clusterId: id as string,
+  });
 
   const addSporeModal = useAddSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);
@@ -102,7 +57,7 @@ export default function ClusterPage(props: ClusterPageProps) {
           <Title order={1}>{cluster.name}</Title>
           <Text>{cluster.description}</Text>
           <Link
-            href={`/account/${ownerAddress}`}
+            href={`/${ownerAddress}`}
             style={{ textDecoration: 'none' }}
           >
             <Text size="sm" color="gray">
@@ -111,24 +66,24 @@ export default function ClusterPage(props: ClusterPageProps) {
           </Link>
         </Flex>
         <Group>
-        {isOwnedCluster && (
-          <Button
-            disabled={!connected}
-            onClick={transferClusterModal.open}
-            loading={transferClusterModal.loading}
-          >
-            Transter
-          </Button>
-        )}
-        {isOwnedCluster && (
-          <Button
-            disabled={!connected}
-            onClick={addSporeModal.open}
-            loading={addSporeModal.loading}
-          >
-            Mint
-          </Button>
-        )}
+          {isOwnedCluster && (
+            <Button
+              disabled={!connected}
+              onClick={transferClusterModal.open}
+              loading={transferClusterModal.loading}
+            >
+              Transter
+            </Button>
+          )}
+          {isOwnedCluster && (
+            <Button
+              disabled={!connected}
+              onClick={addSporeModal.open}
+              loading={addSporeModal.loading}
+            >
+              Mint
+            </Button>
+          )}
         </Group>
       </Flex>
 

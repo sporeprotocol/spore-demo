@@ -1,17 +1,13 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { Network } from './network';
 import { BI, Script } from '@ckb-lumos/lumos';
 
 type ScriptName =
-  keyof (typeof predefinedSporeConfigs)[Network]['lumos']['SCRIPTS'];
+  keyof (typeof predefinedSporeConfigs)['Aggron4']['lumos']['SCRIPTS'];
 
-export function getScriptConfig(
-  name: ScriptName,
-  network: Network = 'Aggron4',
-) {
-  const script = predefinedSporeConfigs[network].lumos.SCRIPTS[name];
+export function getScriptConfig(name: ScriptName) {
+  const script = predefinedSporeConfigs.Aggron4.lumos.SCRIPTS[name];
   if (!script) {
-    throw new Error(`Script ${name} not found in network ${network}`);
+    throw new Error(`Script ${name} not found`);
   }
   return script;
 }
@@ -30,6 +26,18 @@ export function isOmnilockScript(script: Script) {
     script.codeHash === omnilockScript.CODE_HASH &&
     script.hashType === omnilockScript.HASH_TYPE
   );
+}
+
+export function getOmnilockAnyoneCanPayModeLock(lock: Script) {
+  if (!isOmnilockScript(lock)) {
+    throw new Error('Invalid omnilock script');
+  }
+  const args = lock.args.slice(0, 44) + '020000';
+  return {
+    codeHash: lock.codeHash,
+    hashType: lock.hashType,
+    args,
+  };
 }
 
 export function isSameScript(

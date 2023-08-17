@@ -8,8 +8,9 @@ import { useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
+import { trpc } from '@/server';
 
-export function StateProvider({
+function StateProvider({
   children,
   pageProps,
 }: React.PropsWithChildren<{
@@ -25,7 +26,7 @@ export function StateProvider({
   );
 }
 
-export function UIProvider({ children }: React.PropsWithChildren<{}>) {
+function UIProvider({ children }: React.PropsWithChildren<{}>) {
   return (
     <MantineProvider withNormalizeCSS>
       <ModalsProvider>
@@ -41,7 +42,7 @@ const config = {
   connectors: [new MetaMaskConnector()],
 };
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   return (
     <ConnectProvider value={config}>
       <StateProvider pageProps={pageProps}>
@@ -52,3 +53,5 @@ export default function App({ Component, pageProps }: AppProps) {
     </ConnectProvider>
   );
 }
+
+export default trpc.withTRPC(App);
