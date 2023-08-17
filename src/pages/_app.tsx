@@ -9,6 +9,7 @@ import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
 import { trpc } from '@/server';
+import theme from '@/theme';
 
 function StateProvider({
   children,
@@ -28,7 +29,7 @@ function StateProvider({
 
 function UIProvider({ children }: React.PropsWithChildren<{}>) {
   return (
-    <MantineProvider withNormalizeCSS>
+    <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
       <ModalsProvider>
         <Notifications />
         {children}
