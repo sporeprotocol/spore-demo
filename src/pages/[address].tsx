@@ -8,14 +8,17 @@ import { useRouter } from 'next/router';
 import { Cluster } from '@/cluster';
 import { Spore } from '@/spore';
 import { trpc } from '@/server';
+import { useConnect } from '@/hooks/useConnect';
 
 export default function AccountPage() {
   const router = useRouter();
   const { address } = router.query;
+  const { address: connectedAddress } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: clusters = [] } = trpc.cluster.list.useQuery({
     owner: address as string,
+    acp: address === connectedAddress,
   });
   const { data: spores = [] } = trpc.spore.list.useQuery({
     owner: address as string,
