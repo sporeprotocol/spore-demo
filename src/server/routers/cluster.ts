@@ -2,6 +2,7 @@ import ClusterService from '@/cluster';
 import { publicProcedure, router } from '@/server/trpc';
 import {
   getOmnilockAnyoneCanPayModeLock,
+  isAnyoneCanPay,
   isOmnilockScript,
 } from '@/utils/script';
 import { config, helpers } from '@ckb-lumos/lumos';
@@ -38,7 +39,7 @@ export const clusterRouter = router({
         config: config.predefined.AGGRON4,
       });
       const querys = [ClusterService.shared.listByLock(lock)];
-      if (isOmnilockScript(lock)) {
+      if (isOmnilockScript(lock) && !isAnyoneCanPay(lock)) {
         const acpModeLock = getOmnilockAnyoneCanPayModeLock(lock);
         querys.push(ClusterService.shared.listByLock(acpModeLock));
       }
