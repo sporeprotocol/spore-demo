@@ -1,6 +1,7 @@
 import Banner from '@/components/Banner';
 import ClusterCard, { ClusterSkeletonCard } from '@/components/ClusterCard';
 import Layout from '@/components/Layout';
+import SporeCard, { SporeSkeletonCard } from '@/components/SporeCard';
 import { trpc } from '@/server';
 import { Text, Box, Container, Flex, SimpleGrid, Title } from '@mantine/core';
 import groupBy from 'lodash-es/groupBy';
@@ -8,8 +9,11 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 
 export default function HomePage() {
-  const { data: clusters = [], isLoading: isClusterLoading } = trpc.cluster.list.useQuery();
-  const { data: spores = [], isLoading: isSporesLoading } = trpc.spore.list.useQuery();
+  const { data: clusters = [], isLoading: isClusterLoading } =
+    trpc.cluster.list.useQuery();
+  const { data: spores = [], isLoading: isSporesLoading } =
+    trpc.spore.list.useQuery();
+
   const isLoading = isClusterLoading || isSporesLoading;
 
   const peekClusters = useMemo(() => {
@@ -31,7 +35,7 @@ export default function HomePage() {
     <Layout>
       <Banner />
       <Container py="48px" size="xl">
-        <Box>
+        <Box mb="60px">
           <Flex justify="space-between">
             <Title order={3}>Discover Clusters</Title>
             <Link href="/clusters" style={{ textDecoration: 'none' }}>
@@ -80,6 +84,47 @@ export default function HomePage() {
                     cluster={cluster}
                     spores={clusterSpores}
                   />
+                );
+              })}
+            </SimpleGrid>
+          )}
+        </Box>
+        <Box>
+          <Flex>
+            <Title order={3}>Explore All Spores</Title>
+          </Flex>
+          {isSporesLoading ? (
+            <SimpleGrid
+              cols={4}
+              spacing="24px"
+              breakpoints={[
+                { maxWidth: '80rem', cols: 3 },
+                { maxWidth: '60rem', cols: 2 },
+                { maxWidth: '36rem', cols: 1 },
+              ]}
+              mt="24px"
+            >
+              {Array(4)
+                .fill(0)
+                .map((_, index) => {
+                  return <SporeSkeletonCard key={`spore_skeleton_${index}`} />;
+                })}
+            </SimpleGrid>
+          ) : (
+            <SimpleGrid
+              cols={4}
+              spacing="24px"
+              breakpoints={[
+                { maxWidth: '80rem', cols: 3 },
+                { maxWidth: '60rem', cols: 2 },
+                { maxWidth: '36rem', cols: 1 },
+              ]}
+              mt="24px"
+            >
+              {spores.map((spore) => {
+                const cluster = clusters.find((c) => c.id === spore.clusterId);
+                return (
+                  <SporeCard key={spore.id} spore={spore} cluster={cluster} />
                 );
               })}
             </SimpleGrid>

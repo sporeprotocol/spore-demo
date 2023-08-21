@@ -51,7 +51,6 @@ export function ClusterSkeletonCard() {
           <Skeleton
             className={classes.skeleton}
             baseColor={theme.colors.background[1]}
-            enableAnimation={false}
           />
         </AspectRatio>
       </Card.Section>
@@ -60,7 +59,6 @@ export function ClusterSkeletonCard() {
         <Text mb="8px">
           <Skeleton
             baseColor={theme.colors.background[1]}
-            enableAnimation={false}
             height="25px"
             borderRadius="16px"
           />
@@ -68,7 +66,6 @@ export function ClusterSkeletonCard() {
         <Text mb="8px" size="sm">
           <Skeleton
             baseColor={theme.colors.background[1]}
-            enableAnimation={false}
             height="20px"
             borderRadius="16px"
           />
@@ -76,7 +73,6 @@ export function ClusterSkeletonCard() {
         <Text color="text.0">
           <Skeleton
             baseColor={theme.colors.background[1]}
-            enableAnimation={false}
             height="26px"
             width="85px"
             borderRadius="16px"

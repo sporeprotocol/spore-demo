@@ -1,4 +1,4 @@
-import { Text, Flex, createStyles, Container } from '@mantine/core';
+import { Text, Flex, createStyles, Container, MediaQuery } from '@mantine/core';
 import Image from 'next/image';
 
 const useStyles = createStyles((theme) => ({
@@ -26,21 +26,25 @@ export default function Banner() {
   return (
     <Flex align="center" h="280px" bg="brand.0" className={classes.banner}>
       <Container size="xl" mt="80px" className={classes.container}>
-        <Image
-          className={classes.illus}
-          src="/spore-demo-illus.svg"
-          width="339"
-          height="315"
-          alt="Spore Demo Illus"
-        />
+        <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
+          <Image
+            className={classes.illus}
+            src="/spore-demo-illus.svg"
+            width="339"
+            height="315"
+            alt="Spore Demo Illus"
+          />
+        </MediaQuery>
         <Flex direction="column" justify="center" align="center" gap="32px">
           <Image
             src="/images/banner.png"
             width="630"
             height="60"
+            layout="responsive"
             alt="Spore Demo"
           />
-          <Text size="xl">
+
+          <Text size="xl" align="center">
             Connect your wallet, mint a spore, start your cluster – all
             on-chain!
           </Text>
