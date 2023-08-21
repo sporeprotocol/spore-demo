@@ -48,10 +48,21 @@ const useStyles = createStyles((theme) => ({
       top: '100%',
       left: '50%',
       transform: 'translateX(-50%)',
-      backgroundImage: 'url(/nav-indicator.svg)',
+      backgroundImage: 'url(/svg/nav-indicator.svg)',
     },
   },
 }));
+
+const NAVS = {
+  Explore: {
+    href: '/',
+    includes: ['/', '/cluster'],
+  },
+  'My Space': {
+    href: '/my',
+    includes: ['/my'],
+  },
+};
 
 export default function Layout({ children }: React.PropsWithChildren<{}>) {
   const { classes } = useStyles();
@@ -78,26 +89,25 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
               <Grid.Col span={4}>
                 {connected && (
                   <Flex justify="center" gap="50px">
-                    <Link href="/" style={{ textDecoration: 'none' }}>
-                      <Text
-                        className={
-                          router.pathname === '/' ? classes.active : classes.nav
-                        }
+                    {Object.keys(NAVS).map((name: string) => (
+                      <Link
+                        key={name}
+                        href={NAVS[name as keyof typeof NAVS].href}
+                        style={{ textDecoration: 'none' }}
                       >
-                        Explore
-                      </Text>
-                    </Link>
-                    <Link href="/my" style={{ textDecoration: 'none' }}>
-                      <Text
-                        className={
-                          router.pathname === '/my'
-                            ? classes.active
-                            : classes.nav
-                        }
-                      >
-                        My Space
-                      </Text>
-                    </Link>
+                        <Text
+                          className={
+                            NAVS[name as keyof typeof NAVS].includes.includes(
+                              router.pathname,
+                            )
+                              ? classes.active
+                              : classes.nav
+                          }
+                        >
+                          {name}
+                        </Text>
+                      </Link>
+                    ))}
                   </Flex>
                 )}
               </Grid.Col>

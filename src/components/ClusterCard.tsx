@@ -120,7 +120,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
         <Box p="24px">
           <Flex align="center" mb="8px">
             <Image
-              src="/cluster-icon.svg"
+              src="/svg/cluster-icon.svg"
               alt="Cluster Icon"
               width="24px"
               height="24px"
