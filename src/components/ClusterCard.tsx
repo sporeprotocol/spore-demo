@@ -29,6 +29,11 @@ const useStyles = createStyles((theme) => ({
     backgroundColor: theme.colors.brand[0],
     boxShadow: `4px 4px 0px 0px ${theme.colors.text[0]}`,
   },
+  section: {
+    borderBottomWidth: '1px',
+    borderBottomColor: theme.colors.text[0],
+    borderBottomStyle: 'solid',
+  },
   skeleton: {
     height: '100%',
     width: '100%',
@@ -84,7 +89,7 @@ export function ClusterSkeletonCard() {
 
 export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
   const { classes } = useStyles();
-  const cols = spores.length > 2 ? 2 : 1;
+  const cols = spores.length >= 4 ? 2 : 1;
 
   return (
     <Card p={0} className={classes.card}>
@@ -93,12 +98,12 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
         style={{ textDecoration: 'none' }}
         passHref
       >
-        <Card.Section px="md">
+        <Card.Section px="md" className={classes.section}>
           {spores.length > 0 ? (
-            <SimpleGrid cols={cols} spacing={0} bg="#F4F5F9">
+            <SimpleGrid cols={cols} spacing="1px" bg="text.0">
               {spores.slice(0, cols * cols).map((spore) => {
                 return (
-                  <AspectRatio key={spore.id} ratio={140 / 80}>
+                  <AspectRatio key={spore.id} ratio={140 / 80} bg="#F4F5F9">
                     <Image src={`/api/v1/media/${spore.id}`} alt={spore.id} />
                   </AspectRatio>
                 );
