@@ -23,6 +23,10 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: '#2C323D',
     },
   },
+  header: {
+    height: '80px',
+    backgroundImage: 'url(/images/noise-on-yellow.png)',
+  },
   nav: {
     fontSize: '16px',
     fontWeight: 700,
@@ -58,7 +62,12 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
     <AppShell
       padding="none"
       header={
-        <Header height={80} p="md" bg="brand.0" withBorder={false}>
+        <Header
+          height={80}
+          p="md"
+          className={classes.header}
+          withBorder={false}
+        >
           <Container size="xl">
             <Grid align="center" mx="44px">
               <Grid.Col span={4}>

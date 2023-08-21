@@ -22,12 +22,13 @@ export interface ClusterCardProps {
 
 const useStyles = createStyles((theme) => ({
   card: {
+    position: 'relative',
     borderRadius: '8px',
     borderWidth: '1px',
     borderColor: theme.colors.text[0],
     borderStyle: 'solid',
-    backgroundColor: theme.colors.brand[0],
     boxShadow: `4px 4px 0px 0px ${theme.colors.text[0]}`,
+    backgroundImage: 'url(/images/noise-on-yellow.png)',
   },
   section: {
     borderBottomWidth: '1px',

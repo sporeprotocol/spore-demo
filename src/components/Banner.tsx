@@ -3,10 +3,12 @@ import Image from 'next/image';
 
 const useStyles = createStyles((theme) => ({
   banner: {
+    height: '280px',
     overflowY: 'hidden',
     borderBottomWidth: '2px',
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
+    backgroundImage: 'url(/images/noise-on-yellow.png)',
   },
 
   container: {
@@ -24,7 +26,7 @@ export default function Banner() {
   const { classes } = useStyles();
 
   return (
-    <Flex align="center" h="280px" bg="brand.0" className={classes.banner}>
+    <Flex align="center" className={classes.banner}>
       <Container size="xl" mt="80px" className={classes.container}>
         <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
           <Image

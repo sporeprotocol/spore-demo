@@ -26,8 +26,8 @@ const useStyles = createStyles((theme) => ({
     borderWidth: '1px',
     borderColor: theme.colors.text[0],
     borderStyle: 'solid',
-    backgroundColor: theme.colors.brand[1],
     boxShadow: `4px 4px 0px 0px ${theme.colors.text[0]}`,
+    backgroundImage: 'url(/images/noise-on-purple.png)',
   },
   skeleton: {
     height: '100%',
