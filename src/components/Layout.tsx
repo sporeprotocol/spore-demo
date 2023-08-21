@@ -108,7 +108,9 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
         </Header>
       }
     >
-      <Box mt="80px">{children}</Box>
+      <Box bg="background.0" mih="100vh">
+        {children}
+      </Box>
     </AppShell>
   );
 }

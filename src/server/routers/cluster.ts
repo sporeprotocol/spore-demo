@@ -27,12 +27,12 @@ export const clusterRouter = router({
       z
         .object({
           owner: z.string().optional(),
-          acp: z.boolean().optional(),
+          withPublic: z.boolean().optional(),
         })
         .optional(),
     )
     .query(async ({ input }) => {
-      const { owner, acp } = input ?? {};
+      const { owner, withPublic = false } = input ?? {};
       if (!owner) {
         return ClusterService.shared.list();
       }
@@ -40,7 +40,7 @@ export const clusterRouter = router({
         config: config.predefined.AGGRON4,
       });
       const querys = [ClusterService.shared.listByLock(lock)];
-      if (acp && isOmnilockScript(lock) && !isAnyoneCanPay(lock)) {
+      if (withPublic && isOmnilockScript(lock) && !isAnyoneCanPay(lock)) {
         const acpModeLock = getOmnilockAnyoneCanPayModeLock(lock);
         querys.push(ClusterService.shared.listByLock(acpModeLock));
       }

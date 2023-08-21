@@ -15,7 +15,7 @@ const baseTheme: MantineThemeOverride = {
   primaryShade: 0,
   colors: {
     brand: ['#FCEB71', '#6D57CB'],
-    background: ['#FFFDDD', '#E4E5EA', '#FFFFFF'],
+    background: ['#FFFDDD', '#F4F5F9', '#FFFFFF'],
     functional: ['#BB4747', '#20A555'],
     text: ['#1A202C', '#5D626B', '#8A8E95', '#FFFFFF'],
     border: ['#CDCFD5'],
