@@ -31,6 +31,7 @@ function StateProvider({
 const useStyles = createStyles((theme) => ({
   header: {
     padding: '32px',
+    paddingBottom: '16px',
     backgroundColor: theme.colors.background[0],
   },
   title: {
@@ -44,7 +45,13 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: '32px',
   },
   content: {
+    width: '436px',
     backgroundColor: theme.colors.background[0],
+    borderRadius: '16px',
+    borderColor: theme.colors.text[0],
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    boxShadow: '4px 4px 0 #111318',
   },
   close: {
     color: theme.colors.text[0],

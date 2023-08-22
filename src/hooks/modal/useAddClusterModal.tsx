@@ -2,40 +2,26 @@ import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { isNotEmpty, useForm } from '@mantine/form';
-import { Button, Checkbox, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useAddClusterMutation } from '../mutation/useAddClusterMutation';
 import { useConnect } from '../useConnect';
+import CreateClusterModal from '@/components/CreateClusterModal';
 
 export default function useAddClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, lock, getAnyoneCanPayLock } = useConnect();
   const modalId = useId();
 
-  const form = useForm({
-    initialValues: {
-      name: '',
-      description: '',
-      public: false,
-    },
-
-    validate: {
-      name: isNotEmpty('Name cannot be empty'),
-      description: isNotEmpty('description cannot be empty'),
-    },
-  });
-
   const addClusterMutation = useAddClusterMutation();
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
-    async (values: { name: string; description: string; public: boolean }) => {
+    async (values: { name: string; description: string; public: string }) => {
       if (!address || !lock) {
         return;
       }
       try {
-        const toLock = values.public ? getAnyoneCanPayLock() : lock;
+        const toLock = values.public === '1' ? getAnyoneCanPayLock() : lock;
         await addClusterMutation.mutateAsync({
           data: {
             name: values.name,
@@ -67,50 +53,22 @@ export default function useAddClusterModal() {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Add New Cluster',
+        title: 'Create New Cluster',
         onClose: close,
         closeOnEscape: !addClusterMutation.isLoading,
         closeOnClickOutside: !addClusterMutation.isLoading,
         withCloseButton: !addClusterMutation.isLoading,
         children: (
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <TextInput
-              withAsterisk
-              label="Name"
-              {...form.getInputProps('name')}
-            />
-
-            <TextInput
-              withAsterisk
-              label="Description"
-              {...form.getInputProps('description')}
-            />
-
-            <Checkbox
-              mt="md"
-              label="Public"
-              {...form.getInputProps('public', { type: 'checkbox' })}
-            />
-
-            <Group position="right" mt="md">
-              <Button type="submit" loading={addClusterMutation.isLoading}>
-                Submit
-              </Button>
-            </Group>
-          </form>
+          <CreateClusterModal
+            onSubmit={handleSubmit}
+            isLoading={addClusterMutation.isLoading}
+          />
         ),
       });
     } else {
       modals.close(modalId);
     }
-  }, [
-    modalId,
-    addClusterMutation.isLoading,
-    form,
-    handleSubmit,
-    opened,
-    close,
-  ]);
+  }, [modalId, addClusterMutation.isLoading, handleSubmit, opened, close]);
 
   return {
     open,

@@ -53,7 +53,7 @@ const baseTheme: MantineThemeOverride = {
 
 const components: MantineThemeOverride['components'] = {
   Button: {
-    defaultProps: () => ({
+    defaultProps: (theme) => ({
       sx: {
         height: '48px',
         minWidth: '130px',
@@ -66,6 +66,11 @@ const components: MantineThemeOverride['components'] = {
         boxShadow: '4px 4px 0 #111318',
         position: 'relative',
         left: '-4px',
+
+        '&:disabled': {
+          color: theme.white,
+          background: theme.colors.text[2],
+        },
       },
     }),
   },
