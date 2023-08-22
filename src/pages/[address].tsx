@@ -1,16 +1,13 @@
 import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
-import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
-import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
   Container,
   Flex,
   MediaQuery,
   createStyles,
-  Box,
   useMantineTheme,
   Button,
   Group,
@@ -19,7 +16,7 @@ import {
 import { IconCopy } from '@tabler/icons-react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -93,6 +90,10 @@ export default function AccountPage() {
       withPublic: true,
     });
 
+  if (!address) {
+    return null;
+  }
+
   return (
     <Layout>
       <Flex align="center" className={classes.banner}>
@@ -109,7 +110,7 @@ export default function AccountPage() {
           <Flex direction="column" justify="center" align="center" gap="32px">
             <Flex>
               <Title order={2}>
-                {address!.slice(0, 8)}...{address!.slice(-8)}
+                {address.slice(0, 8)}...{address.slice(-8)}
                 {"'s Space"}
               </Title>
             </Flex>
@@ -119,7 +120,7 @@ export default function AccountPage() {
                   Address:
                 </Text>
                 <Text size="xl" weight="bold" color="text.0" mr="5px">
-                  {address!.slice(0, 8)}...{address!.slice(-8)}
+                  {address.slice(0, 8)}...{address.slice(-8)}
                 </Text>
                 <IconCopy size="22px" color={theme.colors.text[0]} />
               </Flex>
