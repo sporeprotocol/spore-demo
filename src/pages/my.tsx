@@ -88,6 +88,7 @@ export default function MySpacePage() {
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery({
       owner: address,
+      withPublic: true,
     });
 
   const balance = useMemo(() => {

@@ -1,10 +1,9 @@
 import Layout from '@/components/Layout';
-import SporeCard, { SporeSkeletonCard } from '@/components/SporeCard';
 import SporeGrid from '@/components/SporeGrid';
 import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { trpc } from '@/server';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { helpers } from '@ckb-lumos/lumos';
 import {
   Text,
   Flex,
@@ -14,10 +13,8 @@ import {
   Image,
   Group,
   Button,
-  Box,
-  Title,
-  SimpleGrid,
 } from '@mantine/core';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 
@@ -53,7 +50,7 @@ export default function ClusterPage() {
     trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
 
   const addSporeModal = useAddSporeModal();
-  const transferClusterModal = useTransferClusterModal();
+  const transferClusterModal = useTransferClusterModal(cluster);
 
   const owner = useMemo(() => {
     if (!cluster) return '';
@@ -96,9 +93,11 @@ export default function ClusterPage() {
                   Owned by
                 </Text>
                 <Flex mb="24px">
-                  <Text size="lg" color="brand.1">
-                    {owner.slice(0, 10)}...{owner.slice(-10)}
-                  </Text>
+                  <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
+                    <Text size="lg" color="brand.1">
+                      {owner.slice(0, 10)}...{owner.slice(-10)}
+                    </Text>
+                  </Link>
                 </Flex>
                 <Group>
                   <Button

@@ -1,26 +1,63 @@
 import Layout from '@/components/Layout';
-import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
-import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
-import { useConnect } from '@/hooks/useConnect';
-import { BI, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
   Image,
-  AspectRatio,
-  Card,
   Flex,
+  Container,
+  Grid,
+  AspectRatio,
+  createStyles,
   Title,
-  Button,
   Box,
+  Button,
+  Group,
 } from '@mantine/core';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
 import { trpc } from '@/server';
+import Link from 'next/link';
+import { BI, config, helpers } from '@ckb-lumos/lumos';
+import { IconCopy } from '@tabler/icons-react';
+import { useConnect } from '@/hooks/useConnect';
+
+const useStyles = createStyles((theme) => ({
+  image: {
+    borderRadius: '8px',
+    borderColor: theme.colors.text[0],
+    borderStyle: 'solid',
+    borderWidth: '1px',
+    boxShadow: '4px 4px 0 #111318',
+    backgroundColor: theme.colors.background[1],
+  },
+  button: {
+    boxShadow: 'none !important',
+    backgroundColor: theme.colors.background[0],
+    borderWidth: '2px',
+    borderStyle: 'solid',
+  },
+  transfer: {
+    borderColor: theme.colors.text[0],
+    color: theme.colors.text[0],
+
+    '&:hover': {
+      backgroundColor: theme.colors.text[0],
+      color: theme.white,
+    },
+  },
+  destory: {
+    borderColor: theme.colors.functional[0],
+    color: theme.colors.functional[0],
+
+    '&:hover': {
+      backgroundColor: theme.colors.functional[0],
+      color: theme.white,
+    },
+  },
+}));
 
 export default function SporePage() {
   const router = useRouter();
   const { id } = router.query;
+  const { classes, cx } = useStyles();
   const { address } = useConnect();
   const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
   const { data: cluster } = trpc.cluster.get.useQuery(
@@ -28,84 +65,95 @@ export default function SporePage() {
     { enabled: !!spore?.clusterId },
   );
 
-  const transferSporeModal = useTransferSporeModal(spore);
-  const destroySporeModal = useDestroySporeModal(spore);
+  if (!spore) return null;
 
-  const isOwned = useMemo(() => {
-    if (!spore || !address) {
-      return false;
-    }
-    return helpers.encodeToAddress(spore.cell.cellOutput.lock) === address;
-  }, [spore, address]);
-
-  if (!spore) {
-    return null;
-  }
-
-  const owner = helpers.encodeToAddress(spore.cell.cellOutput.lock);
+  const amount = BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8;
+  const owner = helpers.encodeToAddress(spore.cell.cellOutput.lock, {
+    config: config.predefined.AGGRON4,
+  });
 
   return (
     <Layout>
-      <Flex direction="row">
-        <Card withBorder radius="md" mr="md">
-          <AspectRatio ratio={1} w="30vw">
-            {spore && (
-              <Image alt={spore.id} src={`/api/v1/media/${spore.id}`} />
-            )}
-          </AspectRatio>
-        </Card>
-        <Flex direction="column" justify="space-between" mt="sm">
-          <Box>
-            <Link
-              href={`/cluster/${spore.clusterId}`}
-              style={{ textDecoration: 'none' }}
-              passHref
-            >
-              <Title order={5} color="blue">
-                {cluster?.name}
-              </Title>
-            </Link>
-            <Title>{`${id!.slice(0, 10)}...${id!.slice(-10)}`}</Title>
-            <Text size="sm" color="gray">
-              Owned by {`${owner.slice(0, 10)}...${owner.slice(-10)}`}
-            </Text>
-            <Card withBorder radius="md" mt="xl">
-              <Text mb="sm" color="gray">
-                Capacity
+      <Container size="xl" py="48px" mt="80px">
+        {cluster && (
+          <Link
+            href={`/cluster/${cluster.id}`}
+            style={{ textDecoration: 'none' }}
+          >
+            <Flex mb="32px">
+              <Image
+                src="/svg/cluster-icon.svg"
+                alt="Cluster Icon"
+                width="24px"
+                height="24px"
+                mr="8px"
+              />
+              <Text size="lg" color="text.0" weight="bold">
+                {cluster.name}
               </Text>
-              <Title order={3}>
-                {BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8}{' '}
-                CKB
-              </Title>
-            </Card>
-          </Box>
-
-          {isOwned && (
-            <Flex direction="row" justify="end" gap="md">
-              <Button
-                size="sm"
-                variant="light"
-                color="blue"
-                radius="md"
-                onClick={transferSporeModal.open}
-                loading={transferSporeModal.loading}
-              >
-                Transfer
-              </Button>
-              <Button
-                size="sm"
-                variant="light"
-                color="red"
-                radius="md"
-                onClick={destroySporeModal.open}
-                loading={destroySporeModal.loading}
-              >
-                Destroy
-              </Button>
             </Flex>
-          )}
-        </Flex>
-      </Flex>
+          </Link>
+        )}
+        <Grid>
+          <Grid.Col span={6}>
+            <AspectRatio ratio={1} w="486px" h="486px">
+              {spore && (
+                <Image
+                  className={classes.image}
+                  alt={spore.id}
+                  width="486px"
+                  height="486px"
+                  src={`/api/v1/media/${spore.id}`}
+                  fit="contain"
+                />
+              )}
+            </AspectRatio>
+          </Grid.Col>
+          <Grid.Col span={6}>
+            <Flex h="100%" direction="column" justify="center">
+              <Flex align="center" mb="32px">
+                <Title order={2} mr="3px">
+                  {spore.id.slice(0, 10)}...{spore.id.slice(-10)}
+                </Title>
+                <IconCopy size="30px" />
+              </Flex>
+              <Flex mb="64px">
+                <Title
+                  order={2}
+                  bg="brand.0"
+                  px="8px"
+                  style={{ display: 'inline' }}
+                >
+                  {amount} CKB
+                </Title>
+              </Flex>
+              <Flex direction="column">
+                <Text size="lg" color="text.0" weight="bold">
+                  Owned by
+                </Text>
+                <Flex align="center">
+                  <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
+                    <Text size="xl" color="brand.1" mr="3px">
+                      {owner.slice(0, 10)}...{owner.slice(-10)}
+                    </Text>
+                  </Link>
+                  <IconCopy size="22px" />
+                </Flex>
+              </Flex>
+              {owner === address && (
+                <Group mt="64px">
+                  <Button className={cx(classes.button, classes.transfer)}>
+                    Transfer
+                  </Button>
+                  <Button className={cx(classes.button, classes.destory)}>
+                    Destory
+                  </Button>
+                </Group>
+              )}
+            </Flex>
+          </Grid.Col>
+        </Grid>
+      </Container>
     </Layout>
   );
 }
