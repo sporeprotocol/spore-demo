@@ -1,4 +1,3 @@
-import ClusterCard, { ClusterSkeletonCard } from '@/components/ClusterCard';
 import Layout from '@/components/Layout';
 import { trpc } from '@/server';
 import Image from 'next/image';
@@ -7,11 +6,10 @@ import {
   Box,
   Container,
   Flex,
-  SimpleGrid,
-  Title,
   createStyles,
   MediaQuery,
 } from '@mantine/core';
+import ClusterGrid from '@/components/ClusterGrid';
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -74,53 +72,12 @@ export default function ClustersPage() {
       </Flex>
       <Container py="48px" size="xl">
         <Box mb="60px">
-          <Flex>
-            <Title order={3}>Explore All Clusters</Title>
-          </Flex>
-          {isLoading ? (
-            <SimpleGrid
-              cols={4}
-              spacing="24px"
-              breakpoints={[
-                { maxWidth: '80rem', cols: 3 },
-                { maxWidth: '60rem', cols: 2 },
-                { maxWidth: '36rem', cols: 1 },
-              ]}
-              mt="24px"
-            >
-              {Array(4)
-                .fill(0)
-                .map((_, index) => {
-                  return (
-                    <ClusterSkeletonCard key={`cluster_skeleton_${index}`} />
-                  );
-                })}
-            </SimpleGrid>
-          ) : (
-            <SimpleGrid
-              cols={4}
-              spacing="24px"
-              breakpoints={[
-                { maxWidth: '80rem', cols: 3 },
-                { maxWidth: '60rem', cols: 2 },
-                { maxWidth: '36rem', cols: 1 },
-              ]}
-              mt="24px"
-            >
-              {clusters.map((cluster) => {
-                const clusterSpores = spores.filter(
-                  (spore) => spore.clusterId === cluster.id,
-                );
-                return (
-                  <ClusterCard
-                    key={cluster.id}
-                    cluster={cluster}
-                    spores={clusterSpores}
-                  />
-                );
-              })}
-            </SimpleGrid>
-          )}
+          <ClusterGrid
+            title="Explore All Clusters"
+            clusters={clusters}
+            spores={spores}
+            isLoading={isLoading}
+          />
         </Box>
       </Container>
     </Layout>

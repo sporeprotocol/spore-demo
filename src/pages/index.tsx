@@ -16,6 +16,8 @@ import Image from 'next/image';
 import groupBy from 'lodash-es/groupBy';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import SporeGrid from '@/components/SporeGrid';
+import ClusterGrid from '@/components/ClusterGrid';
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -94,100 +96,30 @@ export default function HomePage() {
       </Flex>
       <Container py="48px" size="xl">
         <Box mb="60px">
-          <Flex justify="space-between">
-            <Title order={3}>Discover Clusters</Title>
-            <Link href="/cluster" style={{ textDecoration: 'none' }}>
-              <Text color="brand.1" weight="600">
-                See all
-              </Text>
-            </Link>
-          </Flex>
-          {isLoading ? (
-            <SimpleGrid
-              cols={4}
-              spacing="24px"
-              breakpoints={[
-                { maxWidth: '80rem', cols: 3 },
-                { maxWidth: '60rem', cols: 2 },
-                { maxWidth: '36rem', cols: 1 },
-              ]}
-              mt="24px"
-            >
-              {Array(4)
-                .fill(0)
-                .map((_, index) => {
-                  return (
-                    <ClusterSkeletonCard key={`cluster_skeleton_${index}`} />
-                  );
-                })}
-            </SimpleGrid>
-          ) : (
-            <SimpleGrid
-              cols={4}
-              spacing="24px"
-              breakpoints={[
-                { maxWidth: '80rem', cols: 3 },
-                { maxWidth: '60rem', cols: 2 },
-                { maxWidth: '36rem', cols: 1 },
-              ]}
-              mt="24px"
-            >
-              {peekClusters.map((cluster) => {
-                const clusterSpores = spores.filter(
-                  (spore) => spore.clusterId === cluster.id,
-                );
-                return (
-                  <ClusterCard
-                    key={cluster.id}
-                    cluster={cluster}
-                    spores={clusterSpores}
-                  />
-                );
-              })}
-            </SimpleGrid>
-          )}
+          <ClusterGrid
+            title={
+              <>
+                <Flex justify="space-between">
+                  <Title order={3}>Discover Clusters</Title>
+                  <Link href="/cluster" style={{ textDecoration: 'none' }}>
+                    <Text color="brand.1" weight="600">
+                      See all
+                    </Text>
+                  </Link>
+                </Flex>
+              </>
+            }
+            clusters={peekClusters}
+            spores={spores}
+            isLoading={isLoading}
+          />
         </Box>
-        <Box>
-          <Flex>
-            <Title order={3}>Explore All Spores</Title>
-          </Flex>
-          {isSporesLoading ? (
-            <SimpleGrid
-              cols={4}
-              spacing="24px"
-              breakpoints={[
-                { maxWidth: '80rem', cols: 3 },
-                { maxWidth: '60rem', cols: 2 },
-                { maxWidth: '36rem', cols: 1 },
-              ]}
-              mt="24px"
-            >
-              {Array(4)
-                .fill(0)
-                .map((_, index) => {
-                  return <SporeSkeletonCard key={`spore_skeleton_${index}`} />;
-                })}
-            </SimpleGrid>
-          ) : (
-            <SimpleGrid
-              cols={4}
-              spacing="24px"
-              breakpoints={[
-                { maxWidth: '80rem', cols: 3 },
-                { maxWidth: '60rem', cols: 2 },
-                { maxWidth: '36rem', cols: 1 },
-              ]}
-              mt="24px"
-            >
-              {spores.map((spore) => {
-                const cluster = clusters.find((c) => c.id === spore.clusterId);
-                return (
-                  <SporeCard key={spore.id} spore={spore} cluster={cluster} />
-                );
-              })}
-            </SimpleGrid>
-          )}
-        </Box>
+        <SporeGrid
+          title="Explore All Spores"
+          spores={spores}
+          cluster={(id) => clusters.find((c) => c.id === id) ?? undefined}
+          isLoading={isSporesLoading}
+        />
       </Container>
     </Layout>
   );

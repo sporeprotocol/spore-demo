@@ -20,6 +20,7 @@
     "@mantine/form": "^6.0.17",
     "@mantine/hooks": "^6.0.17",
     "@mantine/modals": "^6.0.17",
+    "@mantine/next": "^6.0.19",
     "@mantine/notifications": "^6.0.17",
     "@spore-sdk/core": "^0.1.0-beta.9",
     "@tabler/icons-react": "^2.29.0",
