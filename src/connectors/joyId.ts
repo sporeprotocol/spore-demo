@@ -15,6 +15,7 @@ const JOY_ID_SERVER_URL = 'https://api.joyid.dev';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
+  public enable: boolean = false;
 
   constructor() {
     super();

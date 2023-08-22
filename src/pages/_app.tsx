@@ -1,6 +1,6 @@
 import type { AppProps } from 'next/app';
 import { Provider as JotaiProvider } from 'jotai';
-import { MantineProvider } from '@mantine/core';
+import { MantineProvider, createStyles } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
 import { ModalsProvider } from '@mantine/modals';
@@ -10,6 +10,7 @@ import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
 import { trpc } from '@/server';
 import theme from '@/theme';
+import JoyIdConnector from '@/connectors/joyId';
 
 function StateProvider({
   children,
@@ -27,31 +28,61 @@ function StateProvider({
   );
 }
 
+const useStyles = createStyles((theme) => ({
+  header: {
+    padding: '32px',
+    backgroundColor: theme.colors.background[0],
+  },
+  title: {
+    fontSize: '18px',
+    fontWeight: 'bold',
+    fontFamily: theme.headings.fontFamily,
+  },
+  body: {
+    paddingLeft: '32px',
+    paddingRight: '32px',
+    paddingBottom: '32px',
+  },
+  content: {
+    backgroundColor: theme.colors.background[0],
+  },
+  close: {
+    color: theme.colors.text[0],
+  },
+}));
+
 function UIProvider({ children }: React.PropsWithChildren<{}>) {
+  const { classes } = useStyles();
+
   return (
-    <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
-      <ModalsProvider>
-        <Notifications />
-        {children}
-      </ModalsProvider>
-    </MantineProvider>
+    <ModalsProvider
+      modalProps={{
+        centered: true,
+        classNames: classes,
+      }}
+    >
+      <Notifications />
+      {children}
+    </ModalsProvider>
   );
 }
 
 const config = {
   autoConnect: true,
-  connectors: [new MetaMaskConnector()],
+  connectors: [new MetaMaskConnector(), new JoyIdConnector()],
 };
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <ConnectProvider value={config}>
-      <StateProvider pageProps={pageProps}>
-        <UIProvider>
-          <Component {...pageProps} />
-        </UIProvider>
-      </StateProvider>
-    </ConnectProvider>
+    <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
+      <ConnectProvider value={config}>
+        <StateProvider pageProps={pageProps}>
+          <UIProvider>
+            <Component {...pageProps} />
+          </UIProvider>
+        </StateProvider>
+      </ConnectProvider>
+    </MantineProvider>
   );
 }
 

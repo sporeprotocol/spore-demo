@@ -3,7 +3,9 @@ import { WalletData, walletAtom } from '@/state/wallet';
 import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
 
 export default abstract class CKBConnector {
-  public isConnected = false;
+  public isConnected: boolean = false;
+  public enable: boolean = true;
+
   protected store = store;
   abstract type: string;
 
