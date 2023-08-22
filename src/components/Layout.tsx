@@ -14,6 +14,7 @@ import Logo from './Logo';
 import CreateButton from './CreateButton';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useMemo } from 'react';
 
 const useStyles = createStyles((theme) => ({
   connect: {
@@ -53,21 +54,44 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const NAVS = {
-  Explore: {
-    href: '/',
-    includes: ['/', '/cluster'],
-  },
-  'My Space': {
-    href: '/my',
-    includes: ['/my'],
-  },
+type NavItem = {
+  name: string;
+  href: string;
+  paths?: string[];
+  needConnect?: boolean;
 };
+
+const NAVS: NavItem[] = [
+  {
+    name: 'Explore',
+    href: '/',
+  },
+  {
+    name: 'My Space',
+    href: '/my',
+    needConnect: true,
+  },
+  {
+    name: 'What is Spore?',
+    href: 'https://spore.pro',
+  },
+  {
+    name: 'GitHub',
+    href: 'https://github.com/sporeprotocol/spore-demo',
+  },
+];
 
 export default function Layout({ children }: React.PropsWithChildren<{}>) {
   const { classes } = useStyles();
   const { connected, connect } = useConnect();
   const router = useRouter();
+
+  const navs = useMemo(() => {
+    if (!connected) {
+      return NAVS.filter((nav) => !nav.needConnect);
+    }
+    return NAVS;
+  }, [connected]);
 
   return (
     <AppShell
@@ -81,37 +105,33 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
         >
           <Container size="xl">
             <Grid align="center" mx="44px">
-              <Grid.Col span={4}>
+              <Grid.Col span={2}>
                 <Flex justify="start">
                   <Logo />
                 </Flex>
               </Grid.Col>
-              <Grid.Col span={4}>
-                {connected && (
-                  <Flex justify="center" gap="50px">
-                    {Object.keys(NAVS).map((name: string) => (
-                      <Link
-                        key={name}
-                        href={NAVS[name as keyof typeof NAVS].href}
-                        style={{ textDecoration: 'none' }}
+              <Grid.Col span={8}>
+                <Flex justify="center" gap="50px">
+                  {navs.map((nav) => (
+                    <Link
+                      key={nav.name}
+                      href={nav.href}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <Text
+                        className={
+                          nav.href === router.pathname
+                            ? classes.active
+                            : classes.nav
+                        }
                       >
-                        <Text
-                          className={
-                            NAVS[name as keyof typeof NAVS].includes.includes(
-                              router.pathname,
-                            )
-                              ? classes.active
-                              : classes.nav
-                          }
-                        >
-                          {name}
-                        </Text>
-                      </Link>
-                    ))}
-                  </Flex>
-                )}
+                        {nav.name}
+                      </Text>
+                    </Link>
+                  ))}
+                </Flex>
               </Grid.Col>
-              <Grid.Col span={4}>
+              <Grid.Col span={2}>
                 <Flex justify="end">
                   {connected ? (
                     <CreateButton />
