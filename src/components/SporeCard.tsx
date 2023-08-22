@@ -69,6 +69,7 @@ export function SporeSkeletonCard() {
             <Skeleton
               baseColor={theme.colors.background[1]}
               height="25px"
+              width="85px"
               borderRadius="16px"
             />
           </Text>

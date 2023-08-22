@@ -13,10 +13,13 @@ import {
   Image,
   Group,
   Button,
+  useMantineTheme,
 } from '@mantine/core';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -36,7 +39,8 @@ const useStyles = createStyles((theme) => ({
     boxShadow: 'none !important',
 
     '&:hover': {
-      backgroundColor: theme.fn.lighten(theme.colors.brand[0], 0.3),
+      backgroundColor: theme.colors.text[0],
+      color: theme.white,
     },
   },
 }));
@@ -45,7 +49,10 @@ export default function ClusterPage() {
   const { classes } = useStyles();
   const router = useRouter();
   const { id } = router.query;
-  const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
+  const theme = useMantineTheme();
+
+  const { data: cluster } =
+    trpc.cluster.get.useQuery({ id } as { id: string });
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
 
@@ -57,6 +64,8 @@ export default function ClusterPage() {
     const address = helpers.encodeToAddress(cluster.cell.cellOutput.lock);
     return address;
   }, [cluster]);
+
+  const isLoading = !cluster;
 
   return (
     <Layout>
@@ -78,13 +87,31 @@ export default function ClusterPage() {
                   </Text>
                 </Flex>
                 <Flex mb="24px">
-                  <Text size="32px" weight="bold">
-                    {cluster?.name}
-                  </Text>
+                  {isLoading ? (
+                    <Skeleton
+                      baseColor={theme.colors.background[0]}
+                      height="32px"
+                      width="300px"
+                      borderRadius="16px"
+                    />
+                  ) : (
+                    <Text size="32px" weight="bold">
+                      {cluster?.name}
+                    </Text>
+                  )}
                 </Flex>
-                <Text size="20px" color="text.1">
-                  {cluster?.description}
-                </Text>
+                {isLoading ? (
+                  <Skeleton
+                    baseColor={theme.colors.background[0]}
+                    height="20px"
+                    width="500px"
+                    borderRadius="16px"
+                  />
+                ) : (
+                  <Text size="20px" color="text.1">
+                    {cluster?.description}
+                  </Text>
+                )}
               </Flex>
             </Grid.Col>
             <Grid.Col span={4}>
@@ -93,11 +120,20 @@ export default function ClusterPage() {
                   Owned by
                 </Text>
                 <Flex mb="24px">
-                  <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
-                    <Text size="lg" color="brand.1">
-                      {owner.slice(0, 10)}...{owner.slice(-10)}
-                    </Text>
-                  </Link>
+                  {isLoading ? (
+                    <Skeleton
+                      baseColor={theme.colors.background[0]}
+                      height="20px"
+                      width="200px"
+                      borderRadius="16px"
+                    />
+                  ) : (
+                    <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
+                      <Text size="lg" color="brand.1">
+                        {owner.slice(0, 10)}...{owner.slice(-10)}
+                      </Text>
+                    </Link>
+                  )}
                 </Flex>
                 <Group>
                   <Button
