@@ -1,18 +1,18 @@
-import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
-import { useAddClusterMutation } from '../mutation/useAddClusterMutation';
+import useCreateClusterMutation from '../mutation/useCreateClusterMutation';
 import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
 
-export default function useAddClusterModal() {
+export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, lock, getAnyoneCanPayLock } = useConnect();
   const modalId = useId();
 
-  const addClusterMutation = useAddClusterMutation();
+  const addClusterMutation = useCreateClusterMutation();
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
@@ -20,33 +20,26 @@ export default function useAddClusterModal() {
       if (!address || !lock) {
         return;
       }
-      try {
-        const toLock = values.public === '1' ? getAnyoneCanPayLock() : lock;
-        await addClusterMutation.mutateAsync({
-          data: {
-            name: values.name,
-            description: values.description,
-          },
-          fromInfos: [address],
-          toLock,
-          config: predefinedSporeConfigs.Aggron4,
-        });
 
-        notifications.show({
-          color: 'green',
-          title: 'Congratulations!',
-          message: 'Your cluster has been created.',
-        });
-        close();
-      } catch (e) {
-        notifications.show({
-          color: 'red',
-          title: 'Error!',
-          message: (e as Error).message,
-        });
-      }
+      const toLock = values.public === '1' ? getAnyoneCanPayLock() : lock;
+      await addClusterMutation.mutateAsync({
+        data: {
+          name: values.name,
+          description: values.description,
+        },
+        fromInfos: [address],
+        toLock,
+        config: predefinedSporeConfigs.Aggron4,
+      });
+
+      notifications.show({
+        color: 'green',
+        title: 'Congratulations!',
+        message: 'Your cluster has been created.',
+      });
+      modals.close(modalId);
     },
-    [address, lock, getAnyoneCanPayLock, addClusterMutation, close],
+    [address, lock, getAnyoneCanPayLock, addClusterMutation, modalId],
   );
 
   useEffect(() => {
@@ -55,15 +48,15 @@ export default function useAddClusterModal() {
         modalId,
         title: 'Create New Cluster',
         onClose: close,
+        styles: {
+          content: {
+            minWidth: '500px',
+          },
+        },
         closeOnEscape: !addClusterMutation.isLoading,
         closeOnClickOutside: !addClusterMutation.isLoading,
         withCloseButton: !addClusterMutation.isLoading,
-        children: (
-          <CreateClusterModal
-            onSubmit={handleSubmit}
-            isLoading={addClusterMutation.isLoading}
-          />
-        ),
+        children: <CreateClusterModal onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);

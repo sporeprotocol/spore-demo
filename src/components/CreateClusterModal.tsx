@@ -1,3 +1,4 @@
+import { getFriendlyErrorMessage } from '@/utils/error';
 import {
   Text,
   Flex,
@@ -8,14 +9,14 @@ import {
   Radio,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useCallback, useState } from 'react';
 
 export interface CreateClusterModalProps {
   onSubmit: (values: {
     name: string;
     description: string;
     public: string;
-  }) => void;
-  isLoading: boolean;
+  }) => Promise<void>;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -49,8 +50,10 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function CreateClusterModal(props: CreateClusterModalProps) {
-  const { onSubmit, isLoading } = props;
+  const { onSubmit } = props;
   const { classes } = useStyles();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -60,13 +63,27 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
     },
   });
 
+  const handleSubmit = useCallback(
+    async (values: { name: string; description: string; public: string }) => {
+      try {
+        setLoading(true);
+        await onSubmit(values);
+        setLoading(false);
+      } catch (err) {
+        setError(err as Error);
+        setLoading(false);
+      }
+    },
+    [onSubmit],
+  );
+
   return (
     <Flex direction="column">
       <Text color="text.1" mb="md">
         All cluster info will be stored on-chain and cannot be altered after
         creation.
       </Text>
-      <form onSubmit={form.onSubmit(onSubmit)}>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
         <TextInput
           classNames={{
             root: classes.root,
@@ -112,12 +129,16 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
             />
           </Group>
         </Radio.Group>
-
-        <Group position="right" mt="48px">
+        {error && (
+          <Text size="sm" color="functional.0" mt="md">
+            Error message goes here: {getFriendlyErrorMessage(error.message)}
+          </Text>
+        )}
+        <Group position="right" mt={error ? "24px" : "48px"}>
           <Button
             type="submit"
             className={classes.submit}
-            loading={isLoading}
+            loading={loading}
             disabled={!form.values['name'] || !form.values['description']}
           >
             Submit

@@ -1,5 +1,5 @@
-import useAddClusterModal from '@/hooks/modal/useAddClusterModal';
-import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
+import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
+import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { Button, Menu, Text, createStyles } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 
@@ -47,8 +47,8 @@ const useStyles = createStyles((theme) => ({
 
 export default function CreateButton() {
   const { classes } = useStyles();
-  const addClusterModal = useAddClusterModal();
-  const addSporeModal = useAddSporeModal();
+  const createClusterModal = useCreateClusterModal();
+  const mintSporeModal = useMintSporeModal();
 
   return (
     <Menu
@@ -72,8 +72,8 @@ export default function CreateButton() {
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item onClick={addSporeModal.open}>Mint a Spore</Menu.Item>
-        <Menu.Item onClick={addClusterModal.open}>Create a Cluster</Menu.Item>
+        <Menu.Item onClick={mintSporeModal.open}>Mint a Spore</Menu.Item>
+        <Menu.Item onClick={createClusterModal.open}>Create a Cluster</Menu.Item>
       </Menu.Dropdown>
     </Menu>
   );

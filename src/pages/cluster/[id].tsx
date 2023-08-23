@@ -1,6 +1,6 @@
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
-import useAddSporeModal from '@/hooks/modal/useAddSporeModal';
+import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { trpc } from '@/server';
 import { helpers } from '@ckb-lumos/lumos';
@@ -56,7 +56,7 @@ export default function ClusterPage() {
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
 
-  const addSporeModal = useAddSporeModal();
+  const mintSporeModal = useMintSporeModal();
   const transferClusterModal = useTransferClusterModal(cluster);
 
   const owner = useMemo(() => {
@@ -138,7 +138,7 @@ export default function ClusterPage() {
                 <Group>
                   <Button
                     className={classes.button}
-                    onClick={addSporeModal.open}
+                    onClick={mintSporeModal.open}
                   >
                     Mint Spore
                   </Button>

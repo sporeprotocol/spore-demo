@@ -4,7 +4,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { useMutation, useQueryClient } from 'react-query';
 import { useConnect } from '../useConnect';
 
-export function useAddClusterMutation() {
+export default function useCreateClusterMutation() {
   const queryClient = useQueryClient();
   const { signTransaction } = useConnect();
 
@@ -12,7 +12,7 @@ export function useAddClusterMutation() {
     async (...args: Parameters<typeof createCluster>) => {
       const { txSkeleton } = await createCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = sendTransaction(signedTx);
+      const hash = await sendTransaction(signedTx);
       return hash;
     },
     [signTransaction],

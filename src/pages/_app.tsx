@@ -45,7 +45,6 @@ const useStyles = createStyles((theme) => ({
     paddingBottom: '32px',
   },
   content: {
-    width: '436px',
     backgroundColor: theme.colors.background[0],
     borderRadius: '16px',
     borderColor: theme.colors.text[0],
