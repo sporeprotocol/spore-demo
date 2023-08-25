@@ -131,7 +131,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
         </Radio.Group>
         {error && (
           <Text size="sm" color="functional.0" mt="md">
-            Error message goes here: {getFriendlyErrorMessage(error.message)}
+            {getFriendlyErrorMessage(error.message)}
           </Text>
         )}
         <Group position="right" mt={error ? "24px" : "48px"}>

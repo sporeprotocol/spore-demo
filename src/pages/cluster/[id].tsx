@@ -56,7 +56,7 @@ export default function ClusterPage() {
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
 
-  const mintSporeModal = useMintSporeModal();
+  const mintSporeModal = useMintSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);
 
   const owner = useMemo(() => {

@@ -59,12 +59,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         closeOnEscape: !transferSporeMutation.isLoading,
         withCloseButton: !transferSporeMutation.isLoading,
         closeOnClickOutside: !transferSporeMutation.isLoading,
-        children: (
-          <TransferSporeModal
-            onSubmit={handleSubmit}
-            isLoading={transferSporeMutation.isLoading}
-          />
-        ),
+        children: <TransferSporeModal onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);
