@@ -20,6 +20,8 @@ import { IconCopy } from '@tabler/icons-react';
 import { useConnect } from '@/hooks/useConnect';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
+import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 
 const useStyles = createStyles((theme) => ({
   image: {
@@ -68,6 +70,9 @@ export default function SporePage() {
     { id: spore?.clusterId ?? undefined },
     { enabled: !!spore?.clusterId },
   );
+
+  const transferSpore = useTransferSporeModal(spore);
+  const destorySpore = useDestroySporeModal(spore);
 
   const amount = spore
     ? BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8
@@ -186,10 +191,16 @@ export default function SporePage() {
               </Flex>
               {owner === address && (
                 <Group mt="64px">
-                  <Button className={cx(classes.button, classes.transfer)}>
+                  <Button
+                    className={cx(classes.button, classes.transfer)}
+                    onClick={transferSpore.open}
+                  >
                     Transfer
                   </Button>
-                  <Button className={cx(classes.button, classes.destory)}>
+                  <Button
+                    className={cx(classes.button, classes.destory)}
+                    onClick={destorySpore.open}
+                  >
                     Destory
                   </Button>
                 </Group>

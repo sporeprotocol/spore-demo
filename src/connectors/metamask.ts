@@ -115,6 +115,8 @@ export default class MetaMaskConnector extends CKBConnector {
     const inputs = txSkeleton.get('inputs')!;
     const outputs = txSkeleton.get('outputs')!;
 
+    console.log(inputs, outputs)
+
     // add anyone-can-pay minimal capacity in outputs
     // https://github.com/nervosnetwork/rfcs/blob/master/rfcs/0042-omnilock/0042-omnilock.md#anyone-can-pay-mode
     outputs.forEach((output, index) => {

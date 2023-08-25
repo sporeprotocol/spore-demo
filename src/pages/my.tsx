@@ -14,7 +14,9 @@ import {
   useMantineTheme,
   Button,
   Group,
+  Tooltip,
 } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
@@ -80,6 +82,7 @@ const useStyles = createStyles((theme) => ({
 export default function MySpacePage() {
   const { classes, cx } = useStyles();
   const theme = useMantineTheme();
+  const clipboard = useClipboard({ timeout: 500 });
   const { address } = useConnect();
   const [showSpores, setShowSpores] = useState(false);
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
@@ -128,7 +131,11 @@ export default function MySpacePage() {
                 <Text size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 10)}...{address.slice(-10)}
                 </Text>
-                <IconCopy size="22px" color={theme.colors.text[0]} />
+                <Tooltip label={clipboard.copied ? 'Copied!' : 'Copy'} withArrow>
+                  <Flex sx={{ cursor: 'pointer' }} onClick={() => clipboard.copy(address)}>
+                    <IconCopy size="22px" color={theme.colors.text[0]} />
+                  </Flex>
+                </Tooltip>
               </Flex>
               <Flex align="center">
                 <Text size="xl" align="center" color="text.0" mr="sm">
