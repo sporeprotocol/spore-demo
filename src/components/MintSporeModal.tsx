@@ -200,6 +200,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         value={clusterId}
         onChange={(id) => setClusterId(id || undefined)}
         dropdownComponent={DropdownContainerRef}
+        disabled={loading}
         searchable
       />
 
@@ -218,7 +219,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               alt="preview"
               fit="contain"
             />
-            {hovered && (
+            {hovered && !loading && (
               <Overlay
                 color="#E0E0E0"
                 opacity={0.7}

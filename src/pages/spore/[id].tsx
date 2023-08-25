@@ -75,7 +75,7 @@ export default function SporePage() {
   const destorySpore = useDestroySporeModal(spore);
 
   const amount = spore
-    ? BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8
+    ? Math.ceil(BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8)
     : 0;
   const owner = spore
     ? helpers.encodeToAddress(spore.cell.cellOutput.lock, {

@@ -2,64 +2,62 @@ import {
   predefinedSporeConfigs,
   transferCluster as _transferCluster,
 } from '@spore-sdk/core';
-import { BI, Cell, helpers } from '@ckb-lumos/lumos';
+import { helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { Button, Group, TextInput } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { isNotEmpty, useForm } from '@mantine/form';
-import useTransferClusterMutation from '../mutation/useTransferClusterMutation';
 import { useConnect } from '../useConnect';
 import { Cluster } from '@/cluster';
+import { sendTransaction } from '@/utils/transaction';
+import { useMutation } from 'react-query';
+import { trpc } from '@/server';
+import TransferModal from '@/components/TransferModal';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
-  const { address } = useConnect();
+  const { address, signTransaction } = useConnect();
 
-  const transferClusterMutation = useTransferClusterMutation(cluster);
+  const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+
+  const transferCluster = useCallback(
+    async (...args: Parameters<typeof _transferCluster>) => {
+      const { txSkeleton } = await _transferCluster(...args);
+      const signedTx = await signTransaction(txSkeleton);
+      const hash = await sendTransaction(signedTx);
+      return hash;
+    },
+    [signTransaction],
+  );
+
+  const transferClusterMutation = useMutation(transferCluster, {
+    onSuccess: () => refetch(),
+  });
   const loading =
     transferClusterMutation.isLoading && !transferClusterMutation.isError;
-
-  const form = useForm({
-    initialValues: {
-      to: '',
-    },
-    validate: {
-      to: isNotEmpty('address cannot be empty'),
-    },
-  });
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
       if (!address || !values.to || !cluster) {
         return;
       }
-      try {
-        await transferClusterMutation.mutateAsync({
-          outPoint: cluster.cell.outPoint!,
-          useCapacityMarginAsFee: false,
-          fromInfos: [address],
-          toLock: helpers.parseAddress(values.to),
-          config: predefinedSporeConfigs.Aggron4,
-        });
-        notifications.show({
-          color: 'green',
-          title: 'Transaction successful!',
-          message: `Your cluster has been transfer to ${values.to.slice(
-            0,
-            6,
-          )}...${values.to.slice(-6)}.`,
-        });
-        close();
-      } catch (e) {
-        notifications.show({
-          color: 'red',
-          title: 'Error!',
-          message: (e as Error).message,
-        });
-      }
+      await transferClusterMutation.mutateAsync({
+        outPoint: cluster.cell.outPoint!,
+        useCapacityMarginAsFee: false,
+        fromInfos: [address],
+        toLock: helpers.parseAddress(values.to),
+        config: predefinedSporeConfigs.Aggron4,
+      });
+      notifications.show({
+        color: 'green',
+        title: 'Transaction successful!',
+        message: `Your cluster has been transfer to ${values.to.slice(
+          0,
+          6,
+        )}...${values.to.slice(-6)}.`,
+      });
+      close();
     },
     [address, cluster, transferClusterMutation, close],
   );
@@ -73,33 +71,12 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         closeOnEscape: !transferClusterMutation.isLoading,
         withCloseButton: !transferClusterMutation.isLoading,
         closeOnClickOutside: !transferClusterMutation.isLoading,
-        children: (
-          <form onSubmit={form.onSubmit(handleSubmit)}>
-            <TextInput
-              withAsterisk
-              label="Transfer to"
-              {...form.getInputProps('to')}
-            />
-
-            <Group position="right" mt="md">
-              <Button type="submit" loading={transferClusterMutation.isLoading}>
-                Submit
-              </Button>
-            </Group>
-          </form>
-        ),
+        children: <TransferModal onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);
     }
-  }, [
-    transferClusterMutation.isLoading,
-    handleSubmit,
-    opened,
-    form,
-    close,
-    modalId,
-  ]);
+  }, [transferClusterMutation.isLoading, handleSubmit, opened, close, modalId]);
 
   return {
     open,

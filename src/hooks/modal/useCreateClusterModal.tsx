@@ -2,17 +2,33 @@ import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
-import useCreateClusterMutation from '../mutation/useCreateClusterMutation';
 import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
-import { predefinedSporeConfigs } from '@spore-sdk/core';
+import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
+import { sendTransaction } from '@/utils/transaction';
+import { useMutation } from 'react-query';
+import { trpc } from '@/server';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock, getAnyoneCanPayLock } = useConnect();
+  const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const modalId = useId();
 
-  const addClusterMutation = useCreateClusterMutation();
+  const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+
+  const addCluster = useCallback(
+    async (...args: Parameters<typeof createCluster>) => {
+      const { txSkeleton } = await createCluster(...args);
+      const signedTx = await signTransaction(txSkeleton);
+      const hash = await sendTransaction(signedTx);
+      return hash;
+    },
+    [signTransaction],
+  );
+
+  const addClusterMutation = useMutation(addCluster, {
+    onSuccess: () => refetch(),
+  });
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(

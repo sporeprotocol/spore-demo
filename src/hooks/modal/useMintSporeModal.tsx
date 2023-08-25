@@ -1,20 +1,25 @@
-import { predefinedSporeConfigs } from '@spore-sdk/core';
+import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
-import useMintSporeMutation from '../mutation/useMintSporeMutation';
 import { useConnect } from '../useConnect';
 import { trpc } from '@/server';
 import MintSporeModal from '@/components/MintSporeModal';
+import { sendTransaction } from '@/utils/transaction';
+import { useMutation } from 'react-query';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock } = useConnect();
+  const { address, lock, signTransaction } = useConnect();
   const modalId = useId();
 
   const { data: clusters = [] } = trpc.cluster.list.useQuery();
+  const { refetch } = trpc.spore.list.useQuery(
+    { clusterId: id },
+    { enabled: false },
+  );
 
   const selectableClusters = useMemo(() => {
     return clusters.filter(({ cell }) => {
@@ -25,8 +30,19 @@ export default function useMintSporeModal(id?: string) {
     });
   }, [clusters, lock]);
 
-  const addSporeMutation = useMintSporeMutation();
-  const loading = addSporeMutation.isLoading && !addSporeMutation.isError;
+  const addSpore = useCallback(
+    async (...args: Parameters<typeof createSpore>) => {
+      let { txSkeleton } = await createSpore(...args);
+      const signedTx = await signTransaction(txSkeleton);
+      const hash = await sendTransaction(signedTx);
+      return hash;
+    },
+    [signTransaction],
+  );
+
+  const addSporeMutation = useMutation(addSpore, {
+    onSuccess: () => refetch(),
+  });
 
   const handleSubmit = useCallback(
     async (content: Blob | null, clusterId: string | undefined) => {
@@ -94,6 +110,5 @@ export default function useMintSporeModal(id?: string) {
   return {
     open,
     close,
-    loading,
   };
 }

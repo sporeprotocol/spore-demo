@@ -4,17 +4,36 @@ import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { notifications } from '@mantine/notifications';
-import useTransferSporeMutation from '../mutation/useTransferSporeMutation';
+import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
 import { Spore } from '@/spore';
-import TransferSporeModal from '@/components/TransferSporeModal';
+import { sendTransaction } from '@/utils/transaction';
+import { useMutation } from 'react-query';
+import { trpc } from '@/server';
+import TransferModal from '@/components/TransferModal';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
-  const { address } = useConnect();
+  const { address, signTransaction } = useConnect();
+  const { refetch } = trpc.spore.get.useQuery(
+    { id: spore?.id },
+    { enabled: false },
+  );
 
-  const transferSporeMutation = useTransferSporeMutation();
+  const transferSpore = useCallback(
+    async (...args: Parameters<typeof _transferSpore>) => {
+      const { txSkeleton } = await _transferSpore(...args);
+      const signedTx = await signTransaction(txSkeleton);
+      const hash = await sendTransaction(signedTx);
+      return hash;
+    },
+    [signTransaction],
+  );
+
+  const transferSporeMutation = useMutation(transferSpore, {
+    onSuccess: () => refetch(),
+  });
   const loading =
     transferSporeMutation.isLoading && !transferSporeMutation.isError;
 
@@ -59,7 +78,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         closeOnEscape: !transferSporeMutation.isLoading,
         withCloseButton: !transferSporeMutation.isLoading,
         closeOnClickOutside: !transferSporeMutation.isLoading,
-        children: <TransferSporeModal onSubmit={handleSubmit} />,
+        children: <TransferModal onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);

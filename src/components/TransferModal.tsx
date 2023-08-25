@@ -1,10 +1,9 @@
-import { getFriendlyErrorMessage } from '@/utils/error';
 import { isValidAddress } from '@/utils/helpers';
-import { Text, Button, Group, TextInput, createStyles } from '@mantine/core';
+import { Button, Group, TextInput, createStyles } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useCallback, useState } from 'react';
 
-export interface TransferSporeModalProps {
+export interface TransferModalProps {
   onSubmit: (values: { to: string }) => Promise<void>;
 }
 
@@ -43,7 +42,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function TransferSporeModal(props: TransferSporeModalProps) {
+export default function TransferModal(props: TransferModalProps) {
   const { onSubmit } = props;
   const { classes } = useStyles();
   const [loading, setLoading] = useState(false);

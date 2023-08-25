@@ -86,9 +86,11 @@ export default function MySpacePage() {
   const { address } = useConnect();
   const [showSpores, setShowSpores] = useState(false);
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
+
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ owner: address });
-  const { data: clusters = [], isLoading: isClusterLoading } =
+  const { data: clusters = [] } = trpc.cluster.list.useQuery({ withPublic: true });
+  const { data: ownedClusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery({
       owner: address,
       withPublic: true,
@@ -175,8 +177,8 @@ export default function MySpacePage() {
           />
         ) : (
           <ClusterGrid
-            title={`${clusters.length} Clusters`}
-            clusters={clusters}
+            title={`${ownedClusters.length} Clusters`}
+            clusters={ownedClusters}
             spores={spores}
             isLoading={isSporesLoading || isClusterLoading}
           />
