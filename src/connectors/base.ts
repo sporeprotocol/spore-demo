@@ -3,11 +3,26 @@ import { WalletData, walletAtom } from '@/state/wallet';
 import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
 
 export default abstract class CKBConnector {
-  public isConnected: boolean = false;
-  public enable: boolean = true;
-
+  private _isConnected: boolean = false;
+  private _enable: boolean = true;
   protected store = store;
   abstract type: string;
+
+  protected set isConnected(val: boolean) {
+    this._isConnected = val;
+  }
+
+  public get isConnected() {
+    return this._isConnected;
+  }
+
+  protected set enable(val: boolean) {
+    this._enable = val;
+  }
+
+  public get enable() {
+    return this._enable;
+  }
 
   public get lock(): Script | undefined {
     const { address } = this.getData();
@@ -25,6 +40,12 @@ export default abstract class CKBConnector {
 
   protected getData(): WalletData {
     return this.store.get(walletAtom);
+  }
+
+  protected getLockFromAddress(): Script {
+    const { address } = this.getData();
+    config.initializeConfig(config.predefined.AGGRON4);
+    return helpers.parseAddress(address);
   }
 
   abstract connect(): Promise<void>;

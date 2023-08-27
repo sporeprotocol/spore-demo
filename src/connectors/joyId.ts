@@ -15,10 +15,10 @@ const JOY_ID_SERVER_URL = 'https://api.joyid.dev';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
-  public enable: boolean = false;
 
   constructor() {
     super();
+    this.enable = false;
 
     initConfig({
       name: 'Spore Demo',
@@ -40,6 +40,7 @@ export default class JoyIdConnector extends CKBConnector {
 
   disconnect(): Promise<void> | void {
     this.store.set(walletAtom, defaultWalletValue);
+    this.isConnected = false;
   }
 
   getAnyoneCanPayLock(): Script {

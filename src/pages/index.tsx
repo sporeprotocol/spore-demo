@@ -98,16 +98,14 @@ export default function HomePage() {
         <Box mb="60px">
           <ClusterGrid
             title={
-              <>
-                <Flex justify="space-between">
-                  <Title order={3}>Discover Clusters</Title>
-                  <Link href="/cluster" style={{ textDecoration: 'none' }}>
-                    <Text color="brand.1" weight="600">
-                      See all
-                    </Text>
-                  </Link>
-                </Flex>
-              </>
+              <Flex justify="space-between">
+                <Title order={3}>Discover Clusters</Title>
+                <Link href="/cluster" style={{ textDecoration: 'none' }}>
+                  <Text color="brand.1" weight="600">
+                    See all
+                  </Text>
+                </Link>
+              </Flex>
             }
             clusters={peekClusters}
             spores={spores}
