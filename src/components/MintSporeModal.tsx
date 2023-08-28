@@ -1,7 +1,10 @@
 import { Cluster } from '@/cluster';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
+import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
+import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
+import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
   Box,
@@ -16,11 +19,14 @@ import {
   AspectRatio,
   Overlay,
   Center,
+  Tooltip,
+  Popover,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { IconChevronDown } from '@tabler/icons-react';
-import { useState, useCallback, forwardRef, useRef } from 'react';
+import { useState, useCallback, forwardRef, useRef, useMemo } from 'react';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -123,7 +129,18 @@ const useStyles = createStyles((theme) => ({
     backgroundColor: theme.colors.brand[1],
     '&:hover': {
       backgroundColor: '#7F6BD1',
+      borderRadius: '4px',
     },
+  },
+  popover: {
+    backgroundColor: theme.colors.brand[1],
+    border: 'none',
+    boxShadow: '4px 4px 0 #111318',
+  },
+  arrow: {
+    backgroundColor: theme.colors.brand[1],
+    border: 'none',
+    boxShadow: '4px 2px 0 #111318, 1px 2px 0 #111318',
   },
 }));
 
@@ -150,14 +167,24 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const { defaultClusterId, clusters, onSubmit } = props;
   const { classes } = useStyles();
   const theme = useMantineTheme();
+  const { address } = useConnect();
   const [hovered, setHovered] = useState(false);
   const dropzoneOpenRef = useRef<() => void>(null);
-  const [clusterId, setClusterId] = useState<string | undefined>(defaultClusterId);
+  const [clusterId, setClusterId] = useState<string | undefined>(
+    defaultClusterId,
+  );
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
   const [content, setContent] = useState<Blob | null>(null);
+  const [opened, { close, open }] = useDisclosure(false);
   const onChainSize = useEstimatedOnChainSize(clusterId, content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
+  const balance = useMemo(() => {
+    if (!capacity) return 0;
+    return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
+  }, [capacity]);
 
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
@@ -182,6 +209,19 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   return (
     <Box>
+      <Flex mb="24px">
+        <Text color="text.0" mr="5px">
+          Balance:
+        </Text>
+        <Text color="text.0" weight="700">
+          {balance} CKB
+        </Text>
+        {content && balance - onChainSize > 0 && (
+          <Text color="text.1" ml="5px">
+            (will be ~{balance - onChainSize} CKB after minting)
+          </Text>
+        )}
+      </Flex>
       <Select
         mb="md"
         maxDropdownHeight={200}
@@ -278,9 +318,38 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           <Flex>
             <Text color="text.0">Estimated On-chain Size</Text>
           </Flex>
-          <Text weight="bold" color="text.0">
-            ≈ {onChainSize} CKB
-          </Text>
+          <Flex align="center">
+            <Text weight="bold" color="text.0" mr="5px">
+              ≈ {onChainSize} CKB
+            </Text>
+            <Popover
+              width={356}
+              classNames={{ dropdown: classes.popover, arrow: classes.arrow }}
+              arrowOffset={15}
+              position="top-start"
+              opened={opened}
+              withArrow
+            >
+              <Popover.Target>
+                <Image
+                  src="/svg/icon-info.svg"
+                  alt="info"
+                  width="20"
+                  height="20"
+                  sx={{ cursor: 'pointer' }}
+                  onMouseEnter={open}
+                  onMouseLeave={close}
+                />
+              </Popover.Target>
+              <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                <Text color="white" size="sm">
+                  By creating a spore, you are reserving this amount of CKB for
+                  on-chain storage. You can always destroy spores to redeem your
+                  reserved CKB.
+                </Text>
+              </Popover.Dropdown>
+            </Popover>
+          </Flex>
         </Flex>
       )}
       {error && (

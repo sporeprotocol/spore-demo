@@ -1,3 +1,4 @@
+import EmptyPlaceholder from '@/components/EmptyPlaceholder';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
@@ -10,11 +11,12 @@ import {
   createStyles,
   Container,
   Grid,
-  Image,
   Group,
   Button,
   useMantineTheme,
+  Box,
 } from '@mantine/core';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
@@ -51,8 +53,7 @@ export default function ClusterPage() {
   const { id } = router.query;
   const theme = useMantineTheme();
 
-  const { data: cluster } =
-    trpc.cluster.get.useQuery({ id } as { id: string });
+  const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
 
@@ -75,13 +76,14 @@ export default function ClusterPage() {
             <Grid.Col span={8}>
               <Flex direction="column">
                 <Flex align="center">
-                  <Image
-                    src="/svg/cluster-icon.svg"
-                    alt="Cluster Icon"
-                    width="24px"
-                    height="24px"
-                    mr="8px"
-                  />
+                  <Box mr="8px">
+                    <Image
+                      src="/svg/cluster-icon.svg"
+                      alt="Cluster Icon"
+                      width="24"
+                      height="24"
+                    />
+                  </Box>
                   <Text size="xl" weight="bold" color="text.1">
                     Cluster
                   </Text>
@@ -155,12 +157,21 @@ export default function ClusterPage() {
         </Container>
       </Flex>
       <Container py="48px" size="xl">
-        <SporeGrid
-          title={`${spores.length} Spores`}
-          spores={spores}
-          cluster={cluster}
-          isLoading={isSporesLoading}
-        />
+        {spores.length > 0 ? (
+          <SporeGrid
+            title={`${spores.length} Spores`}
+            spores={spores}
+            cluster={cluster}
+            isLoading={isSporesLoading}
+          />
+        ) : (
+          <EmptyPlaceholder
+            title="Ignite Your Creativity"
+            description="Let your creativity bloom and paint this Cluster with your imagination!"
+            submitLabel="Mint Spore"
+            onClick={mintSporeModal.open}
+          />
+        )}
       </Container>
     </Layout>
   );

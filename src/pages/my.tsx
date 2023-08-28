@@ -1,6 +1,9 @@
 import ClusterGrid from '@/components/ClusterGrid';
+import EmptyPlaceholder from '@/components/EmptyPlaceholder';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
+import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
+import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
 import { BI } from '@ckb-lumos/lumos';
@@ -89,12 +92,17 @@ export default function MySpacePage() {
 
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ owner: address });
-  const { data: clusters = [] } = trpc.cluster.list.useQuery({ withPublic: true });
+  const { data: clusters = [] } = trpc.cluster.list.useQuery({
+    withPublic: true,
+  });
   const { data: ownedClusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery({
       owner: address,
       withPublic: true,
     });
+
+  const mintSporeModal = useMintSporeModal();
+  const createClusterModal = useCreateClusterModal();
 
   const balance = useMemo(() => {
     if (!capacity) return 0;
@@ -133,8 +141,14 @@ export default function MySpacePage() {
                 <Text size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 10)}...{address.slice(-10)}
                 </Text>
-                <Tooltip label={clipboard.copied ? 'Copied!' : 'Copy'} withArrow>
-                  <Flex sx={{ cursor: 'pointer' }} onClick={() => clipboard.copy(address)}>
+                <Tooltip
+                  label={clipboard.copied ? 'Copied!' : 'Copy'}
+                  withArrow
+                >
+                  <Flex
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => clipboard.copy(address)}
+                  >
                     <IconCopy size="22px" color={theme.colors.text[0]} />
                   </Flex>
                 </Tooltip>
@@ -169,19 +183,41 @@ export default function MySpacePage() {
           </Group>
         </Flex>
         {showSpores ? (
-          <SporeGrid
-            title={`${spores.length} Spores`}
-            spores={spores}
-            cluster={(id) => clusters.find((c) => c.id === id)}
-            isLoading={isSporesLoading}
-          />
+          <>
+            {spores.length > 0 ? (
+              <SporeGrid
+                title={`${spores.length} Spores`}
+                spores={spores}
+                cluster={(id) => clusters.find((c) => c.id === id)}
+                isLoading={isSporesLoading}
+              />
+            ) : (
+              <EmptyPlaceholder
+                title="Spore Creations Await"
+                description="Let your creativity bloom and cultivate unique Spores with your imagination!"
+                submitLabel="Mint Spore"
+                onClick={mintSporeModal.open}
+              />
+            )}
+          </>
         ) : (
-          <ClusterGrid
-            title={`${ownedClusters.length} Clusters`}
-            clusters={ownedClusters}
-            spores={spores}
-            isLoading={isSporesLoading || isClusterLoading}
-          />
+          <>
+            {ownedClusters.length > 0 ? (
+              <ClusterGrid
+                title={`${ownedClusters.length} Clusters`}
+                clusters={ownedClusters}
+                spores={spores}
+                isLoading={isSporesLoading || isClusterLoading}
+              />
+            ) : (
+              <EmptyPlaceholder
+                title="Cluster Creations Await"
+                description="Start your imaginative journey by creating Clusters"
+                submitLabel="Create Cluster"
+                onClick={createClusterModal.open}
+              />
+            )}
+          </>
         )}
       </Container>
     </Layout>

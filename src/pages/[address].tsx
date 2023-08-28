@@ -1,6 +1,9 @@
 import ClusterGrid from '@/components/ClusterGrid';
+import EmptyPlaceholder from '@/components/EmptyPlaceholder';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
+import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
+import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { trpc } from '@/server';
 import {
   Text,
@@ -82,6 +85,7 @@ export default function AccountPage() {
   const { address } = router.query;
   const theme = useMantineTheme();
   const [showSpores, setShowSpores] = useState(false);
+
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ owner: address as string });
   const { data: clusters = [], isLoading: isClusterLoading } =
@@ -89,6 +93,9 @@ export default function AccountPage() {
       owner: address as string,
       withPublic: true,
     });
+
+  const mintSporeModal = useMintSporeModal();
+  const createClusterModal = useCreateClusterModal();
 
   if (!address) {
     return null;
@@ -146,19 +153,41 @@ export default function AccountPage() {
           </Group>
         </Flex>
         {showSpores ? (
-          <SporeGrid
-            title={`${spores.length} Spores`}
-            spores={spores}
-            cluster={(id) => clusters.find((c) => c.id === id)}
-            isLoading={isSporesLoading}
-          />
+          <>
+            {spores.length > 0 ? (
+              <SporeGrid
+                title={`${spores.length} Spores`}
+                spores={spores}
+                cluster={(id) => clusters.find((c) => c.id === id)}
+                isLoading={isSporesLoading}
+              />
+            ) : (
+              <EmptyPlaceholder
+                title="Spore Creations Await"
+                description="Let your creativity bloom and cultivate unique Spores with your imagination!"
+                submitLabel="Mint Spore"
+                onClick={mintSporeModal.open}
+              />
+            )}
+          </>
         ) : (
-          <ClusterGrid
-            title={`${clusters.length} Clusters`}
-            clusters={clusters}
-            spores={spores}
-            isLoading={isSporesLoading || isClusterLoading}
-          />
+          <>
+            {clusters.length > 0 ? (
+              <ClusterGrid
+                title={`${clusters.length} Clusters`}
+                clusters={clusters}
+                spores={spores}
+                isLoading={isSporesLoading || isClusterLoading}
+              />
+            ) : (
+              <EmptyPlaceholder
+                title="Cluster Creations Await"
+                description="Start your imaginative journey by creating Clusters"
+                submitLabel="Create Cluster"
+                onClick={createClusterModal.open}
+              />
+            )}
+          </>
         )}
       </Container>
     </Layout>
