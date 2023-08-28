@@ -1,9 +1,6 @@
 import ClusterGrid from '@/components/ClusterGrid';
-import EmptyPlaceholder from '@/components/EmptyPlaceholder';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
-import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
-import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { trpc } from '@/server';
 import {
   Text,
@@ -17,6 +14,7 @@ import {
   Title,
 } from '@mantine/core';
 import { IconCopy } from '@tabler/icons-react';
+import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -102,6 +100,12 @@ export default function AccountPage() {
 
   return (
     <Layout>
+      <Head>
+        <title>
+          {address.slice(0, 8)}...{address.slice(-8)}
+          {"'s Space"}
+        </title>
+      </Head>
       <Flex align="center" className={classes.banner}>
         <Container size="xl" mt="80px" className={classes.container}>
           <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>

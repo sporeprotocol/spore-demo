@@ -10,6 +10,7 @@ import {
   MediaQuery,
 } from '@mantine/core';
 import ClusterGrid from '@/components/ClusterGrid';
+import Head from 'next/head';
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -44,6 +45,11 @@ export default function ClustersPage() {
 
   return (
     <Layout>
+      <Head>
+        <title>
+          All Clusters - Spore Demo
+        </title>
+      </Head>
       <Flex align="center" className={classes.banner}>
         <Container size="xl" mt="80px" className={classes.container}>
           <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>

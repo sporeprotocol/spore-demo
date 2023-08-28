@@ -21,6 +21,7 @@ import {
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
+import Head from 'next/head';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
@@ -110,6 +111,11 @@ export default function MySpacePage() {
 
   return (
     <Layout>
+      <Head>
+        <title>
+          My Spore - Spore Demo
+        </title>
+      </Head>
       <Flex align="center" className={classes.banner}>
         <Container size="xl" mt="80px" className={classes.container}>
           <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>

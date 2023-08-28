@@ -11,6 +11,7 @@ import MetaMaskConnector from '@/connectors/metamask';
 import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
+import Head from 'next/head';
 
 function StateProvider({
   children,
@@ -80,15 +81,24 @@ const config = {
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <MantineProvider theme={theme} withNormalizeCSS withGlobalStyles>
-      <ConnectProvider value={config}>
-        <StateProvider pageProps={pageProps}>
-          <UIProvider>
-            <Component {...pageProps} />
-          </UIProvider>
-        </StateProvider>
-      </ConnectProvider>
-    </MantineProvider>
+    <>
+      <Head>
+        <title>Spore Demo</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width"
+        />
+      </Head>
+      <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
+        <ConnectProvider value={config}>
+          <StateProvider pageProps={pageProps}>
+            <UIProvider>
+              <Component {...pageProps} />
+            </UIProvider>
+          </StateProvider>
+        </ConnectProvider>
+      </MantineProvider>
+    </>
   );
 }
 

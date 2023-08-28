@@ -16,6 +16,7 @@ import {
   useMantineTheme,
   Box,
 } from '@mantine/core';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -70,6 +71,11 @@ export default function ClusterPage() {
 
   return (
     <Layout>
+      <Head>
+        <title>
+          Cluster: {id} - Spore Demo
+        </title>
+      </Head>
       <Flex align="center" className={classes.header}>
         <Container w="100%" size="xl" mt="80px">
           <Grid>

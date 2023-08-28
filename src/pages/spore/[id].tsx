@@ -24,6 +24,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import { useMemo } from 'react';
+import Head from 'next/head';
 
 const useStyles = createStyles((theme) => ({
   image: {
@@ -102,6 +103,11 @@ export default function SporePage() {
 
   return (
     <Layout>
+      <Head>
+        <title>
+          Spore: {id} - Spore Demo
+        </title>
+      </Head>
       <Container size="xl" py="48px" mt="80px">
         {cluster ? (
           <Link
@@ -227,7 +233,7 @@ export default function SporePage() {
             </Flex>
           </Grid.Col>
         </Grid>
-        {cluster && spores.length > 0 && (
+        {cluster && spores.length > 1 && (
           <Flex justify="space-between" mt="80px">
             {prevSporeIndex >= 0 ? (
               <Box
