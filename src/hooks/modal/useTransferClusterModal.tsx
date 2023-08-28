@@ -13,6 +13,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
+import { showNotifaction } from '@/utils/notifications';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
@@ -49,17 +50,10 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         toLock: helpers.parseAddress(values.to),
         config: predefinedSporeConfigs.Aggron4,
       });
-      notifications.show({
-        color: 'green',
-        title: 'Transaction successful!',
-        message: `Your cluster has been transfer to ${values.to.slice(
-          0,
-          6,
-        )}...${values.to.slice(-6)}.`,
-      });
-      close();
+      showNotifaction('Cluster Transferred!')
+      modals.close(modalId);
     },
-    [address, cluster, transferClusterMutation, close],
+    [address, cluster, transferClusterMutation, modalId],
   );
 
   useEffect(() => {

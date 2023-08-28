@@ -13,6 +13,7 @@ import DestroySporeModal from '@/components/DestroySporeModal';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
+import { showNotifaction } from '@/utils/notifications';
 
 export default function useDestroySporeModal(spore: Spore | undefined) {
   const modalId = useId();
@@ -48,11 +49,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
       fromInfos: [address],
       config: predefinedSporeConfigs.Aggron4,
     });
-    notifications.show({
-      color: 'green',
-      title: 'Farewell!',
-      message: `Your spore has been destroyed.`,
-    });
+    showNotifaction('Spore destroyed!')
     modals.close(modalId);
     router.back();
   }, [address, spore, destroySporeMutation, router, modalId]);

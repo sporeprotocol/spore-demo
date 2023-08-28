@@ -2,17 +2,19 @@ import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '../useConnect';
 import { trpc } from '@/server';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
+import { showNotifaction } from '@/utils/notifications';
+import { useRouter } from 'next/router';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, lock, signTransaction } = useConnect();
+  const router = useRouter();
   const modalId = useId();
 
   const { data: clusters = [] } = trpc.cluster.list.useQuery();
@@ -32,10 +34,12 @@ export default function useMintSporeModal(id?: string) {
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
-      let { txSkeleton } = await createSpore(...args);
+      let { txSkeleton, outputIndex } = await createSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      await sendTransaction(signedTx);
+      const outputs = txSkeleton.get('outputs');
+      const spore = outputs.get(outputIndex);
+      return spore;
     },
     [signTransaction],
   );
@@ -51,7 +55,7 @@ export default function useMintSporeModal(id?: string) {
       }
 
       const contentBuffer = await content.arrayBuffer();
-      await addSporeMutation.mutateAsync({
+      const spore = await addSporeMutation.mutateAsync({
         data: {
           contentType: content.type,
           content: new Uint8Array(contentBuffer),
@@ -61,14 +65,12 @@ export default function useMintSporeModal(id?: string) {
         toLock: lock,
         config: predefinedSporeConfigs.Aggron4,
       });
-      notifications.show({
-        color: 'green',
-        title: 'Congratulations!',
-        message: 'Your spore has been successfully minted.',
+      showNotifaction('Spore minted!', () => {
+        router.push(`/spore/${spore?.cellOutput.type?.args}`);
       });
       close();
     },
-    [address, lock, addSporeMutation, close],
+    [address, lock, addSporeMutation, close, router],
   );
 
   useEffect(() => {

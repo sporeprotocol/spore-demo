@@ -67,7 +67,7 @@ function UIProvider({ children }: React.PropsWithChildren<{}>) {
         classNames: classes,
       }}
     >
-      <Notifications />
+      <Notifications position="bottom-center" />
       {children}
     </ModalsProvider>
   );

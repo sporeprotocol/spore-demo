@@ -11,6 +11,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
+import { showNotifaction } from '@/utils/notifications';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();
@@ -49,15 +50,8 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
           toLock: helpers.parseAddress(values.to),
           config: predefinedSporeConfigs.Aggron4,
         });
-        notifications.show({
-          color: 'green',
-          title: 'Transaction successful!',
-          message: `Your spore has been transfer to ${values.to.slice(
-            0,
-            6,
-          )}...${values.to.slice(-6)}.`,
-        });
-        close();
+        showNotifaction('Spore Transferred!');
+        modals.close(modalId);
       } catch (e) {
         notifications.show({
           color: 'red',
@@ -66,7 +60,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         });
       }
     },
-    [address, spore, transferSporeMutation, close],
+    [address, spore, transferSporeMutation, modalId],
   );
 
   useEffect(() => {

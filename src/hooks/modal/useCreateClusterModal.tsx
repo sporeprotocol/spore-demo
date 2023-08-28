@@ -1,16 +1,18 @@
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
 import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
+import { showNotifaction } from '@/utils/notifications';
+import { useRouter } from 'next/router';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
+  const router = useRouter();
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const modalId = useId();
 
@@ -18,10 +20,12 @@ export default function useCreateClusterModal() {
 
   const addCluster = useCallback(
     async (...args: Parameters<typeof createCluster>) => {
-      const { txSkeleton } = await createCluster(...args);
+      const { txSkeleton, outputIndex } = await createCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      await sendTransaction(signedTx);
+      const outputs = txSkeleton.get('outputs');
+      const cluster = outputs.get(outputIndex);
+      return cluster;
     },
     [signTransaction],
   );
@@ -38,7 +42,7 @@ export default function useCreateClusterModal() {
       }
 
       const toLock = values.public === '1' ? getAnyoneCanPayLock() : lock;
-      await addClusterMutation.mutateAsync({
+      const cluster = await addClusterMutation.mutateAsync({
         data: {
           name: values.name,
           description: values.description,
@@ -48,14 +52,12 @@ export default function useCreateClusterModal() {
         config: predefinedSporeConfigs.Aggron4,
       });
 
-      notifications.show({
-        color: 'green',
-        title: 'Congratulations!',
-        message: 'Your cluster has been created.',
+      showNotifaction('Cluster Created!', () => {
+        router.push(`/cluster/${cluster?.cellOutput.type?.args}`);
       });
       modals.close(modalId);
     },
-    [address, lock, getAnyoneCanPayLock, addClusterMutation, modalId],
+    [address, lock, getAnyoneCanPayLock, addClusterMutation, modalId, router],
   );
 
   useEffect(() => {
