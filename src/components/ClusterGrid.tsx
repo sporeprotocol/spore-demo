@@ -16,7 +16,7 @@ export default function ClusterGrid(props: ClusterGridProps) {
   const { title, clusters, spores, isLoading } = props;
   const createClusterModal = useCreateClusterModal();
 
-  if (!isLoading && spores.length === 0) {
+  if (!isLoading && clusters.length === 0) {
     return (
       <EmptyPlaceholder
         title="Cluster Creations Await"

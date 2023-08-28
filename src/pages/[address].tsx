@@ -12,7 +12,9 @@ import {
   Button,
   Group,
   Title,
+  Tooltip,
 } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
 import Head from 'next/head';
 import Image from 'next/image';
@@ -83,6 +85,7 @@ export default function AccountPage() {
   const { address } = router.query;
   const theme = useMantineTheme();
   const [showSpores, setShowSpores] = useState(false);
+  const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ owner: address as string });
@@ -124,7 +127,7 @@ export default function AccountPage() {
                 {"'s Space"}
               </Title>
             </Flex>
-            <Flex px="24px" w="100%" justify="center">
+            <Flex px="24px" w="100%" justify="center" align="center">
               <Flex align="center">
                 <Text size="xl" align="center" color="text.0" mr="sm">
                   Address:
@@ -132,7 +135,18 @@ export default function AccountPage() {
                 <Text size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 8)}...{address.slice(-8)}
                 </Text>
-                <IconCopy size="22px" color={theme.colors.text[0]} />
+                <Tooltip
+                  label={clipboard.copied ? 'Copied!' : 'Copy'}
+                  withArrow
+                >
+                  <Flex
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => clipboard.copy(address)}
+                    ml="3px"
+                  >
+                    <IconCopy size="22px" color={theme.colors.text[0]} />
+                  </Flex>
+                </Tooltip>
               </Flex>
             </Flex>
           </Flex>

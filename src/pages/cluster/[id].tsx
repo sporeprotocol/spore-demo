@@ -3,6 +3,7 @@ import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
+import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
 import { helpers } from '@ckb-lumos/lumos';
 import {
@@ -15,7 +16,10 @@ import {
   Button,
   useMantineTheme,
   Box,
+  Tooltip,
 } from '@mantine/core';
+import { useClipboard } from '@mantine/hooks';
+import { IconCopy } from '@tabler/icons-react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,6 +57,8 @@ export default function ClusterPage() {
   const router = useRouter();
   const { id } = router.query;
   const theme = useMantineTheme();
+  const { address } = useConnect();
+  const clipboard = useClipboard({ timeout: 500 });
 
   const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
   const { data: spores = [], isLoading: isSporesLoading } =
@@ -72,9 +78,7 @@ export default function ClusterPage() {
   return (
     <Layout>
       <Head>
-        <title>
-          Cluster: {id} - Spore Demo
-        </title>
+        <title>Cluster: {id} - Spore Demo</title>
       </Head>
       <Flex align="center" className={classes.header}>
         <Container w="100%" size="xl" mt="80px">
@@ -136,11 +140,43 @@ export default function ClusterPage() {
                       borderRadius="16px"
                     />
                   ) : (
-                    <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
-                      <Text size="lg" color="brand.1">
-                        {owner.slice(0, 10)}...{owner.slice(-10)}
-                      </Text>
-                    </Link>
+                    <Flex align="center">
+                      {address === owner ? (
+                        <>
+                          <Text size="lg">Me (</Text>
+                          <Link
+                            href={`/my`}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <Text size="lg" color="brand.1">
+                              {owner.slice(0, 10)}...{owner.slice(-10)}
+                            </Text>
+                          </Link>
+                          <Text size="lg">)</Text>
+                        </>
+                      ) : (
+                        <Link
+                          href={`/${owner}`}
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <Text size="lg" color="brand.1">
+                            {owner.slice(0, 10)}...{owner.slice(-10)}
+                          </Text>
+                        </Link>
+                      )}
+                      <Tooltip
+                        label={clipboard.copied ? 'Copied!' : 'Copy'}
+                        withArrow
+                      >
+                        <Flex
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() => clipboard.copy(address)}
+                          ml="3px"
+                        >
+                          <IconCopy size="22px" color={theme.colors.text[0]} />
+                        </Flex>
+                      </Tooltip>
+                    </Flex>
                   )}
                 </Flex>
                 <Group>
