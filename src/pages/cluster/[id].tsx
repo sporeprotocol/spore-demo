@@ -157,21 +157,12 @@ export default function ClusterPage() {
         </Container>
       </Flex>
       <Container py="48px" size="xl">
-        {spores.length > 0 ? (
-          <SporeGrid
-            title={`${spores.length} Spores`}
-            spores={spores}
-            cluster={cluster}
-            isLoading={isSporesLoading}
-          />
-        ) : (
-          <EmptyPlaceholder
-            title="Ignite Your Creativity"
-            description="Let your creativity bloom and paint this Cluster with your imagination!"
-            submitLabel="Mint Spore"
-            onClick={mintSporeModal.open}
-          />
-        )}
+        <SporeGrid
+          title={isSporesLoading ? '' : `${spores.length} Spores`}
+          spores={spores}
+          cluster={cluster}
+          isLoading={isSporesLoading}
+        />
       </Container>
     </Layout>
   );

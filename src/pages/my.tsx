@@ -101,8 +101,7 @@ export default function MySpacePage() {
       withPublic: true,
     });
 
-  const mintSporeModal = useMintSporeModal();
-  const createClusterModal = useCreateClusterModal();
+  const isLoading = isSporesLoading || isClusterLoading;
 
   const balance = useMemo(() => {
     if (!capacity) return 0;
@@ -183,41 +182,19 @@ export default function MySpacePage() {
           </Group>
         </Flex>
         {showSpores ? (
-          <>
-            {spores.length > 0 ? (
-              <SporeGrid
-                title={`${spores.length} Spores`}
-                spores={spores}
-                cluster={(id) => clusters.find((c) => c.id === id)}
-                isLoading={isSporesLoading}
-              />
-            ) : (
-              <EmptyPlaceholder
-                title="Spore Creations Await"
-                description="Let your creativity bloom and cultivate unique Spores with your imagination!"
-                submitLabel="Mint Spore"
-                onClick={mintSporeModal.open}
-              />
-            )}
-          </>
+          <SporeGrid
+            title={isSporesLoading ? '' : `${spores.length} Spores`}
+            spores={spores}
+            cluster={(id) => clusters.find((c) => c.id === id)}
+            isLoading={isSporesLoading}
+          />
         ) : (
-          <>
-            {ownedClusters.length > 0 ? (
-              <ClusterGrid
-                title={`${ownedClusters.length} Clusters`}
-                clusters={ownedClusters}
-                spores={spores}
-                isLoading={isSporesLoading || isClusterLoading}
-              />
-            ) : (
-              <EmptyPlaceholder
-                title="Cluster Creations Await"
-                description="Start your imaginative journey by creating Clusters"
-                submitLabel="Create Cluster"
-                onClick={createClusterModal.open}
-              />
-            )}
-          </>
+          <ClusterGrid
+            title={isLoading ? '' : `${clusters.length} Clusters`}
+            clusters={ownedClusters}
+            spores={spores}
+            isLoading={isLoading}
+          />
         )}
       </Container>
     </Layout>

@@ -94,8 +94,7 @@ export default function AccountPage() {
       withPublic: true,
     });
 
-  const mintSporeModal = useMintSporeModal();
-  const createClusterModal = useCreateClusterModal();
+  const isLoading = isSporesLoading || isClusterLoading;
 
   if (!address) {
     return null;
@@ -153,41 +152,19 @@ export default function AccountPage() {
           </Group>
         </Flex>
         {showSpores ? (
-          <>
-            {spores.length > 0 ? (
-              <SporeGrid
-                title={`${spores.length} Spores`}
-                spores={spores}
-                cluster={(id) => clusters.find((c) => c.id === id)}
-                isLoading={isSporesLoading}
-              />
-            ) : (
-              <EmptyPlaceholder
-                title="Spore Creations Await"
-                description="Let your creativity bloom and cultivate unique Spores with your imagination!"
-                submitLabel="Mint Spore"
-                onClick={mintSporeModal.open}
-              />
-            )}
-          </>
+          <SporeGrid
+            title={isSporesLoading ? '' : `${spores.length} Spores`}
+            spores={spores}
+            cluster={(id) => clusters.find((c) => c.id === id)}
+            isLoading={isSporesLoading}
+          />
         ) : (
-          <>
-            {clusters.length > 0 ? (
-              <ClusterGrid
-                title={`${clusters.length} Clusters`}
-                clusters={clusters}
-                spores={spores}
-                isLoading={isSporesLoading || isClusterLoading}
-              />
-            ) : (
-              <EmptyPlaceholder
-                title="Cluster Creations Await"
-                description="Start your imaginative journey by creating Clusters"
-                submitLabel="Create Cluster"
-                onClick={createClusterModal.open}
-              />
-            )}
-          </>
+          <ClusterGrid
+            title={isLoading ? '' : `${clusters.length} Clusters`}
+            clusters={clusters}
+            spores={spores}
+            isLoading={isLoading}
+          />
         )}
       </Container>
     </Layout>

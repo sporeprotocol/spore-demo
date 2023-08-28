@@ -11,6 +11,7 @@ import {
   Button,
   Group,
   useMantineTheme,
+  Box,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { trpc } from '@/server';
@@ -22,6 +23,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
+import { useMemo } from 'react';
 
 const useStyles = createStyles((theme) => ({
   image: {
@@ -70,6 +72,10 @@ export default function SporePage() {
     { id: spore?.clusterId ?? undefined },
     { enabled: !!spore?.clusterId },
   );
+  const { data: spores = [] } = trpc.spore.list.useQuery(
+    { clusterId: spore?.clusterId ?? undefined },
+    { enabled: !!spore?.clusterId },
+  );
 
   const transferSpore = useTransferSporeModal(spore);
   const destorySpore = useDestroySporeModal(spore);
@@ -83,12 +89,21 @@ export default function SporePage() {
       })
     : '';
 
+  const nextSporeIndex = useMemo(
+    () => spores.findIndex((sp) => sp.id === id) + 1,
+    [spores, id],
+  );
+  const prevSporeIndex = useMemo(
+    () => spores.findIndex((sp) => sp.id === id) - 1,
+    [spores, id],
+  );
+
   const isLoading = !spore;
 
   return (
     <Layout>
       <Container size="xl" py="48px" mt="80px">
-        {cluster && (
+        {cluster ? (
           <Link
             href={`/cluster/${cluster.id}`}
             style={{ textDecoration: 'none' }}
@@ -106,17 +121,21 @@ export default function SporePage() {
               </Text>
             </Flex>
           </Link>
+        ) : (
+          <Box mb="32px" h="28px" />
         )}
         <Grid>
           <Grid.Col span={6}>
             <AspectRatio ratio={1} w="486px" h="486px">
               {isLoading ? (
-                <Skeleton
-                  width="100%"
-                  height="100%"
-                  className={classes.image}
-                  baseColor={theme.colors.background[1]}
-                />
+                <Box className={classes.image}>
+                  <Skeleton
+                    width="100%"
+                    height="100%"
+                    className={classes.image}
+                    baseColor={theme.colors.background[1]}
+                  />
+                </Box>
               ) : (
                 <Image
                   alt={spore!.id}
@@ -208,6 +227,47 @@ export default function SporePage() {
             </Flex>
           </Grid.Col>
         </Grid>
+        {cluster && spores.length > 0 && (
+          <Flex justify="space-between" mt="80px">
+            {prevSporeIndex >= 0 ? (
+              <Box
+                sx={{ cursor: 'pointer' }}
+                onClick={() =>
+                  router.push(`/spore/${spores[prevSporeIndex].id}`)
+                }
+              >
+                <Image
+                  src="/svg/icon-chevron-left.svg"
+                  width="32"
+                  height="32"
+                  alt="Previus Spore"
+                />
+              </Box>
+            ) : (
+              <Box h="32px" w="32px" />
+            )}
+            <Text size="xl" color="text.0">
+              {nextSporeIndex} / {spores.length}
+            </Text>
+            {nextSporeIndex < spores.length ? (
+              <Box
+                sx={{ cursor: 'pointer' }}
+                onClick={() =>
+                  router.push(`/spore/${spores[nextSporeIndex].id}`)
+                }
+              >
+                <Image
+                  src="/svg/icon-chevron-right.svg"
+                  width="32"
+                  height="32"
+                  alt="Previus Spore"
+                />
+              </Box>
+            ) : (
+              <Box h="32px" w="32px" />
+            )}
+          </Flex>
+        )}
       </Container>
     </Layout>
   );

@@ -1,7 +1,9 @@
 import { Spore } from '@/spore';
-import { Box, Container, Flex, SimpleGrid, Title } from '@mantine/core';
+import { Box, Flex, SimpleGrid, Title } from '@mantine/core';
 import SporeCard, { SporeSkeletonCard } from './SporeCard';
 import { Cluster } from '@/cluster';
+import EmptyPlaceholder from './EmptyPlaceholder';
+import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 
 export interface SporeGridProps {
   title: string;
@@ -15,6 +17,18 @@ export interface SporeGridProps {
 
 export default function SporeGrid(props: SporeGridProps) {
   const { title, spores, isLoading } = props;
+  const mintSporeModal = useMintSporeModal();
+
+  if (!isLoading && spores.length === 0) {
+    return (
+      <EmptyPlaceholder
+        title="Spore Creations Await"
+        description="Let your creativity bloom and cultivate unique Spores with your imagination!"
+        submitLabel="Mint Spore"
+        onClick={mintSporeModal.open}
+      />
+    );
+  }
 
   return (
     <Box>
