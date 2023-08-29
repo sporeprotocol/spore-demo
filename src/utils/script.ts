@@ -54,6 +54,13 @@ export function isSameScript(
   );
 }
 
+export function hasOwnership(ownerLock: Script, targetLock: Script) {
+  if (isAnyoneCanPay(targetLock)) {
+    return targetLock.args.slice(0, 44) === ownerLock.args.slice(0, 44);
+  }
+  return isSameScript(ownerLock, targetLock);
+}
+
 export function isAnyoneCanPay(script: Script) {
   if (isOmnilockScript(script)) {
     return script.args.slice(44, 46) === '02';

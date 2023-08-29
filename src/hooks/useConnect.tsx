@@ -1,6 +1,8 @@
+import ConnectModal from '@/components/ConnectModal';
 import CKBConnector from '@/connectors/base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
+import { modals } from '@mantine/modals';
 import { useAtom } from 'jotai';
 import {
   createContext,
@@ -60,19 +62,37 @@ export const useConnect = () => {
     }
   }, [connectors, connectorType, setWallet]);
 
+  useEffect(() => {
+    modals.close('connect wallet');
+  }, [connected]);
+
   const connect = useCallback(() => {
+    if (connectors.length === 0) {
+      throw new Error('No connector found');
+    }
+
     if (connectors.length === 1) {
       const [connector] = connectors;
       connector.connect();
+      return;
     }
+
+    modals.open({
+      modalId: 'connect wallet',
+      title: 'Select a wallet',
+      children: <ConnectModal connectors={connectors} />,
+    });
   }, [connectors]);
 
-  const isOwned = useCallback((lock: Script) => {
-    if (!connector) {
-      throw new Error(`Connector ${connectorType} not found`);
-    }
-    return connector.isOwned(lock);
-  }, [connector, connectorType]);
+  const isOwned = useCallback(
+    (lock: Script) => {
+      if (!connector) {
+        throw new Error(`Connector ${connectorType} not found`);
+      }
+      return connector.isOwned(lock);
+    },
+    [connector, connectorType],
+  );
 
   const getAnyoneCanPayLock = useCallback(() => {
     if (!connector) {

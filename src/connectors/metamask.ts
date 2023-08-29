@@ -81,13 +81,11 @@ export default class MetaMaskConnector extends CKBConnector {
   public async disconnect(): Promise<void> {
     await disconnect();
     this.listeners.forEach((unlisten) => unlisten());
+    this.isConnected = false;
   }
 
   public getAnyoneCanPayLock(minimalCkb = 0, minimalUdt = 0): Script {
-    const { address } = this.getData();
-    config.initializeConfig(config.predefined.AGGRON4);
-    const lock = helpers.parseAddress(address);
-
+    const lock = this.getLockFromAddress();
     const ckb = bytes.hexify(number.Uint8.pack(minimalCkb)).slice(2);
     const udt = bytes.hexify(number.Uint8.pack(minimalUdt)).slice(2);
     const args = `02${ckb}${udt}`;
@@ -96,9 +94,7 @@ export default class MetaMaskConnector extends CKBConnector {
   }
 
   public isOwned(targetLock: Script): boolean {
-    const { address } = this.getData();
-    config.initializeConfig(config.predefined.AGGRON4);
-    const lock = helpers.parseAddress(address);
+    const lock = this.getLockFromAddress();
     return (
       lock.codeHash === targetLock.codeHash &&
       lock.hashType === targetLock.hashType &&

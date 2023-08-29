@@ -7,10 +7,13 @@ export const sporeRouter = router({
   get: publicProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.string().optional(),
       }),
     )
     .query(async ({ input }) => {
+      if (!input.id) {
+        return undefined;
+      }
       const spore = SporeService.shared.get(input.id);
       return spore;
     }),
