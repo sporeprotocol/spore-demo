@@ -19,7 +19,6 @@ import {
   AspectRatio,
   Overlay,
   Center,
-  Tooltip,
   Popover,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
@@ -354,7 +353,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       )}
       {error && (
         <Text size="sm" color="functional.0">
-          Error message goes here: {getFriendlyErrorMessage(error.message)}
+          {getFriendlyErrorMessage(error.message)}
         </Text>
       )}
       <Group position="right" mt="32px">

@@ -88,7 +88,7 @@ export default function MySpacePage() {
   const theme = useMantineTheme();
   const clipboard = useClipboard({ timeout: 500 });
   const { address } = useConnect();
-  const [showSpores, setShowSpores] = useState(false);
+  const [showSpores, setShowSpores] = useState(true);
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
 
   const { data: spores = [], isLoading: isSporesLoading } =
@@ -174,16 +174,16 @@ export default function MySpacePage() {
         <Flex justify="center" mb="48px">
           <Group spacing={0} className={classes.buttonGroup}>
             <Button
-              className={cx(classes.button, { [classes.active]: !showSpores })}
-              onClick={() => setShowSpores(false)}
-            >
-              Clusters
-            </Button>
-            <Button
               className={cx(classes.button, { [classes.active]: showSpores })}
               onClick={() => setShowSpores(true)}
             >
               Spores
+            </Button>
+            <Button
+              className={cx(classes.button, { [classes.active]: !showSpores })}
+              onClick={() => setShowSpores(false)}
+            >
+              Clusters
             </Button>
           </Group>
         </Flex>
@@ -196,7 +196,7 @@ export default function MySpacePage() {
           />
         ) : (
           <ClusterGrid
-            title={isLoading ? '' : `${clusters.length} Clusters`}
+            title={isLoading ? '' : `${ownedClusters.length} Clusters`}
             clusters={ownedClusters}
             spores={spores}
             isLoading={isLoading}

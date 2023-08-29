@@ -5,6 +5,7 @@ import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
+import { isAnyoneCanPay } from '@/utils/script';
 import { helpers } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -17,6 +18,7 @@ import {
   useMantineTheme,
   Box,
   Tooltip,
+  Title,
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
@@ -36,6 +38,18 @@ const useStyles = createStyles((theme) => ({
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
     backgroundImage: 'url(/images/noise-on-yellow.png)',
+  },
+  name: {
+    textOverflow: 'ellipsis',
+    maxWidth: '574px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+  },
+  description: {
+    textOverflow: 'ellipsis',
+    maxWidth: '690px ',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
   },
   button: {
     color: theme.colors.text[0],
@@ -73,6 +87,13 @@ export default function ClusterPage() {
     return address;
   }, [cluster]);
 
+  const isPublic = useMemo(() => {
+    if (!cluster) {
+      return false;
+    }
+    return isAnyoneCanPay(cluster?.cell.cellOutput.lock);
+  }, [cluster]);
+
   const isLoading = !cluster;
 
   return (
@@ -107,9 +128,42 @@ export default function ClusterPage() {
                       borderRadius="16px"
                     />
                   ) : (
-                    <Text size="32px" weight="bold">
-                      {cluster?.name}
-                    </Text>
+                    <Flex>
+                      <Title order={2} mr="md" className={classes.name}>
+                        {cluster?.name}
+                      </Title>
+                      {isPublic ? (
+                        <Tooltip
+                          label="Anyone can mint Spores into this public Cluster"
+                          withArrow
+                        >
+                          <Flex
+                            align="center"
+                            h="40px"
+                            bg="white"
+                            px="md"
+                            sx={{ borderRadius: '20px' }}
+                          >
+                            <Title order={5}>Public</Title>
+                          </Flex>
+                        </Tooltip>
+                      ) : (
+                        <Tooltip
+                          label="Only the owner can mint Spores into this private Cluster"
+                          withArrow
+                        >
+                          <Flex
+                            align="center"
+                            h="40px"
+                            bg="white"
+                            px="md"
+                            sx={{ borderRadius: '20px' }}
+                          >
+                            <Title order={5}>Private</Title>
+                          </Flex>
+                        </Tooltip>
+                      )}
+                    </Flex>
                   )}
                 </Flex>
                 {isLoading ? (
@@ -120,7 +174,11 @@ export default function ClusterPage() {
                     borderRadius="16px"
                   />
                 ) : (
-                  <Text size="20px" color="text.1">
+                  <Text
+                    size="20px"
+                    color="text.1"
+                    className={classes.description}
+                  >
                     {cluster?.description}
                   </Text>
                 )}
@@ -144,10 +202,7 @@ export default function ClusterPage() {
                       {address === owner ? (
                         <>
                           <Text size="lg">Me (</Text>
-                          <Link
-                            href={`/my`}
-                            style={{ textDecoration: 'none' }}
-                          >
+                          <Link href={`/my`} style={{ textDecoration: 'none' }}>
                             <Text size="lg" color="brand.1">
                               {owner.slice(0, 10)}...{owner.slice(-10)}
                             </Text>
@@ -180,18 +235,22 @@ export default function ClusterPage() {
                   )}
                 </Flex>
                 <Group>
-                  <Button
-                    className={classes.button}
-                    onClick={mintSporeModal.open}
-                  >
-                    Mint Spore
-                  </Button>
-                  <Button
-                    className={classes.button}
-                    onClick={transferClusterModal.open}
-                  >
-                    Transfer Cluster
-                  </Button>
+                  {(isPublic || owner === address) && (
+                    <Button
+                      className={classes.button}
+                      onClick={mintSporeModal.open}
+                    >
+                      Mint Spore
+                    </Button>
+                  )}
+                  {owner === address && (
+                    <Button
+                      className={classes.button}
+                      onClick={transferClusterModal.open}
+                    >
+                      Transfer Cluster
+                    </Button>
+                  )}
                 </Group>
               </Flex>
             </Grid.Col>

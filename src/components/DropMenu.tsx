@@ -1,7 +1,6 @@
-import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
-import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
-import { Button, Menu, Text, createStyles } from '@mantine/core';
-import { IconPlus } from '@tabler/icons-react';
+import { Menu, createStyles } from '@mantine/core';
+import { FloatingPosition } from '@mantine/core/lib/Floating';
+import { MouseEventHandler } from 'react';
 
 const useStyles = createStyles((theme) => ({
   create: {
@@ -41,19 +40,27 @@ const useStyles = createStyles((theme) => ({
 
     '&:hover': {
       backgroundColor: theme.colors.background[0],
-    }
+    },
   },
 }));
 
-export default function CreateButton() {
+export interface DropMenuProps extends React.PropsWithChildren<{}> {
+  menu: {
+    key: string;
+    title: React.ReactNode | string;
+    onClick: MouseEventHandler<HTMLButtonElement>;
+  }[];
+  position?: FloatingPosition;
+}
+
+export default function DropMenu(props: DropMenuProps) {
   const { classes } = useStyles();
-  const createClusterModal = useCreateClusterModal();
-  const mintSporeModal = useMintSporeModal();
+  const { menu, position, children } = props;
 
   return (
     <Menu
       width={180}
-      position="bottom"
+      position={position ?? "bottom"}
       trigger="hover"
       classNames={{
         dropdown: classes.dropdown,
@@ -65,15 +72,17 @@ export default function CreateButton() {
       withArrow
     >
       <Menu.Target>
-        <Button className={classes.create}>
-          <IconPlus />
-          <Text>Create</Text>
-        </Button>
+        {children}
       </Menu.Target>
 
       <Menu.Dropdown>
-        <Menu.Item onClick={mintSporeModal.open}>Mint a Spore</Menu.Item>
-        <Menu.Item onClick={createClusterModal.open}>Create a Cluster</Menu.Item>
+        {menu.map(({ key, title, onClick }) => {
+          return (
+            <Menu.Item key={key} onClick={onClick}>
+              {title}
+            </Menu.Item>
+          );
+        })}
       </Menu.Dropdown>
     </Menu>
   );

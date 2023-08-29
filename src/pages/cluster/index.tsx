@@ -8,9 +8,14 @@ import {
   Flex,
   createStyles,
   MediaQuery,
+  Title,
+  Switch,
 } from '@mantine/core';
 import ClusterGrid from '@/components/ClusterGrid';
 import Head from 'next/head';
+import { useMemo, useState } from 'react';
+import { isAnyoneCanPay, isSameScript } from '@/utils/script';
+import { useConnect } from '@/hooks/useConnect';
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -21,20 +26,31 @@ const useStyles = createStyles((theme) => ({
     borderBottomStyle: 'solid',
     backgroundImage: 'url(/images/noise-on-yellow.png)',
   },
-
   container: {
     position: 'relative',
   },
-
   illus: {
     position: 'absolute',
     right: '-330px',
     top: '-48px',
   },
+  track: {
+    backgroundColor: 'transparent !important',
+    borderWidth: '2px',
+    borderColor: theme.colors.brand[1] + '!important',
+    width: '40px',
+    height: '24px',
+    cursor: 'pointer',
+  },
+  thumb: {
+    backgroundColor: theme.colors.brand[1],
+  },
 }));
 
 export default function ClustersPage() {
   const { classes } = useStyles();
+  const { lock } = useConnect();
+  const [showMintableOnly, setShowMintableOnly] = useState(false);
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();
@@ -43,12 +59,22 @@ export default function ClustersPage() {
 
   const isLoading = isClusterLoading || isSporesLoading;
 
+  const displayClusters = useMemo(() => {
+    if (showMintableOnly) {
+      return clusters.filter(({ cell }) => {
+        return (
+          isAnyoneCanPay(cell.cellOutput.lock) ||
+          isSameScript(lock, cell.cellOutput.lock)
+        );
+      });
+    }
+    return clusters;
+  }, [clusters, showMintableOnly, lock]);
+
   return (
     <Layout>
       <Head>
-        <title>
-          All Clusters - Spore Demo
-        </title>
+        <title>All Clusters - Spore Demo</title>
       </Head>
       <Flex align="center" className={classes.banner}>
         <Container size="xl" mt="80px" className={classes.container}>
@@ -66,7 +92,6 @@ export default function ClustersPage() {
               src="/images/clusters-title.png"
               width="766"
               height="60"
-              layout="responsive"
               alt="Spore Demo"
             />
 
@@ -79,8 +104,21 @@ export default function ClustersPage() {
       <Container py="48px" size="xl">
         <Box mb="60px">
           <ClusterGrid
-            title="Explore All Clusters"
-            clusters={clusters}
+            title={
+              <Flex justify="space-between" align="center">
+                <Title order={3}>Explore All Clusters</Title>
+                <Switch
+                  size="16px"
+                  label="Only show Clusters I can mint"
+                  classNames={{ track: classes.track, thumb: classes.thumb }}
+                  checked={showMintableOnly}
+                  onChange={(event) =>
+                    setShowMintableOnly(event.currentTarget.checked)
+                  }
+                />
+              </Flex>
+            }
+            clusters={displayClusters}
             spores={spores}
             isLoading={isLoading}
           />

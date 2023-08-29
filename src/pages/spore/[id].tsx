@@ -170,7 +170,18 @@ export default function SporePage() {
                     <Title order={2} mr="3px">
                       {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
                     </Title>
-                    <IconCopy size="30px" />
+                    <Tooltip
+                      label={clipboard.copied ? 'Copied!' : 'Copy'}
+                      withArrow
+                    >
+                      <Flex
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() => clipboard.copy(spore!.id)}
+                        ml="3px"
+                      >
+                        <IconCopy size="30px" color={theme.colors.text[0]} />
+                      </Flex>
+                    </Tooltip>
                   </>
                 )}
               </Flex>
@@ -263,11 +274,10 @@ export default function SporePage() {
         {cluster && spores.length > 1 && (
           <Flex justify="space-between" mt="80px">
             {prevSporeIndex >= 0 ? (
-              <Box
-                sx={{ cursor: 'pointer' }}
-                onClick={() =>
-                  router.push(`/spore/${spores[prevSporeIndex].id}`)
-                }
+              <Link
+                href={`/spore/${spores[prevSporeIndex].id}`}
+                style={{ textDecoration: 'none' }}
+                prefetch
               >
                 <Image
                   src="/svg/icon-chevron-left.svg"
@@ -275,7 +285,7 @@ export default function SporePage() {
                   height="32"
                   alt="Previus Spore"
                 />
-              </Box>
+              </Link>
             ) : (
               <Box h="32px" w="32px" />
             )}
@@ -283,11 +293,10 @@ export default function SporePage() {
               {nextSporeIndex} / {spores.length}
             </Text>
             {nextSporeIndex < spores.length ? (
-              <Box
-                sx={{ cursor: 'pointer' }}
-                onClick={() =>
-                  router.push(`/spore/${spores[nextSporeIndex].id}`)
-                }
+              <Link
+                href={`/spore/${spores[nextSporeIndex].id}`}
+                style={{ textDecoration: 'none' }}
+                prefetch
               >
                 <Image
                   src="/svg/icon-chevron-right.svg"
@@ -295,7 +304,7 @@ export default function SporePage() {
                   height="32"
                   alt="Previus Spore"
                 />
-              </Box>
+              </Link>
             ) : (
               <Box h="32px" w="32px" />
             )}

@@ -14,7 +14,11 @@ import Logo from './Logo';
 import CreateButton from './CreateButton';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
+import { HTMLAttributeAnchorTarget, useMemo } from 'react';
+import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
+import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
+import DropMenu from './DropMenu';
+import { IconPlus } from '@tabler/icons-react';
 
 const useStyles = createStyles((theme) => ({
   connect: {
@@ -52,12 +56,19 @@ const useStyles = createStyles((theme) => ({
       backgroundImage: 'url(/svg/nav-indicator.svg)',
     },
   },
+  create: {
+    backgroundColor: theme.colors.brand[1],
+
+    '&:hover': {
+      backgroundColor: '#7F6BD1',
+    },
+  },
 }));
 
 type NavItem = {
   name: string;
   href: string;
-  paths?: string[];
+  target?: HTMLAttributeAnchorTarget;
   needConnect?: boolean;
 };
 
@@ -74,10 +85,12 @@ const NAVS: NavItem[] = [
   {
     name: 'What is Spore?',
     href: 'https://spore.pro',
+    target: '_blank',
   },
   {
     name: 'GitHub',
     href: 'https://github.com/sporeprotocol/spore-demo',
+    target: '_blank',
   },
 ];
 
@@ -85,6 +98,9 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
   const { classes } = useStyles();
   const { connected, connect } = useConnect();
   const router = useRouter();
+
+  const createClusterModal = useCreateClusterModal();
+  const mintSporeModal = useMintSporeModal();
 
   const navs = useMemo(() => {
     if (!connected) {
@@ -116,6 +132,7 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
                     <Link
                       key={nav.name}
                       href={nav.href}
+                      target={nav.target}
                       style={{ textDecoration: 'none' }}
                     >
                       <Text
@@ -134,7 +151,25 @@ export default function Layout({ children }: React.PropsWithChildren<{}>) {
               <Grid.Col span={2}>
                 <Flex justify="end">
                   {connected ? (
-                    <CreateButton />
+                    <DropMenu
+                      menu={[
+                        {
+                          key: 'mint-spore',
+                          title: 'Mint a Spore',
+                          onClick: mintSporeModal.open,
+                        },
+                        {
+                          key: 'create-cluster',
+                          title: 'Create a Cluster',
+                          onClick: createClusterModal.open,
+                        },
+                      ]}
+                    >
+                      <Button className={classes.create}>
+                        <IconPlus />
+                        <Text>Create</Text>
+                      </Button>
+                    </DropMenu>
                   ) : (
                     <Button className={classes.connect} onClick={connect}>
                       Connect Wallet

@@ -47,6 +47,16 @@ const baseTheme: MantineThemeOverride = {
         fontWeight: 'bold',
         lineHeight: 1.3,
       },
+      h4: {
+        fontSize: '20px',
+        fontWeight: 'bold',
+        lineHeight: 1.3,
+      },
+      h5: {
+        fontSize: '18px',
+        fontWeight: 'bold',
+        lineHeight: 1.3,
+      },
     },
   },
 };
