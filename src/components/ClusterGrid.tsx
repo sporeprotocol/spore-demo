@@ -4,6 +4,7 @@ import { Box, Flex, SimpleGrid, Title } from '@mantine/core';
 import ClusterCard, { ClusterSkeletonCard } from './ClusterCard';
 import EmptyPlaceholder from './EmptyPlaceholder';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
+import { useRouter } from 'next/router';
 
 export interface ClusterGridProps {
   title: string | JSX.Element;
@@ -14,15 +15,27 @@ export interface ClusterGridProps {
 
 export default function ClusterGrid(props: ClusterGridProps) {
   const { title, clusters, spores, isLoading } = props;
+  const router = useRouter();
   const createClusterModal = useCreateClusterModal();
 
   if (!isLoading && clusters.length === 0) {
+    if (router.pathname === '/my') {
+      return (
+        <EmptyPlaceholder
+          title="Cluster Creations Await"
+          description="Start your imaginative journey by creating Clusters"
+          submitLabel="Create Cluster"
+          onClick={createClusterModal.open}
+        />
+      );
+    }
+
     return (
       <EmptyPlaceholder
-        title="Cluster Creations Await"
-        description="Start your imaginative journey by creating Clusters"
-        submitLabel="Create Cluster"
-        onClick={createClusterModal.open}
+        title="No Clusters Found"
+        description="This user hasn’t minted any spores yet. Feel free to discover a world of creativity elsewhere!"
+        submitLabel="Explore"
+        onClick={() => router.push('/')}
       />
     );
   }

@@ -11,7 +11,6 @@ import {
 } from '@mantine/core';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
-import CreateButton from './CreateButton';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { HTMLAttributeAnchorTarget, useMemo } from 'react';

@@ -144,7 +144,13 @@ export default function ClusterPage() {
                             px="md"
                             sx={{ borderRadius: '20px' }}
                           >
-                            <Title order={5}>Public</Title>
+                            <Title
+                              order={5}
+                              color="text.0"
+                              style={{ cursor: 'default' }}
+                            >
+                              Public
+                            </Title>
                           </Flex>
                         </Tooltip>
                       ) : (
@@ -159,7 +165,13 @@ export default function ClusterPage() {
                             px="md"
                             sx={{ borderRadius: '20px' }}
                           >
-                            <Title order={5}>Private</Title>
+                            <Title
+                              order={5}
+                              color="text.0"
+                              style={{ cursor: 'default' }}
+                            >
+                              Private
+                            </Title>
                           </Flex>
                         </Tooltip>
                       )}

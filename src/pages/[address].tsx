@@ -84,7 +84,7 @@ export default function AccountPage() {
   const router = useRouter();
   const { address } = router.query;
   const theme = useMantineTheme();
-  const [showSpores, setShowSpores] = useState(false);
+  const [showSpores, setShowSpores] = useState(true);
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spores = [], isLoading: isSporesLoading } =
@@ -156,16 +156,16 @@ export default function AccountPage() {
         <Flex justify="center" mb="48px">
           <Group spacing={0} className={classes.buttonGroup}>
             <Button
-              className={cx(classes.button, { [classes.active]: !showSpores })}
-              onClick={() => setShowSpores(false)}
-            >
-              Clusters
-            </Button>
-            <Button
               className={cx(classes.button, { [classes.active]: showSpores })}
               onClick={() => setShowSpores(true)}
             >
               Spores
+            </Button>
+            <Button
+              className={cx(classes.button, { [classes.active]: !showSpores })}
+              onClick={() => setShowSpores(false)}
+            >
+              Clusters
             </Button>
           </Group>
         </Flex>

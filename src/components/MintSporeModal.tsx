@@ -67,6 +67,10 @@ const useStyles = createStyles((theme) => ({
       borderBottomLeftRadius: '0px',
       borderWidth: '2px',
     },
+
+    '.mantine-Select-item[data-hovered]': {
+      backgroundColor: theme.colors.background[0],
+    },
   },
   input: {
     height: '50px',
@@ -89,13 +93,17 @@ const useStyles = createStyles((theme) => ({
     },
   },
   dropdown: {
-    top: '118px !important',
+    marginTop: '-10px',
     borderTopLeftRadius: '0px',
     borderTopRightRadius: '0px',
     borderColor: theme.colors.brand[1],
     borderWidth: '2px',
     borderBottomLeftRadius: '6px',
     borderBottomRightRadius: '6px',
+
+    '.mantine-Select-item': {
+      fontSize: '16px',
+    },
   },
   dropzone: {
     width: '616px',
