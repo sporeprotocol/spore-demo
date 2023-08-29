@@ -69,7 +69,13 @@ const useStyles = createStyles((theme) => ({
     },
 
     '.mantine-Select-item[data-hovered]': {
+      backgroundColor: theme.fn.rgba('#1A202C', 0.08),
+      color: theme.colors.text[0],
+    },
+
+    '.mantine-Select-item[data-selected]': {
       backgroundColor: theme.colors.background[0],
+      color: theme.colors.text[0],
     },
   },
   input: {

@@ -17,40 +17,48 @@ import { useMemo, useState } from 'react';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
 
-const useStyles = createStyles((theme) => ({
-  banner: {
-    height: '280px',
-    overflowY: 'hidden',
-    borderBottomWidth: '2px',
-    borderBottomColor: theme.colors.text[0],
-    borderBottomStyle: 'solid',
-    backgroundImage: 'url(/images/noise-on-yellow.png)',
-  },
-  container: {
-    position: 'relative',
-  },
-  illus: {
-    position: 'absolute',
-    right: '-330px',
-    top: '-48px',
-  },
-  track: {
-    backgroundColor: 'transparent !important',
-    borderWidth: '2px',
-    borderColor: theme.colors.brand[1] + '!important',
-    width: '40px',
-    height: '24px',
-    cursor: 'pointer',
-  },
-  thumb: {
-    backgroundColor: theme.colors.brand[1],
-  },
-}));
+const useStyles = createStyles(
+  (theme, params: { showMintableOnly: boolean }) => ({
+    banner: {
+      height: '280px',
+      overflowY: 'hidden',
+      borderBottomWidth: '2px',
+      borderBottomColor: theme.colors.text[0],
+      borderBottomStyle: 'solid',
+      backgroundImage: 'url(/images/noise-on-yellow.png)',
+    },
+    container: {
+      position: 'relative',
+    },
+    illus: {
+      position: 'absolute',
+      right: '-330px',
+      top: '-48px',
+    },
+    track: {
+      backgroundColor: 'transparent !important',
+      borderWidth: '2px',
+      borderColor:
+        (params.showMintableOnly
+          ? theme.colors.brand[1]
+          : theme.colors.text[2]) + '!important',
+      width: '40px',
+      height: '24px',
+      cursor: 'pointer',
+    },
+    thumb: {
+      backgroundColor:
+        (params.showMintableOnly
+          ? theme.colors.brand[1]
+          : theme.colors.text[2]) + '!important',
+    },
+  }),
+);
 
 export default function ClustersPage() {
-  const { classes } = useStyles();
   const { lock } = useConnect();
   const [showMintableOnly, setShowMintableOnly] = useState(false);
+  const { classes } = useStyles({ showMintableOnly });
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();

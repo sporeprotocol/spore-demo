@@ -43,6 +43,12 @@ const useStyles = createStyles((theme) => ({
       borderRadius: '16px',
     },
   },
+  description: {
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+  },
   section: {
     borderBottomWidth: '1px',
     borderBottomColor: theme.colors.text[0],
@@ -106,6 +112,7 @@ export function ClusterSkeletonCard() {
 
 export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
   const { classes } = useStyles();
+  const theme = useMantineTheme();
   const cols = spores.length >= 4 ? 2 : 1;
   const { lock } = useConnect();
   const [hovered, { close, open }] = useDisclosure(false);
@@ -173,7 +180,12 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
                 {cluster.name}
               </Title>
             </Flex>
-            <Text mb="8px" size="sm" color="text.1">
+            <Text
+              className={classes.description}
+              mb="8px"
+              size="sm"
+              color="text.1"
+            >
               {cluster.description}
             </Text>
             <Text color="text.0">{spores.length} Spores</Text>
@@ -208,7 +220,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
               ]}
             >
               <Flex align="center" sx={{ cursor: 'pointer' }}>
-                <IconDotsVertical size="20px" color="white" />
+                <IconDotsVertical size="20px" color={theme.colors.text[0]} />
               </Flex>
             </DropMenu>
           </Flex>
