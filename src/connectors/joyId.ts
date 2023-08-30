@@ -10,20 +10,16 @@ import CKBConnector from './base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import { common } from '@ckb-lumos/common-scripts';
 
-const JOY_ID_URL = 'https://app.joyid.dev';
-const JOY_ID_SERVER_URL = 'https://api.joyid.dev';
-
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
 
   constructor() {
     super();
-    this.enable = false;
 
     initConfig({
       name: 'Spore Demo',
-      joyidAppURL: JOY_ID_URL,
-      joyidServerURL: JOY_ID_SERVER_URL,
+      joyidAppURL: process.env.JOY_ID_URL,
+      joyidServerURL: process.env.JOY_ID_SERVER_URL,
     });
   }
 
