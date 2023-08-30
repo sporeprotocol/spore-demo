@@ -8,7 +8,7 @@ import { trpc } from '@/server';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
-import { showNotifaction } from '@/utils/notifications';
+import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 
 export default function useMintSporeModal(id?: string) {
@@ -65,7 +65,7 @@ export default function useMintSporeModal(id?: string) {
         toLock: lock,
         config: predefinedSporeConfigs.Aggron4,
       });
-      showNotifaction('Spore minted!', () => {
+      showSuccess('Spore minted!', () => {
         router.push(`/spore/${spore?.cellOutput.type?.args}`);
       });
       close();

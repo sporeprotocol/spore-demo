@@ -7,7 +7,7 @@ import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
-import { showNotifaction } from '@/utils/notifications';
+import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 
 export default function useCreateClusterModal() {
@@ -52,7 +52,7 @@ export default function useCreateClusterModal() {
         config: predefinedSporeConfigs.Aggron4,
       });
 
-      showNotifaction('Cluster Created!', () => {
+      showSuccess('Cluster Created!', () => {
         router.push(`/cluster/${cluster?.cellOutput.type?.args}`);
       });
       modals.close(modalId);

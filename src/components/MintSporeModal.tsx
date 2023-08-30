@@ -4,6 +4,7 @@ import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
+import { showError } from '@/utils/notifications';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -23,7 +24,6 @@ import {
 } from '@mantine/core';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useDisclosure } from '@mantine/hooks';
-import { notifications } from '@mantine/notifications';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useState, useCallback, forwardRef, useRef, useMemo } from 'react';
 
@@ -297,12 +297,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           classNames={{ root: classes.dropzone }}
           accept={IMAGE_MIME_TYPE}
           onReject={() => {
-            notifications.show({
-              color: 'red',
-              title: 'Error!',
-              message:
-                'Only image files are supported, and the size cannot exceed 300KB.',
-            });
+            showError(
+              `Only image files are supported, and the size cannot exceed ${MAX_SIZE_LIMIT}KB.`,
+            );
           }}
           maxSize={MAX_SIZE_LIMIT * 1000}
         >

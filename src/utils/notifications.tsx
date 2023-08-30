@@ -15,32 +15,59 @@ const styles: Parameters<(typeof notifications)['show']>[0]['styles'] = (
   },
 });
 
-export function showNotifaction(message: string, onClick?: () => void) {
+interface CustonMessageProps {
+  icon: string;
+  message: string;
+  onClick?: () => Promise<void> | void;
+}
+
+const CustonMessage = (props: CustonMessageProps) => {
+  const { icon, message, onClick } = props;
+  return (
+    <Flex justify="space-between">
+      <Flex align="center">
+        <Box mr="8px">
+          <Image src={icon} width="24" height="24" alt="notification" />
+        </Box>
+        <Text size="lg" weight="700">
+          {message}
+        </Text>
+      </Flex>
+      <Flex align="center" sx={{ cursor: 'pointer' }} onClick={onClick}>
+        {!!onClick && (
+          <Text weight="600" color="brand.1">
+            View Details
+          </Text>
+        )}
+      </Flex>
+    </Flex>
+  );
+};
+
+export function showSuccess(message: string, onClick?: () => void) {
   notifications.show({
     color: 'brand.0',
     message: (
-      <Flex justify="space-between">
-        <Flex align="center">
-          <Box mr="8px">
-            <Image
-              src="/svg/icon-check-circle.svg"
-              width="24"
-              height="24"
-              alt="notification"
-            />
-          </Box>
-          <Text size="lg" weight="700">
-            {message}
-          </Text>
-        </Flex>
-        <Flex align="center" sx={{ cursor: 'pointer' }} onClick={onClick}>
-          {onClick && (
-            <Text weight="600" color="brand.1">
-              View Details
-            </Text>
-          )}
-        </Flex>
-      </Flex>
+      <CustonMessage
+        icon="/svg/icon-check-circle.svg"
+        message={message}
+        onClick={onClick}
+      />
+    ),
+    withCloseButton: false,
+    styles: styles,
+  });
+}
+
+export function showError(message: string, onClick?: () => void) {
+  notifications.show({
+    color: 'brand.0',
+    message: (
+      <CustonMessage
+        icon="/svg/icon-x-circle.svg"
+        message={message}
+        onClick={onClick}
+      />
     ),
     withCloseButton: false,
     styles: styles,

@@ -132,7 +132,7 @@ export default function ClustersPage() {
                 <Title order={3}>Explore All Clusters</Title>
                 <Switch
                   size="16px"
-                  label="Only show Clusters I can mint"
+                  label="Only show Clusters I can mint into"
                   classNames={{ track: classes.track, thumb: classes.thumb }}
                   checked={showMintableOnly}
                   onChange={(event) =>

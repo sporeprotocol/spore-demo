@@ -44,8 +44,9 @@ export default abstract class CKBConnector {
 
   protected getLockFromAddress(): Script {
     const { address } = this.getData();
-    config.initializeConfig(config.predefined.AGGRON4);
-    return helpers.parseAddress(address);
+    return helpers.parseAddress(address, {
+      config: config.predefined.AGGRON4,
+    });
   }
 
   abstract connect(): Promise<void>;

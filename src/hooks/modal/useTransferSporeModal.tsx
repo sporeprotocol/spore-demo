@@ -1,5 +1,5 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { helpers } from '@ckb-lumos/lumos';
+import { config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -11,7 +11,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
-import { showNotifaction } from '@/utils/notifications';
+import { showSuccess } from '@/utils/notifications';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();
@@ -43,22 +43,16 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       if (!address || !values.to || !spore) {
         return;
       }
-      try {
-        await transferSporeMutation.mutateAsync({
-          outPoint: spore.cell.outPoint!,
-          fromInfos: [address],
-          toLock: helpers.parseAddress(values.to),
-          config: predefinedSporeConfigs.Aggron4,
-        });
-        showNotifaction('Spore Transferred!');
-        modals.close(modalId);
-      } catch (e) {
-        notifications.show({
-          color: 'red',
-          title: 'Error!',
-          message: (e as Error).message,
-        });
-      }
+      await transferSporeMutation.mutateAsync({
+        outPoint: spore.cell.outPoint!,
+        fromInfos: [address],
+        toLock: helpers.parseAddress(values.to, {
+          config: config.predefined.AGGRON4,
+        }),
+        config: predefinedSporeConfigs.Aggron4,
+      });
+      showSuccess('Spore Transferred!');
+      modals.close(modalId);
     },
     [address, spore, transferSporeMutation, modalId],
   );

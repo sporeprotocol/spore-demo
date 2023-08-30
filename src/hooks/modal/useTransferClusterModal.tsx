@@ -2,7 +2,7 @@ import {
   predefinedSporeConfigs,
   transferCluster as _transferCluster,
 } from '@spore-sdk/core';
-import { helpers } from '@ckb-lumos/lumos';
+import { config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -13,7 +13,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
-import { showNotifaction } from '@/utils/notifications';
+import { showSuccess } from '@/utils/notifications';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
@@ -47,10 +47,10 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         outPoint: cluster.cell.outPoint!,
         useCapacityMarginAsFee: false,
         fromInfos: [address],
-        toLock: helpers.parseAddress(values.to),
+        toLock: helpers.parseAddress(values.to, { config: config.predefined.AGGRON4 }),
         config: predefinedSporeConfigs.Aggron4,
       });
-      showNotifaction('Cluster Transferred!')
+      showSuccess('Cluster Transferred!')
       modals.close(modalId);
     },
     [address, cluster, transferClusterMutation, modalId],

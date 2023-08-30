@@ -145,7 +145,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
             loading={loading}
             disabled={!form.values['name'] || !form.values['description']}
           >
-            Submit
+            Create
           </Button>
         </Group>
       </form>
