@@ -16,6 +16,7 @@ import Head from 'next/head';
 import { useMemo, useState } from 'react';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
+import groupBy from 'lodash-es/groupBy';
 
 const useStyles = createStyles(
   (theme, params: { showMintableOnly: boolean }) => ({
@@ -67,17 +68,31 @@ export default function ClustersPage() {
 
   const isLoading = isClusterLoading || isSporesLoading;
 
+  const sortedClusters = useMemo(() => {
+    const sporesByCluster = groupBy(spores, (spore) => spore.clusterId);
+    const ordererClustersId = Object.entries(sporesByCluster)
+      .sort(([, aSpores], [_, bSpores]) => aSpores.length - bSpores.length)
+      .map(([clusterId]) => clusterId);
+
+    return clusters
+      .sort((a, b) => {
+        const aIndex = ordererClustersId.indexOf(a.id) ?? 0;
+        const bIndex = ordererClustersId.indexOf(b.id) ?? 0;
+        return bIndex - aIndex;
+      })
+  }, [clusters, spores]);
+
   const displayClusters = useMemo(() => {
     if (showMintableOnly) {
-      return clusters.filter(({ cell }) => {
+      return sortedClusters.filter(({ cell }) => {
         return (
           isAnyoneCanPay(cell.cellOutput.lock) ||
           isSameScript(lock, cell.cellOutput.lock)
         );
       });
     }
-    return clusters;
-  }, [clusters, showMintableOnly, lock]);
+    return sortedClusters;
+  }, [sortedClusters, showMintableOnly, lock]);
 
   return (
     <Layout>

@@ -1,13 +1,10 @@
-import ClusterCard, { ClusterSkeletonCard } from '@/components/ClusterCard';
 import Layout from '@/components/Layout';
-import SporeCard, { SporeSkeletonCard } from '@/components/SporeCard';
 import { trpc } from '@/server';
 import {
   Text,
   Box,
   Container,
   Flex,
-  SimpleGrid,
   Title,
   createStyles,
   MediaQuery,
