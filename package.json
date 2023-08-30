@@ -10,7 +10,11 @@
     "analyze": "cross-env SKIP_BUILD_STATIC_GENERATION=true ANALYZE=true next build"
   },
   "dependencies": {
-    "@ckb-lumos/lumos": "^0.21.0-next.0 ",
+    "@ckb-lumos/lumos": "^0.21.0-next.0",
+    "@ckb-lumos/codec": "^0.21.0-next.0",
+    "@ckb-lumos/base": "^0.21.0-next.0",
+    "@ckb-lumos/helpers": "^0.21.0-next.0",
+    "@ckb-lumos/common-scripts": "^0.21.0-next.0",
     "@emotion/react": "^11.11.1",
     "@hapi/boom": "^10.0.1",
     "@joyid/ckb": "^0.0.1",
