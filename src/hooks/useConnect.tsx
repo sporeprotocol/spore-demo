@@ -29,8 +29,7 @@ export const useConnect = () => {
 
   const lock = useMemo(() => {
     if (!address) return undefined;
-    config.initializeConfig(config.predefined.AGGRON4);
-    return helpers.parseAddress(address);
+    return helpers.parseAddress(address, { config: config.predefined.AGGRON4 });
   }, [address]);
 
   const connector = useMemo(

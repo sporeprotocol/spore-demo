@@ -55,7 +55,9 @@ export default class MetaMaskConnector extends CKBConnector {
     const lock = commons.omnilock.createOmnilockScript({
       auth: { flag: 'ETHEREUM', content: account ?? '0x' },
     });
-    const address = helpers.encodeToAddress(lock);
+    const address = helpers.encodeToAddress(lock, {
+      config: config.predefined.AGGRON4,
+    });
     this.setData({
       address,
       connectorType: this.type.toLowerCase(),
