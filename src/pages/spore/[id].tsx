@@ -28,7 +28,7 @@ import { useMemo } from 'react';
 import Head from 'next/head';
 import { useClipboard } from '@mantine/hooks';
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
   image: {
     borderRadius: '8px',
     borderColor: theme.colors.text[0],
@@ -36,6 +36,7 @@ const useStyles = createStyles((theme) => ({
     borderWidth: '1px',
     boxShadow: '4px 4px 0 #111318',
     backgroundColor: theme.colors.background[1],
+    imageRendering: params?.pixelated ? 'pixelated' : 'auto',
   },
   button: {
     boxShadow: 'none !important',
@@ -66,12 +67,14 @@ const useStyles = createStyles((theme) => ({
 export default function SporePage() {
   const router = useRouter();
   const { id } = router.query;
-  const { classes, cx } = useStyles();
   const theme = useMantineTheme();
   const { address } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
+  const capacity = useMemo(() => BI.from(spore?.cell.cellOutput.capacity ?? 0).toNumber(), [spore]);
+  const { classes, cx } = useStyles({ pixelated: capacity < 10_000 * (10 ** 8) });
+
   const { data: cluster } = trpc.cluster.get.useQuery(
     { id: spore?.clusterId ?? undefined },
     { enabled: !!spore?.clusterId },

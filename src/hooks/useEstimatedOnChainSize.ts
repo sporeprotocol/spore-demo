@@ -31,13 +31,20 @@ export default function useEstimatedOnChainSize(
           config: predefinedSporeConfigs.Aggron4,
         });
 
-        const inputs = txSkeleton.get('inputs');
-        const capacity = inputs
-          .filter((input) => isSameScript(input.cellOutput.lock, lock))
-          .reduce((sum, input) => {
-            return sum.add(BI.from(input.cellOutput.capacity));
-          }, BI.from(0));
+        const outputs = txSkeleton.get('outputs');
+        const cell = outputs
+          .filter((output) => isSameScript(output.cellOutput.lock, lock))
+          .find((output) => {
+            const { type } = output.cellOutput;
+            const { script: sporeScript } =
+              predefinedSporeConfigs.Aggron4.scripts.Spore;
+            return (
+              type?.codeHash === sporeScript.codeHash &&
+              type.hashType === sporeScript.hashType
+            );
+          });
 
+        const capacity = BI.from(cell?.cellOutput.capacity ?? 0);
         return Math.ceil(capacity.toNumber() / 10 ** 8);
       } catch (error) {
         return Math.ceil(content.size);

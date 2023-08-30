@@ -12,7 +12,7 @@ import {
   useMantineTheme,
   Title,
 } from '@mantine/core';
-import { useDisclosure, useHover } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { IconDotsVertical } from '@tabler/icons-react';
 import Link from 'next/link';
 import Skeleton from 'react-loading-skeleton';
@@ -29,7 +29,7 @@ export interface SporeCardProps {
   spore: Spore;
 }
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
   card: {
     borderRadius: '8px',
     borderWidth: '1px',
@@ -42,6 +42,12 @@ const useStyles = createStyles((theme) => ({
     '&:hover': {
       borderRadius: '16px',
     },
+  },
+  image: {
+    imageRendering: params?.pixelated ? 'pixelated' : 'auto',
+  },
+  figure: {
+    width: '100%'
   },
   skeleton: {
     height: '100%',
@@ -57,7 +63,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export function SporeSkeletonCard() {
-  const { classes } = useStyles();
+  const { classes } = useStyles({ pixelated: false });
   const theme = useMantineTheme();
 
   return (
@@ -101,7 +107,8 @@ export function SporeSkeletonCard() {
 }
 
 export default function SporeCard({ cluster, spore }: SporeCardProps) {
-  const { classes } = useStyles();
+  const capacity = useMemo(() => BI.from(spore.cell.cellOutput.capacity ?? 0).toNumber(), [spore]);
+  const { classes } = useStyles({ pixelated: capacity < 10_000 * (10 ** 8) });
   const [hovered, { close, open }] = useDisclosure(false);
   const { lock } = useConnect();
 
@@ -127,7 +134,14 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
         <Card p={0} className={classes.card}>
           <Card.Section px="md" pt="md">
             <AspectRatio ratio={1} bg="#F4F5F9">
-              <Image alt={spore.id} src={`/api/v1/media/${spore.id}`} />
+              <Image
+                alt={spore.id}
+                src={`/api/v1/media/${spore.id}`}
+                classNames={{
+                  image: classes.image,
+                  figure: classes.figure,
+                }}
+              />
             </AspectRatio>
           </Card.Section>
           <Box p="24px">
