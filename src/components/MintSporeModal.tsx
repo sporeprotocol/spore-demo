@@ -41,7 +41,7 @@ export interface MintSporeModalProps {
   ) => Promise<void>;
 }
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
   create: {
     position: 'absolute',
     bottom: '0px',
@@ -128,6 +128,7 @@ const useStyles = createStyles((theme) => ({
   image: {
     width: '616px',
     height: '260px',
+    imageRendering: params?.pixelated ? 'pixelated' : 'auto',
   },
   change: {
     height: '48px',
@@ -161,7 +162,7 @@ const DropdownContainer: React.ForwardRefRenderFunction<
   any,
   React.PropsWithChildren<{}>
 > = (props, ref) => {
-  const { classes } = useStyles();
+  const { classes } = useStyles({ pixelated: false });
   const { children, ...restProps } = props;
   const createClusterModal = useCreateClusterModal();
 
@@ -178,7 +179,6 @@ const DropdownContainerRef = forwardRef(DropdownContainer);
 
 export default function MintSporeModal(props: MintSporeModalProps) {
   const { defaultClusterId, clusters, onSubmit } = props;
-  const { classes } = useStyles();
   const theme = useMantineTheme();
   const { address } = useConnect();
   const [hovered, setHovered] = useState(false);
@@ -192,6 +192,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const onChainSize = useEstimatedOnChainSize(clusterId, content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { classes } = useStyles({ pixelated: (content?.size ?? 0) < 10_000 });
 
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
   const balance = useMemo(() => {
