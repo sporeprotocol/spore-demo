@@ -6,7 +6,6 @@ import { config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
 import { useConnect } from '../useConnect';
 import { Cluster } from '@/cluster';
 import { sendTransaction } from '@/utils/transaction';

@@ -8,12 +8,18 @@ export default trpcNext.createNextApiHandler({
   batching: {
     enabled: true,
   },
-  // responseMeta() {
-  //   const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
-  //   return {
-  //     headers: {
-  //       'cache-control': `s-maxage=1, stale-while-revalidate=${ONE_DAY_IN_SECONDS}`,
-  //     },
-  //   };
-  // },
+  responseMeta: (opts) => {
+    const { errors, type } = opts;
+    const allOk = errors.length === 0;
+    const isQuery = type === 'query';
+
+    if (allOk && isQuery) {
+      return {
+        headers: {
+          'cache-control': `s-maxage=1, stale-while-revalidate`,
+        },
+      };
+    }
+    return {};
+  },
 });

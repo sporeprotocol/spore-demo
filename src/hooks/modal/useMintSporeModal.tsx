@@ -19,8 +19,12 @@ export default function useMintSporeModal(id?: string) {
 
   const { data: clusters = [] } = trpc.cluster.list.useQuery();
   const { refetch } = trpc.spore.list.useQuery(
-    { clusterId: id },
-    { enabled: false },
+    {
+      clusterId: id,
+    },
+    {
+      enabled: false,
+    },
   );
 
   const selectableClusters = useMemo(() => {
@@ -45,7 +49,9 @@ export default function useMintSporeModal(id?: string) {
   );
 
   const addSporeMutation = useMutation(addSpore, {
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      refetch();
+    },
   });
 
   const handleSubmit = useCallback(

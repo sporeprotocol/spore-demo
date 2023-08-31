@@ -23,6 +23,7 @@ export const sporeRouter = router({
         .object({
           clusterId: z.string().optional(),
           owner: z.string().optional(),
+          forceUpdate: z.boolean().optional(),
         })
         .optional(),
     )
@@ -37,5 +38,5 @@ export const sporeRouter = router({
       });
       const spores = await SporeService.shared.listByLock(lock, clusterId);
       return spores;
-    }),
+    })
 });

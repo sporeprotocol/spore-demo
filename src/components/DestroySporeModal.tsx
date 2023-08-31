@@ -15,10 +15,10 @@ const useStyles = createStyles((theme) => ({
     backgroundColor: 'transparent !important',
     border: 'none !important',
     boxShadow: 'none !important',
+  },
 
-    '.mantine-Button-label': {
-      color: `${theme.colors.brand[1]}`,
-    },
+  label: {
+    color: `${theme.colors.brand[1]} !important`,
   },
 
   destory: {
@@ -66,7 +66,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
       <Flex direction="row" justify="flex-end">
         <Group>
           <Button
-            className={classes.cancel}
+            classNames={{ root: classes.cancel, label: classes.label }}
             onClick={onClose}
             disabled={loading}
           >
