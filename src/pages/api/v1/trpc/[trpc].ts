@@ -8,7 +8,8 @@ export default trpcNext.createNextApiHandler({
   batching: {
     enabled: true,
   },
-  responseMeta: ({ type, errors }) => {
+  responseMeta: (opts) => {
+    const { errors, type } = opts;
     const allOk = errors.length === 0;
     const isQuery = type === 'query';
 

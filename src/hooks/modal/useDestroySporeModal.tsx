@@ -5,7 +5,6 @@ import {
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
 import { useRouter } from 'next/router';
 import { useConnect } from '../useConnect';
 import { Spore } from '@/spore';
@@ -37,7 +36,9 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
   );
 
   const destroySporeMutation = useMutation(destroySpore, {
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      refetch();
+    },
   });
 
   const handleSubmit = useCallback(async () => {
@@ -51,7 +52,9 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
     });
     showSuccess('Spore destroyed!')
     modals.close(modalId);
-    router.back();
+    if (router.pathname.startsWith('/spore')) {
+      router.back();
+    }
   }, [address, spore, destroySporeMutation, router, modalId]);
 
   useEffect(() => {

@@ -106,10 +106,9 @@ const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
     borderWidth: '2px',
     borderBottomLeftRadius: '6px',
     borderBottomRightRadius: '6px',
-
-    '.mantine-Select-item': {
-      fontSize: '16px',
-    },
+  },
+  dropdownItem: {
+    fontSize: '16px',
   },
   dropzone: {
     width: '616px',
@@ -246,6 +245,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           root: classes.select,
           input: classes.input,
           dropdown: classes.dropdown,
+          item: classes.dropdownItem,
         }}
         data={clusters.map(({ id, name }) => ({
           value: id,

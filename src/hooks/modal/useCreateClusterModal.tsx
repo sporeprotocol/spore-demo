@@ -16,7 +16,9 @@ export default function useCreateClusterModal() {
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const modalId = useId();
 
-  const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+  const { refetch } = trpc.cluster.list.useQuery(undefined, {
+    enabled: false,
+  });
 
   const addCluster = useCallback(
     async (...args: Parameters<typeof createCluster>) => {
@@ -31,7 +33,9 @@ export default function useCreateClusterModal() {
   );
 
   const addClusterMutation = useMutation(addCluster, {
-    onSuccess: () => refetch(),
+    onSuccess: () => {
+      refetch();
+    },
   });
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
