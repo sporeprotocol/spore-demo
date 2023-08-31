@@ -27,6 +27,31 @@ import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import { useMemo } from 'react';
 import Head from 'next/head';
 import { useClipboard } from '@mantine/hooks';
+import { SporeOpenGraph } from '@/components/OpenGraph';
+import { GetStaticPaths, GetStaticPropsContext } from 'next';
+import SporeService from '@/spore';
+
+export async function getStaticProps(
+  context: GetStaticPropsContext<{ id: string }>,
+) {
+  const id = context.params?.id as string;
+  return {
+    props: {
+      id,
+    },
+  };
+}
+export const getStaticPaths: GetStaticPaths = async () => {
+  const spores = await SporeService.shared.list();
+  return {
+    paths: spores.map((spore) => ({
+      params: {
+        id: spore.id,
+      },
+    })),
+    fallback: 'blocking',
+  };
+};
 
 const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
   image: {
@@ -115,6 +140,7 @@ export default function SporePage() {
       <Head>
         <title>Spore: {id} - Spore Demo</title>
       </Head>
+      <SporeOpenGraph id={id as string} />
       <Container size="xl" py="48px" mt="80px">
         {cluster ? (
           <Link
