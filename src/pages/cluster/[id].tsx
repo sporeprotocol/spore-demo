@@ -28,6 +28,31 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
+import { ClusterOpenGraph } from '@/components/OpenGraph';
+import { GetStaticPaths, GetStaticPropsContext } from 'next';
+import ClusterService from '@/cluster';
+
+export async function getStaticProps(
+  context: GetStaticPropsContext<{ id: string }>,
+) {
+  const id = context.params?.id as string;
+  return {
+    props: {
+      id,
+    },
+  };
+}
+export const getStaticPaths: GetStaticPaths = async () => {
+  const clusters = await ClusterService.shared.list();
+  return {
+    paths: clusters.map((cluster) => ({
+      params: {
+        id: cluster.id,
+      },
+    })),
+    fallback: 'blocking',
+  };
+};
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -74,8 +99,9 @@ export default function ClusterPage() {
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
-  const { data: spores } =
-    trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
+  const { data: spores } = trpc.spore.list.useQuery({ clusterId: id } as {
+    clusterId: string;
+  });
 
   const mintSporeModal = useMintSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);
@@ -101,6 +127,7 @@ export default function ClusterPage() {
       <Head>
         <title>Cluster: {id} - Spore Demo</title>
       </Head>
+      <ClusterOpenGraph id={id as string} />
       <Flex align="center" className={classes.header}>
         <Container w="100%" size="xl" mt="80px">
           <Grid>

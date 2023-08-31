@@ -14,6 +14,7 @@ import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
 import { cache } from '@/utils/cache';
+import { GlobalOpenGraph } from '@/components/OpenGraph';
 
 function StateProvider({
   children,
@@ -76,37 +77,6 @@ function UIProvider({ children }: React.PropsWithChildren<{}>) {
   );
 }
 
-function SEO() {
-  return (
-    <DefaultSeo
-      title="Spore Demo"
-      description="A Spore Protocol Demo, based on Next.js + React + Spore SDK."
-      themeColor={theme.colors!.brand![0]}
-      openGraph={{
-        type: 'website',
-        locale: 'en',
-        url: 'https://spore-demo.vercel.app',
-        siteName: 'Spore Demo',
-        title: 'Spore Demo',
-        description:
-          'A Spore Protocol Demo, based on Next.js + React + Spore SDK.',
-        images: [
-          {
-            url: '/images/og.png',
-            width: 400,
-            height: 320,
-            alt: 'Spore Demo',
-            type: 'image/png',
-          },
-        ],
-      }}
-      twitter={{
-        cardType: 'summary_large_image',
-      }}
-    />
-  );
-}
-
 const config = {
   autoConnect: true,
   connectors: [new MetaMaskConnector(), new JoyIdConnector()],
@@ -131,7 +101,7 @@ function App({ Component, pageProps }: AppProps) {
         <ConnectProvider value={config}>
           <StateProvider pageProps={pageProps}>
             <UIProvider>
-              <SEO />
+              <GlobalOpenGraph />
               <Component {...pageProps} />
             </UIProvider>
           </StateProvider>
