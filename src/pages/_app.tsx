@@ -13,6 +13,7 @@ import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
+import { rtlCache } from '@/utils/cache';
 
 function StateProvider({
   children,
@@ -87,7 +88,8 @@ function SEO() {
         url: 'https://spore-demo.vercel.app',
         siteName: 'Spore Demo',
         title: 'Spore Demo',
-        description: 'A Spore Protocol Demo, based on Next.js + React + Spore SDK.',
+        description:
+          'A Spore Protocol Demo, based on Next.js + React + Spore SDK.',
         images: [
           {
             url: '/images/og.png',
@@ -120,7 +122,12 @@ function App({ Component, pageProps }: AppProps) {
           content="minimum-scale=1, initial-scale=1, width=device-width"
         />
       </Head>
-      <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
+      <MantineProvider
+        withNormalizeCSS
+        withGlobalStyles
+        theme={theme}
+        emotionCache={rtlCache}
+      >
         <ConnectProvider value={config}>
           <StateProvider pageProps={pageProps}>
             <UIProvider>

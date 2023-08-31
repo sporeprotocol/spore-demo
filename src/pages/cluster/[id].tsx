@@ -1,4 +1,4 @@
-import EmptyPlaceholder from '@/components/EmptyPlaceholder';
+import 'react-loading-skeleton/dist/skeleton.css';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
@@ -28,7 +28,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -75,7 +74,7 @@ export default function ClusterPage() {
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
-  const { data: spores = [], isLoading: isSporesLoading } =
+  const { data: spores } =
     trpc.spore.list.useQuery({ clusterId: id } as { clusterId: string });
 
   const mintSporeModal = useMintSporeModal(id as string);
@@ -94,6 +93,7 @@ export default function ClusterPage() {
     return isAnyoneCanPay(cluster?.cell.cellOutput.lock);
   }, [cluster]);
 
+  const isSporesLoading = !spores;
   const isLoading = !cluster;
 
   return (
@@ -272,7 +272,7 @@ export default function ClusterPage() {
       <Container py="48px" size="xl">
         <SporeGrid
           title={isSporesLoading ? '' : `${spores.length} Spores`}
-          spores={spores}
+          spores={spores ?? []}
           cluster={cluster}
           isLoading={isSporesLoading}
         />

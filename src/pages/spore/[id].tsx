@@ -1,3 +1,4 @@
+import 'react-loading-skeleton/dist/skeleton.css';
 import Layout from '@/components/Layout';
 import {
   Text,
@@ -21,7 +22,6 @@ import { BI, config, helpers } from '@ckb-lumos/lumos';
 import { IconCopy } from '@tabler/icons-react';
 import { useConnect } from '@/hooks/useConnect';
 import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import { useMemo } from 'react';
@@ -72,14 +72,17 @@ export default function SporePage() {
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
-  const capacity = useMemo(() => BI.from(spore?.cell.cellOutput.capacity ?? 0).toNumber(), [spore]);
-  const { classes, cx } = useStyles({ pixelated: capacity < 10_000 * (10 ** 8) });
+  const capacity = useMemo(
+    () => BI.from(spore?.cell.cellOutput.capacity ?? 0).toNumber(),
+    [spore],
+  );
+  const { classes, cx } = useStyles({ pixelated: capacity < 10_000 * 10 ** 8 });
 
   const { data: cluster } = trpc.cluster.get.useQuery(
     { id: spore?.clusterId ?? undefined },
     { enabled: !!spore?.clusterId },
   );
-  const { data: spores = [] } = trpc.spore.list.useQuery(
+  const { data: spores } = trpc.spore.list.useQuery(
     { clusterId: spore?.clusterId ?? undefined },
     { enabled: !!spore?.clusterId },
   );
@@ -97,11 +100,11 @@ export default function SporePage() {
     : '';
 
   const nextSporeIndex = useMemo(
-    () => spores.findIndex((sp) => sp.id === id) + 1,
+    () => (spores ?? []).findIndex((sp) => sp.id === id) + 1,
     [spores, id],
   );
   const prevSporeIndex = useMemo(
-    () => spores.findIndex((sp) => sp.id === id) - 1,
+    () => (spores ?? []).findIndex((sp) => sp.id === id) - 1,
     [spores, id],
   );
 
@@ -274,7 +277,7 @@ export default function SporePage() {
             </Flex>
           </Grid.Col>
         </Grid>
-        {cluster && spores.length > 1 && (
+        {cluster && spores && spores.length > 1 && (
           <Flex justify="space-between" mt="80px">
             {prevSporeIndex >= 0 ? (
               <Link
