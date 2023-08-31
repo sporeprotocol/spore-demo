@@ -13,7 +13,7 @@ import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
-import { rtlCache } from '@/utils/cache';
+import { cache } from '@/utils/cache';
 
 function StateProvider({
   children,
@@ -126,7 +126,7 @@ function App({ Component, pageProps }: AppProps) {
         withNormalizeCSS
         withGlobalStyles
         theme={theme}
-        emotionCache={rtlCache}
+        emotionCache={cache}
       >
         <ConnectProvider value={config}>
           <StateProvider pageProps={pageProps}>
