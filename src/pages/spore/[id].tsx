@@ -56,12 +56,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 const useStyles = createStyles((theme) => ({
   image: {
+    width: '468px',
+    height: '468px',
     borderRadius: '8px',
     borderColor: theme.colors.text[0],
     borderStyle: 'solid',
     borderWidth: '1px',
     boxShadow: '4px 4px 0 #111318',
     backgroundColor: theme.colors.background[1],
+    overflow: 'hidden',
   },
   button: {
     boxShadow: 'none !important',
@@ -163,7 +166,7 @@ export default function SporePage() {
           <Grid.Col span={6}>
             <Box className={classes.image}>
               {isLoading ? (
-                <AspectRatio ratio={1} w="486px" h="486px">
+                <AspectRatio ratio={1}>
                   <Box className={classes.image}>
                     <Skeleton
                       width="100%"
