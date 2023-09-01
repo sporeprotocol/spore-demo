@@ -116,7 +116,7 @@ export default function MySpacePage() {
         <title>My Spore - Spore Demo</title>
       </Head>
       <Flex align="center" className={classes.banner}>
-        <Container size="xl" mt="80px" className={classes.container}>
+        <Container size="xl" className={classes.container}>
           <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
             <Image
               className={classes.illus}

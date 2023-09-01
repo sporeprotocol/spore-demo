@@ -1,5 +1,5 @@
 import { Spore } from '@/spore';
-import { Box, Flex, SimpleGrid, Title } from '@mantine/core';
+import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import SporeCard, { SporeSkeletonCard } from './SporeCard';
 import { Cluster } from '@/cluster';
 import EmptyPlaceholder from './EmptyPlaceholder';
@@ -19,6 +19,7 @@ export interface SporeGridProps {
 export default function SporeGrid(props: SporeGridProps) {
   const { title, spores, isLoading } = props;
   const router = useRouter();
+  const theme = useMantineTheme();
   const mintSporeModal = useMintSporeModal();
 
   if (!isLoading && spores.length === 0) {
@@ -53,9 +54,9 @@ export default function SporeGrid(props: SporeGridProps) {
           cols={4}
           spacing="24px"
           breakpoints={[
-            { maxWidth: '80rem', cols: 3 },
-            { maxWidth: '60rem', cols: 2 },
-            { maxWidth: '36rem', cols: 1 },
+            { maxWidth: theme.breakpoints.lg, cols: 3 },
+            { maxWidth: theme.breakpoints.md, cols: 2 },
+            { maxWidth: theme.breakpoints.xs, cols: 1 },
           ]}
           mt="24px"
         >

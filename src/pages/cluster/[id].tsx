@@ -130,7 +130,7 @@ export default function ClusterPage() {
       </Head>
       <ClusterOpenGraph id={id as string} />
       <Flex align="center" className={classes.header}>
-        <Container w="100%" size="xl" mt="80px">
+        <Container w="100%" size="xl">
           <Grid>
             <Grid.Col span={8}>
               <Flex direction="column">

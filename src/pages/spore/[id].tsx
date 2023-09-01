@@ -141,7 +141,7 @@ export default function SporePage() {
         <title>Spore: {id} - Spore Demo</title>
       </Head>
       <SporeOpenGraph id={id as string} />
-      <Container size="xl" py="48px" mt="80px">
+      <Container size="xl" py="48px">
         {cluster ? (
           <Link
             href={`/cluster/${cluster.id}`}
