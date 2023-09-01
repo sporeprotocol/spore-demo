@@ -30,7 +30,7 @@ import { useClipboard } from '@mantine/hooks';
 import { SporeOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
-import ImageRender from '@/components/renders/image';
+import ImageSporeRender from '@/components/renders/image';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -174,7 +174,7 @@ export default function SporePage() {
                   </Box>
                 </AspectRatio>
               ) : (
-                <ImageRender spore={spore} />
+                <ImageSporeRender spore={spore} />
               )}
             </Box>
           </Grid.Col>

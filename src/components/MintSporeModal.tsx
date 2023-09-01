@@ -2,6 +2,7 @@ import { Cluster } from '@/cluster';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
+import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError } from '@/utils/notifications';
@@ -17,15 +18,13 @@ import {
   createStyles,
   useMantineTheme,
   Flex,
-  AspectRatio,
-  Overlay,
-  Center,
   Popover,
 } from '@mantine/core';
-import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { useDisclosure } from '@mantine/hooks';
 import { IconChevronDown } from '@tabler/icons-react';
 import { useState, useCallback, forwardRef, useRef, useMemo } from 'react';
+import { ImagePreviewRender } from './renders/image';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -41,7 +40,7 @@ export interface MintSporeModalProps {
   ) => Promise<void>;
 }
 
-const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
+const useStyles = createStyles((theme) => ({
   create: {
     position: 'absolute',
     bottom: '0px',
@@ -117,27 +116,6 @@ const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  imageContainer: {
-    borderColor: theme.colors.text[0],
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderRadius: '6px',
-    backgroundColor: theme.colors.background[1],
-  },
-  image: {
-    width: '616px',
-    height: '260px',
-    imageRendering: params?.pixelated ? 'pixelated' : 'auto',
-  },
-  change: {
-    height: '48px',
-    minWidth: '132px',
-    borderColor: theme.colors.text[0],
-    borderWidth: '1px',
-    borderStyle: 'solid',
-    borderRadius: '6px',
-    cursor: 'pointer',
-  },
   submit: {
     backgroundColor: theme.colors.brand[1],
     '&:hover': {
@@ -161,7 +139,7 @@ const DropdownContainer: React.ForwardRefRenderFunction<
   any,
   React.PropsWithChildren<{}>
 > = (props, ref) => {
-  const { classes } = useStyles({ pixelated: false });
+  const { classes } = useStyles();
   const { children, ...restProps } = props;
   const createClusterModal = useCreateClusterModal();
 
@@ -180,18 +158,16 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const { defaultClusterId, clusters, onSubmit } = props;
   const theme = useMantineTheme();
   const { address } = useConnect();
-  const [hovered, setHovered] = useState(false);
   const dropzoneOpenRef = useRef<() => void>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(
     defaultClusterId,
   );
-  const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
   const [content, setContent] = useState<Blob | null>(null);
   const [opened, { close, open }] = useDisclosure(false);
   const onChainSize = useEstimatedOnChainSize(clusterId, content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const { classes } = useStyles({ pixelated: (content?.size ?? 0) < 10_000 });
+  const { classes } = useStyles();
 
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
   const balance = useMemo(() => {
@@ -202,11 +178,6 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
     setContent(file);
-    const reader = new window.FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      setDataUrl(reader.result);
-    };
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -258,45 +229,17 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         searchable
       />
 
-      {dataUrl ? (
-        <Box
-          className={classes.imageContainer}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          <AspectRatio ratio={616 / 260}>
-            <Image
-              width="616px"
-              height="260px"
-              className={classes.image}
-              src={dataUrl.toString()}
-              alt="preview"
-              fit="contain"
-            />
-            {hovered && !loading && (
-              <Overlay
-                color="#E0E0E0"
-                opacity={0.7}
-                sx={{ borderRadius: '6px' }}
-              >
-                <Center
-                  className={classes.change}
-                  onClick={() => dropzoneOpenRef.current?.()}
-                >
-                  <Text color="text.0" weight="bold">
-                    Change Image
-                  </Text>
-                </Center>
-              </Overlay>
-            )}
-          </AspectRatio>
-        </Box>
+      {content ? (
+        <ImagePreviewRender
+          content={content}
+          onClick={() => dropzoneOpenRef.current?.()}
+        />
       ) : (
         <Dropzone
           openRef={dropzoneOpenRef}
           onDrop={handleDrop}
           classNames={{ root: classes.dropzone }}
-          accept={IMAGE_MIME_TYPE}
+          accept={SUPPORTED_MIME_TYPE}
           onReject={() => {
             showError(
               `Only image files are supported, and the size cannot exceed ${MAX_SIZE_LIMIT}KB.`,

@@ -1,9 +1,17 @@
 import { Spore } from '@/spore';
 import { BI } from '@ckb-lumos/lumos';
-import { AspectRatio, Image, createStyles } from '@mantine/core';
-import { useMemo } from 'react';
+import {
+  Text,
+  AspectRatio,
+  Box,
+  Center,
+  Image,
+  Overlay,
+  createStyles,
+} from '@mantine/core';
+import { useEffect, useMemo, useState } from 'react';
 
-export interface ImageRenderProps {
+export interface ImageSporeRenderProps {
   spore: Spore;
   ratio?: number;
 }
@@ -17,7 +25,7 @@ const useStyles = createStyles((_, params?: { pixelated: boolean }) => ({
   },
 }));
 
-export default function ImageRender(props: ImageRenderProps) {
+export default function ImageSporeRender(props: ImageSporeRenderProps) {
   const { spore, ratio = 1 } = props;
   const capacity = useMemo(
     () => BI.from(spore.cell.cellOutput.capacity ?? 0).toNumber(),
@@ -36,5 +44,87 @@ export default function ImageRender(props: ImageRenderProps) {
         }}
       />
     </AspectRatio>
+  );
+}
+
+export interface ImagePreviewRenderProps {
+  content: Blob;
+  onClick: () => void;
+  ratio?: number;
+  loading?: boolean;
+}
+
+const usePreviewStyles = createStyles(
+  (theme, params?: { pixelated: boolean }) => ({
+    imageContainer: {
+      borderColor: theme.colors.text[0],
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderRadius: '6px',
+      backgroundColor: theme.colors.background[1],
+    },
+    image: {
+      width: '616px',
+      height: '260px',
+      imageRendering: params?.pixelated ? 'pixelated' : 'auto',
+    },
+    change: {
+      height: '48px',
+      minWidth: '132px',
+      borderColor: theme.colors.text[0],
+      borderWidth: '1px',
+      borderStyle: 'solid',
+      borderRadius: '6px',
+      cursor: 'pointer',
+    },
+  }),
+);
+
+export function ImagePreviewRender(props: ImagePreviewRenderProps) {
+  const { content, loading, onClick } = props;
+  const [hovered, setHovered] = useState(false);
+  const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
+  const { classes } = usePreviewStyles({
+    pixelated: (content?.size ?? 0) < 10_000,
+  });
+
+  useEffect(() => {
+    const reader = new window.FileReader();
+    reader.readAsDataURL(content);
+    reader.onloadend = () => {
+      setDataUrl(reader.result);
+    };
+  }, [content]);
+
+  if (!dataUrl) {
+    return null;
+  }
+
+  return (
+    <Box
+      className={classes.imageContainer}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <AspectRatio ratio={616 / 260}>
+        <Image
+          width="616px"
+          height="260px"
+          className={classes.image}
+          src={dataUrl.toString()}
+          alt="preview"
+          fit="contain"
+        />
+        {hovered && !loading && (
+          <Overlay color="#E0E0E0" opacity={0.7} sx={{ borderRadius: '6px' }}>
+            <Center className={classes.change} onClick={onClick}>
+              <Text color="text.0" weight="bold">
+                Change Image
+              </Text>
+            </Center>
+          </Overlay>
+        )}
+      </AspectRatio>
+    </Box>
   );
 }

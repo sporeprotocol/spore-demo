@@ -22,7 +22,7 @@ import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
-import ImageRender from './renders/image';
+import ImageSporeRender from './renders/image';
 
 export interface ClusterCardProps {
   cluster: Cluster;
@@ -142,7 +142,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
               <SimpleGrid cols={cols} spacing="1px" bg="text.0">
                 {spores.slice(0, cols * cols).map((spore) => {
                   return (
-                    <ImageRender
+                    <ImageSporeRender
                       key={spore.id}
                       spore={spore}
                       ratio={140 / 80}
