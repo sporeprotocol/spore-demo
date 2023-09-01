@@ -30,6 +30,7 @@ import { useClipboard } from '@mantine/hooks';
 import { SporeOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
+import ImageRender from '@/components/renders/image';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -53,7 +54,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
+const useStyles = createStyles((theme) => ({
   image: {
     borderRadius: '8px',
     borderColor: theme.colors.text[0],
@@ -61,7 +62,6 @@ const useStyles = createStyles((theme, params?: { pixelated: boolean }) => ({
     borderWidth: '1px',
     boxShadow: '4px 4px 0 #111318',
     backgroundColor: theme.colors.background[1],
-    imageRendering: params?.pixelated ? 'pixelated' : 'auto',
   },
   button: {
     boxShadow: 'none !important',
@@ -97,11 +97,7 @@ export default function SporePage() {
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
-  const capacity = useMemo(
-    () => BI.from(spore?.cell.cellOutput.capacity ?? 0).toNumber(),
-    [spore],
-  );
-  const { classes, cx } = useStyles({ pixelated: capacity < 10_000 * 10 ** 8 });
+  const { classes, cx } = useStyles();
 
   const { data: cluster } = trpc.cluster.get.useQuery(
     { id: spore?.clusterId ?? undefined },
@@ -165,27 +161,22 @@ export default function SporePage() {
         )}
         <Grid>
           <Grid.Col span={6}>
-            <AspectRatio ratio={1} w="486px" h="486px">
+            <Box className={classes.image}>
               {isLoading ? (
-                <Box className={classes.image}>
-                  <Skeleton
-                    width="100%"
-                    height="100%"
-                    className={classes.image}
-                    baseColor={theme.colors.background[1]}
-                  />
-                </Box>
+                <AspectRatio ratio={1} w="486px" h="486px">
+                  <Box className={classes.image}>
+                    <Skeleton
+                      width="100%"
+                      height="100%"
+                      className={classes.image}
+                      baseColor={theme.colors.background[1]}
+                    />
+                  </Box>
+                </AspectRatio>
               ) : (
-                <Image
-                  alt={spore!.id}
-                  width="486px"
-                  height="486px"
-                  src={`/api/v1/media/${spore!.id}`}
-                  fit="contain"
-                  className={classes.image}
-                />
+                <ImageRender spore={spore} />
               )}
-            </AspectRatio>
+            </Box>
           </Grid.Col>
           <Grid.Col span={6}>
             <Flex h="100%" direction="column" justify="center">
