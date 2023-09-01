@@ -10,10 +10,9 @@ import {
   createStyles,
   Title,
   Button,
-  Group,
   useMantineTheme,
   Box,
-  Tooltip,
+  MediaQuery,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { trpc } from '@/server';
@@ -26,7 +25,7 @@ import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import { useMemo } from 'react';
 import Head from 'next/head';
-import { useClipboard } from '@mantine/hooks';
+import { useClipboard, useMediaQuery } from '@mantine/hooks';
 import { SporeOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
@@ -57,8 +56,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 const useStyles = createStyles((theme) => ({
   image: {
-    width: '468px',
-    height: '468px',
+    width: '100%',
+    height: '100%',
+    maxWidth: '468px',
+    maxWeight: '468px',
     borderRadius: '8px',
     borderColor: theme.colors.text[0],
     borderStyle: 'solid',
@@ -66,6 +67,16 @@ const useStyles = createStyles((theme) => ({
     boxShadow: '4px 4px 0 #111318',
     backgroundColor: theme.colors.background[1],
     overflow: 'hidden',
+
+    [theme.fn.smallerThan('sm')]: {
+      maxWidth: '100%',
+      maxHeight: '100%',
+    },
+  },
+  title: {
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',
+    wordBreak: 'break-all',
   },
   button: {
     boxShadow: 'none !important',
@@ -102,6 +113,8 @@ export default function SporePage() {
 
   const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
   const { classes, cx } = useStyles();
+  const smallerThenXS = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const smallerThenSM = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const { data: cluster } = trpc.cluster.get.useQuery(
     { id: spore?.clusterId ?? undefined },
@@ -163,11 +176,11 @@ export default function SporePage() {
         ) : (
           <Box mb="32px" h="28px" />
         )}
-        <Grid>
-          <Grid.Col span={6}>
-            <Box className={classes.image}>
+        <Grid gutter="24px">
+          <Grid.Col span={smallerThenXS ? 12 : 6}>
+            <Box>
               {isLoading ? (
-                <AspectRatio ratio={1}>
+                <AspectRatio ratio={1} className={classes.image}>
                   <Box className={classes.image}>
                     <Skeleton
                       width="100%"
@@ -178,11 +191,13 @@ export default function SporePage() {
                   </Box>
                 </AspectRatio>
               ) : (
-                <ImageSporeRender spore={spore} />
+                <Box className={classes.image}>
+                  <ImageSporeRender spore={spore} />
+                </Box>
               )}
             </Box>
           </Grid.Col>
-          <Grid.Col span={6}>
+          <Grid.Col span={smallerThenXS ? 12 : 6}>
             <Flex h="100%" direction="column" justify="center">
               <Flex align="center" mb="32px">
                 {isLoading ? (
@@ -194,23 +209,27 @@ export default function SporePage() {
                   />
                 ) : (
                   <>
-                    <Title order={2} mr="3px">
-                      {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
-                    </Title>
-                    <Flex
-                      sx={{ cursor: 'pointer' }}
-                      onClick={() => {
-                        clipboard.copy(spore!.id);
-                        showSuccess('Copied!');
-                      }}
-                      ml="3px"
-                    >
-                      <IconCopy size="30px" color={theme.colors.text[0]} />
-                    </Flex>
+                    <Box className={classes.title}>
+                      <Title order={2} color="text.0" mr="3px">
+                        {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
+                      </Title>
+                    </Box>
+                    <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+                      <Flex
+                        sx={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          clipboard.copy(spore!.id);
+                          showSuccess('Copied!');
+                        }}
+                        ml="3px"
+                      >
+                        <IconCopy size="30px" color={theme.colors.text[0]} />
+                      </Flex>
+                    </MediaQuery>
                   </>
                 )}
               </Flex>
-              <Flex mb="64px">
+              <Flex mb={smallerThenSM ? '32px' : '64px'}>
                 {isLoading ? (
                   <Skeleton
                     baseColor={theme.colors.background[1]}
@@ -266,7 +285,7 @@ export default function SporePage() {
                       sx={{ cursor: 'pointer' }}
                       onClick={() => {
                         clipboard.copy(owner);
-                        showSuccess('Copied!')
+                        showSuccess('Copied!');
                       }}
                       ml="3px"
                     >
@@ -276,7 +295,11 @@ export default function SporePage() {
                 )}
               </Flex>
               {owner === address && (
-                <Group mt="64px">
+                <Flex
+                  direction={{ base: 'column', xs: 'row' }}
+                  gap="24px"
+                  mt={smallerThenSM ? '32px' : '64px'}
+                >
                   <Button
                     className={cx(classes.button, classes.transfer)}
                     onClick={transferSpore.open}
@@ -289,7 +312,7 @@ export default function SporePage() {
                   >
                     Destory
                   </Button>
-                </Group>
+                </Flex>
               )}
             </Flex>
           </Grid.Col>

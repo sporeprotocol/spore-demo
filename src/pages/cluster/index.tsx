@@ -27,6 +27,10 @@ const useStyles = createStyles(
       borderBottomColor: theme.colors.text[0],
       borderBottomStyle: 'solid',
       backgroundImage: 'url(/images/noise-on-yellow.png)',
+
+      [theme.fn.smallerThan('sm')]: {
+        minHeight: '232px',
+      },
     },
     container: {
       position: 'relative',
@@ -74,12 +78,11 @@ export default function ClustersPage() {
       .sort(([, aSpores], [_, bSpores]) => aSpores.length - bSpores.length)
       .map(([clusterId]) => clusterId);
 
-    return clusters
-      .sort((a, b) => {
-        const aIndex = ordererClustersId.indexOf(a.id) ?? 0;
-        const bIndex = ordererClustersId.indexOf(b.id) ?? 0;
-        return bIndex - aIndex;
-      })
+    return clusters.sort((a, b) => {
+      const aIndex = ordererClustersId.indexOf(a.id) ?? 0;
+      const bIndex = ordererClustersId.indexOf(b.id) ?? 0;
+      return bIndex - aIndex;
+    });
   }, [clusters, spores]);
 
   const displayClusters = useMemo(() => {
@@ -94,41 +97,59 @@ export default function ClustersPage() {
     return sortedClusters;
   }, [sortedClusters, showMintableOnly, lock]);
 
-  return (
-    <Layout>
-      <Head>
-        <title>All Clusters - Spore Demo</title>
-      </Head>
-      <Flex align="center" className={classes.banner}>
-        <Container size="xl" className={classes.container}>
-          <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
-            <Image
-              className={classes.illus}
-              src="/svg/all-clusters-illus.svg"
-              width="358"
-              height="358"
-              alt="Spore Demo Illus"
-            />
-          </MediaQuery>
-          <Flex direction="column" justify="center" align="center" gap="32px">
+  const header = (
+    <Flex align="center" className={classes.banner}>
+      <Container size="xl" className={classes.container}>
+        <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
+          <Image
+            className={classes.illus}
+            src="/svg/all-clusters-illus.svg"
+            width="358"
+            height="358"
+            alt="Spore Demo Illus"
+          />
+        </MediaQuery>
+        <Flex direction="column" justify="center" align="center" gap="32px">
+          <MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
             <Image
               src="/images/clusters-title.png"
               width="766"
               height="60"
               alt="Spore Demo"
             />
+          </MediaQuery>
+          <MediaQuery largerThan="xs" styles={{ display: 'none' }}>
+            <Image
+              src="/images/clusters-title.mobile.png"
+              width="350"
+              height="96"
+              alt="Spore Demo"
+            />
+          </MediaQuery>
 
-            <Text size="xl" align="center">
-              Transform your imaginative visions into vibrant Clusters!
-            </Text>
-          </Flex>
-        </Container>
-      </Flex>
+          <Text size="xl" align="center">
+            Transform your imaginative visions into vibrant Clusters!
+          </Text>
+        </Flex>
+      </Container>
+    </Flex>
+  );
+
+  return (
+    <Layout header={header}>
+      <Head>
+        <title>All Clusters - Spore Demo</title>
+      </Head>
       <Container py="48px" size="xl">
         <Box mb="60px">
           <ClusterGrid
             title={
-              <Flex justify="space-between" align="center">
+              <Flex
+                direction={{ base: 'column', xs: 'row' }}
+                gap={{ base: 'md', xs: 'none' }}
+                justify="space-between"
+                align={{ base: 'start', xs: 'center' }}
+              >
                 <Title order={3}>Explore All Clusters</Title>
                 <Switch
                   size="16px"

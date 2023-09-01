@@ -70,49 +70,52 @@ export default function HomePage() {
       .slice(0, 4);
   }, [clusters, spores]);
 
-  return (
-    <Layout>
-      <Flex align="center" className={classes.banner}>
-        <Container size="xl" className={classes.container}>
-          <MediaQuery
-            query={`(max-width: ${theme.breakpoints.lg})`}
-            styles={{ display: 'none' }}
-          >
-            <Image
-              className={classes.illus}
-              src="/svg/spore-demo-illus.svg"
-              width="339"
-              height="315"
-              alt="Spore Demo Illus"
-            />
-          </MediaQuery>
-          <Flex direction="column" justify="center" align="center" gap="32px">
-            <Box>
-              <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-                <Image
-                  src={'/images/demo-title.png'}
-                  width="630"
-                  height="60"
-                  alt="Spore Demo"
-                />
-              </MediaQuery>
-              <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                <Image
-                  src={'/images/demo-title.mobile.png'}
-                  width={smallerThenXS ? '213' : '331'}
-                  height={smallerThenXS ? '96' : '136'}
-                  alt="Spore Demo"
-                />
-              </MediaQuery>
-            </Box>
+  const header = (
+    <Flex align="center" className={classes.banner}>
+      <Container size="xl" className={classes.container}>
+        <MediaQuery
+          query={`(max-width: ${theme.breakpoints.lg})`}
+          styles={{ display: 'none' }}
+        >
+          <Image
+            className={classes.illus}
+            src="/svg/spore-demo-illus.svg"
+            width="339"
+            height="315"
+            alt="Spore Demo Illus"
+          />
+        </MediaQuery>
+        <Flex direction="column" justify="center" align="center" gap="32px">
+          <Box>
+            <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+              <Image
+                src={'/images/demo-title.png'}
+                width="630"
+                height="60"
+                alt="Spore Demo"
+              />
+            </MediaQuery>
+            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+              <Image
+                src={'/images/demo-title.mobile.png'}
+                width={smallerThenXS ? '213' : '331'}
+                height={smallerThenXS ? '96' : '136'}
+                alt="Spore Demo"
+              />
+            </MediaQuery>
+          </Box>
 
-            <Text size="xl" align="center">
-              Connect your wallet, mint a spore, start your cluster – all
-              on-chain!
-            </Text>
-          </Flex>
-        </Container>
-      </Flex>
+          <Text size="xl" align="center">
+            Connect your wallet, mint a spore, start your cluster – all
+            on-chain!
+          </Text>
+        </Flex>
+      </Container>
+    </Flex>
+  );
+
+  return (
+    <Layout header={header}>
       <Container py="48px" size="xl">
         <Box mb="60px">
           <ClusterGrid

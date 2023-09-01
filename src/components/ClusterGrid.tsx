@@ -55,9 +55,9 @@ export default function ClusterGrid(props: ClusterGridProps) {
           cols={4}
           spacing="24px"
           breakpoints={[
-            { maxWidth: '80rem', cols: 3 },
-            { maxWidth: '60rem', cols: 2 },
-            { maxWidth: '36rem', cols: 1 },
+            { maxWidth: theme.breakpoints.lg, cols: 3 },
+            { maxWidth: theme.breakpoints.md, cols: 2 },
+            { maxWidth: theme.breakpoints.xs, cols: 1 },
           ]}
           mt="24px"
         >

@@ -8,7 +8,6 @@ import { useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
-import { DefaultSeo } from 'next-seo';
 import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';

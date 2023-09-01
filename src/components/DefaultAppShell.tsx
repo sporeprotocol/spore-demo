@@ -8,6 +8,7 @@ import {
   createStyles,
   Box,
   AppShell,
+  useMantineTheme,
 } from '@mantine/core';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
@@ -19,6 +20,7 @@ import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import DropMenu from './DropMenu';
 import { IconPlus } from '@tabler/icons-react';
 import { NAVS } from '@/constants';
+import { useMediaQuery } from '@mantine/hooks';
 
 const useStyles = createStyles((theme) => ({
   connect: {
@@ -70,6 +72,8 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
   const { classes } = useStyles();
   const { connected, connect } = useConnect();
   const router = useRouter();
+  const theme = useMantineTheme();
+  const smallerThenLG = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
 
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
@@ -92,7 +96,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
           withBorder={false}
         >
           <Container size="xl">
-            <Grid align="center" mx="44px">
+            <Grid align="center" mx={smallerThenLG ? '0px' : '44px'}>
               <Grid.Col span={2}>
                 <Flex justify="start">
                   <Logo />

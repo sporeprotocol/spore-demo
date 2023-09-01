@@ -12,6 +12,7 @@ import {
   Text,
   Button,
   Drawer,
+  MediaQuery,
 } from '@mantine/core';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
@@ -137,110 +138,119 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
           className={classes.header}
           withBorder={false}
         >
-          <Container size="xl">
-            <Grid h="56px" align="center">
-              <Grid.Col span={6} p={0}>
-                <Flex justify="start">
-                  <Logo />
-                </Flex>
-              </Grid.Col>
-              <Grid.Col span={6} p={0}>
-                <Flex justify="end">
-                  <Burger
-                    className={classes.burger}
-                    opened={opened}
-                    onClick={() => setOpened((o) => !o)}
-                    size="sm"
-                    color={theme.white}
-                  />
-                </Flex>
-              </Grid.Col>
-            </Grid>
-          </Container>
+          <MediaQuery
+            largerThan="xs"
+            styles={{ paddingLeft: '22px', paddingRight: '22px' }}
+          >
+            <Box>
+              <Container size="xl">
+                <Grid h="56px" align="center">
+                  <Grid.Col span={6} p={0}>
+                    <Flex justify="start">
+                      <Logo />
+                    </Flex>
+                  </Grid.Col>
+                  <Grid.Col span={6} p={0}>
+                    <Flex justify="end">
+                      <Burger
+                        className={classes.burger}
+                        opened={opened}
+                        onClick={() => setOpened((o) => !o)}
+                        size="sm"
+                        color={theme.white}
+                      />
+                    </Flex>
+                  </Grid.Col>
+                </Grid>
+              </Container>
+            </Box>
+          </MediaQuery>
         </MantineHeader>
       }
       navbar={
-        <Navbar
-          className={classes.navbar}
-          hiddenBreakpoint="sm"
-          hidden={!opened}
-        >
-          {connected ? (
-            <>
-              <Drawer
-                opened={drawerOpened}
-                overlayProps={{
-                  color: '#E0E0E0',
-                  opacity: 0.7,
-                }}
-                classNames={{
-                  content: classes.drawerContent,
-                  body: classes.drawerBody,
-                }}
-                styles={{
-                  header: { display: 'none' },
-                }}
-                onClose={drawer.close}
-                size="150px"
-                position="bottom"
-              >
-                <Flex h="42px" className={classes.drawerHeader}>
-                  <Text className={classes.drawerTitle}>Create</Text>
-                </Flex>
-                <Box
-                  px="16px"
-                  py="12px"
-                  onClick={() => {
-                    drawer.close();
-                    mintSporeModal.open();
+        <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+          <Navbar
+            className={classes.navbar}
+            hiddenBreakpoint="sm"
+            hidden={!opened}
+          >
+            {connected ? (
+              <>
+                <Drawer
+                  opened={drawerOpened}
+                  overlayProps={{
+                    color: '#E0E0E0',
+                    opacity: 0.7,
                   }}
-                >
-                  <Text>Mint a Spore</Text>
-                </Box>
-                <Box
-                  px="16px"
-                  py="12px"
-                  onClick={() => {
-                    drawer.close();
-                    createClusterModal.open();
+                  classNames={{
+                    content: classes.drawerContent,
+                    body: classes.drawerBody,
                   }}
+                  styles={{
+                    header: { display: 'none' },
+                  }}
+                  onClose={drawer.close}
+                  size="150px"
+                  position="bottom"
                 >
-                  <Text>Create a Cluster</Text>
-                </Box>
-              </Drawer>
-              <Button className={classes.create} onClick={drawer.open}>
-                <IconPlus />
-                <Text>Create</Text>
-              </Button>
-            </>
-          ) : (
-            <Button className={classes.connect} onClick={connect}>
-              Connect Wallet
-            </Button>
-          )}
-          <Box mt="md">
-            <Flex direction="column" justify="center">
-              {navs.map((nav) => (
-                <Link
-                  key={nav.name}
-                  href={nav.href}
-                  target={nav.target}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <Text
-                    className={
-                      nav.href === router.pathname
-                        ? classes.active
-                        : classes.nav
-                    }
+                  <Flex h="42px" className={classes.drawerHeader}>
+                    <Text className={classes.drawerTitle}>Create</Text>
+                  </Flex>
+                  <Box
+                    px="16px"
+                    py="12px"
+                    onClick={() => {
+                      drawer.close();
+                      mintSporeModal.open();
+                    }}
                   >
-                    {nav.name}
-                  </Text>
-                </Link>
-              ))}
-            </Flex>
-          </Box>
-        </Navbar>
+                    <Text>Mint a Spore</Text>
+                  </Box>
+                  <Box
+                    px="16px"
+                    py="12px"
+                    onClick={() => {
+                      drawer.close();
+                      createClusterModal.open();
+                    }}
+                  >
+                    <Text>Create a Cluster</Text>
+                  </Box>
+                </Drawer>
+                <Button className={classes.create} onClick={drawer.open}>
+                  <IconPlus />
+                  <Text>Create</Text>
+                </Button>
+              </>
+            ) : (
+              <Button className={classes.connect} onClick={connect}>
+                Connect Wallet
+              </Button>
+            )}
+            <Box mt="md">
+              <Flex direction="column" justify="center">
+                {navs.map((nav) => (
+                  <Link
+                    key={nav.name}
+                    href={nav.href}
+                    target={nav.target}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <Text
+                      className={
+                        nav.href === router.pathname
+                          ? classes.active
+                          : classes.nav
+                      }
+                    >
+                      {nav.name}
+                    </Text>
+                  </Link>
+                ))}
+              </Flex>
+            </Box>
+          </Navbar>
+        </MediaQuery>
       }
     >
       <Box bg="background.0" mih="100vh" mt="56px">

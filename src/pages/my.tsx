@@ -1,9 +1,6 @@
 import ClusterGrid from '@/components/ClusterGrid';
-import EmptyPlaceholder from '@/components/EmptyPlaceholder';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
-import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
-import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
 import { showSuccess } from '@/utils/notifications';
@@ -18,12 +15,11 @@ import {
   useMantineTheme,
   Button,
   Group,
-  Tooltip,
+  Image,
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
 import Head from 'next/head';
-import Image from 'next/image';
 import { useMemo, useState } from 'react';
 
 const useStyles = createStyles((theme) => ({
@@ -34,6 +30,10 @@ const useStyles = createStyles((theme) => ({
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
     backgroundImage: 'url(/images/noise-on-yellow.png)',
+
+    [theme.fn.smallerThan('sm')]: {
+      minHeight: '232px',
+    },
   },
 
   container: {
@@ -110,63 +110,81 @@ export default function MySpacePage() {
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
   }, [capacity]);
 
-  return (
-    <Layout>
-      <Head>
-        <title>My Spore - Spore Demo</title>
-      </Head>
-      <Flex align="center" className={classes.banner}>
-        <Container size="xl" className={classes.container}>
-          <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
-            <Image
-              className={classes.illus}
-              src="/svg/my-space-illus.svg"
-              width="251"
-              height="263"
-              alt="My Space Illus"
-            />
-          </MediaQuery>
-          <Flex direction="column" justify="center" align="center" gap="32px">
-            <Box w="631px" px="68px">
+  const header = (
+    <Flex align="center" className={classes.banner}>
+      <Container size="xl" className={classes.container}>
+        <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
+          <Image
+            className={classes.illus}
+            src="/svg/my-space-illus.svg"
+            width="251"
+            height="263"
+            alt="My Space Illus"
+          />
+        </MediaQuery>
+        <Flex direction="column" justify="center" align="center" gap="32px">
+          <MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
+            <Box px="68px">
               <Image
                 src="/images/my-space-title.png"
                 width="495"
                 height="60"
-                layout="responsive"
                 alt="My Space"
               />
             </Box>
-
-            <Flex px="24px" w="100%" justify="space-between">
-              <Flex align="center">
-                <Text size="xl" align="center" color="text.0" mr="sm">
-                  Address:
-                </Text>
-                <Text size="xl" weight="bold" color="text.0" mr="5px">
-                  {address.slice(0, 10)}...{address.slice(-10)}
-                </Text>
-                <Flex
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    clipboard.copy(address);
-                    showSuccess('Copied!');
-                  }}
-                >
-                  <IconCopy size="22px" color={theme.colors.text[0]} />
-                </Flex>
-              </Flex>
-              <Flex align="center">
-                <Text size="xl" align="center" color="text.0" mr="sm">
-                  Balance:
-                </Text>
-                <Text size="xl" weight="bold" color="text.0" mr="5px">
-                  {balance} CKB
-                </Text>
+          </MediaQuery>
+          <MediaQuery largerThan="xs" styles={{ display: 'none' }}>
+            <Image
+              src="/images/my-space-title.png"
+              width="324"
+              height="40"
+              alt="My Space"
+            />
+          </MediaQuery>
+          <Flex
+            direction={{ base: 'column', xs: 'row' }}
+            gap={{ base: 'md', xs: 'none' }}
+            w="100%"
+            align="center"
+            justify="space-around"
+          >
+            <Flex align="center">
+              <Text size="xl" align="center" color="text.0" mr="sm">
+                Address:
+              </Text>
+              <Text size="xl" weight="bold" color="text.0" mr="5px">
+                {address.slice(0, 10)}...{address.slice(-10)}
+              </Text>
+              <Flex
+                sx={{ cursor: 'pointer' }}
+                onClick={() => {
+                  clipboard.copy(address);
+                  showSuccess('Copied!');
+                }}
+                ml="3px"
+              >
+                <IconCopy size="22px" color={theme.colors.text[0]} />
               </Flex>
             </Flex>
+            <Flex align="center">
+              <Text size="xl" align="center" color="text.0" mr="sm">
+                Balance:
+              </Text>
+              <Text size="xl" weight="bold" color="text.0" mr="5px">
+                {balance} CKB
+              </Text>
+            </Flex>
           </Flex>
-        </Container>
-      </Flex>
+        </Flex>
+      </Container>
+    </Flex>
+  );
+
+  return (
+    <Layout header={header}>
+      <Head>
+        <title>My Spore - Spore Demo</title>
+      </Head>
       <Container size="xl" py="48px">
         <Flex justify="center" mb="48px">
           <Group spacing={0} className={classes.buttonGroup}>
