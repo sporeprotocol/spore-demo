@@ -9,7 +9,7 @@ import { verifyCredential } from '@joyid/core';
 import CKBConnector from '../base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import { common } from '@ckb-lumos/common-scripts';
-import lockScriptInfo from './lock';
+import lockScriptInfo, { prepareSigningEntries } from './lock';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
@@ -69,7 +69,7 @@ export default class JoyIdConnector extends CKBConnector {
       }
     }
 
-    let tx = common.prepareSigningEntries(txSkeleton);
+    txSkeleton = prepareSigningEntries(txSkeleton);
     const signingEntries = txSkeleton.get('signingEntries');
     const witnesses = txSkeleton.get('witnesses');
 
@@ -82,11 +82,11 @@ export default class JoyIdConnector extends CKBConnector {
         lock: signature,
       }),
     );
-    tx = tx.update('witnesses', (witnesses) => {
+    txSkeleton = txSkeleton.update('witnesses', (witnesses) => {
       return witnesses.set(index, signedWitness);
     });
 
-    const signedTx = helpers.createTransactionFromSkeleton(tx);
+    const signedTx = helpers.createTransactionFromSkeleton(txSkeleton);
     return signedTx;
   }
 }
