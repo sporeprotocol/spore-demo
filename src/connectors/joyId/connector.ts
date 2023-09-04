@@ -6,9 +6,10 @@ import { Transaction, helpers } from '@ckb-lumos/lumos';
 import { initConfig, connect, signChallenge } from '@joyid/ckb';
 // @ts-ignore
 import { verifyCredential } from '@joyid/core';
-import CKBConnector from './base';
+import CKBConnector from '../base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import { common } from '@ckb-lumos/common-scripts';
+import lockScriptInfo from './lock';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
@@ -16,6 +17,7 @@ export default class JoyIdConnector extends CKBConnector {
   constructor() {
     super();
 
+    common.registerCustomLockScriptInfos([lockScriptInfo]);
     initConfig({
       name: 'Spore Demo',
       joyidAppURL: process.env.JOY_ID_URL,
@@ -24,6 +26,12 @@ export default class JoyIdConnector extends CKBConnector {
   }
 
   async connect(): Promise<void> {
+    const data = this.getData();
+    if (data.connectorType === this.type && data.address) {
+      this.isConnected = true;
+      return;
+    }
+
     const authData = await connect();
     const { address } = authData;
     this.store.set(walletAtom, {

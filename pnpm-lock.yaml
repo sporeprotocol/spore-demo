@@ -14,6 +14,9 @@ dependencies:
   '@ckb-lumos/common-scripts':
     specifier: ^0.21.0-next.0
     version: 0.21.0-next.0(cross-fetch@3.1.8)(jsbi@4.3.0)
+  '@ckb-lumos/config-manager':
+    specifier: ^0.20.0
+    version: 0.20.0(cross-fetch@3.1.8)(jsbi@4.3.0)
   '@ckb-lumos/helpers':
     specifier: ^0.21.0-next.0
     version: 0.21.0-next.0(cross-fetch@3.1.8)(jsbi@4.3.0)
