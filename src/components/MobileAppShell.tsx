@@ -175,53 +175,10 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
             hidden={!opened}
           >
             {connected ? (
-              <>
-                <Drawer
-                  opened={drawerOpened}
-                  overlayProps={{
-                    color: '#E0E0E0',
-                    opacity: 0.7,
-                  }}
-                  classNames={{
-                    content: classes.drawerContent,
-                    body: classes.drawerBody,
-                  }}
-                  styles={{
-                    header: { display: 'none' },
-                  }}
-                  onClose={drawer.close}
-                  size="150px"
-                  position="bottom"
-                >
-                  <Flex h="42px" className={classes.drawerHeader}>
-                    <Text className={classes.drawerTitle}>Create</Text>
-                  </Flex>
-                  <Box
-                    px="16px"
-                    py="12px"
-                    onClick={() => {
-                      drawer.close();
-                      mintSporeModal.open();
-                    }}
-                  >
-                    <Text>Mint a Spore</Text>
-                  </Box>
-                  <Box
-                    px="16px"
-                    py="12px"
-                    onClick={() => {
-                      drawer.close();
-                      createClusterModal.open();
-                    }}
-                  >
-                    <Text>Create a Cluster</Text>
-                  </Box>
-                </Drawer>
-                <Button className={classes.create} onClick={drawer.open}>
-                  <IconPlus />
-                  <Text>Create</Text>
-                </Button>
-              </>
+              <Button className={classes.create} onClick={drawer.open}>
+                <IconPlus />
+                <Text>Create</Text>
+              </Button>
             ) : (
               <Button className={classes.connect} onClick={connect}>
                 Connect Wallet
@@ -254,6 +211,50 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
       }
     >
       <Box bg="background.0" mih="100vh" mt="56px">
+        <Drawer
+          opened={drawerOpened}
+          transitionProps={{
+            duration: 0,
+          }}
+          overlayProps={{
+            color: '#E0E0E0',
+            opacity: 0.7,
+          }}
+          classNames={{
+            content: classes.drawerContent,
+            body: classes.drawerBody,
+          }}
+          styles={{
+            header: { display: 'none' },
+          }}
+          onClose={drawer.close}
+          size="150px"
+          position="bottom"
+        >
+          <Flex h="42px" className={classes.drawerHeader}>
+            <Text className={classes.drawerTitle}>Create</Text>
+          </Flex>
+          <Box
+            px="16px"
+            py="12px"
+            onClick={() => {
+              drawer.close();
+              mintSporeModal.open();
+            }}
+          >
+            <Text>Mint a Spore</Text>
+          </Box>
+          <Box
+            px="16px"
+            py="12px"
+            onClick={() => {
+              drawer.close();
+              createClusterModal.open();
+            }}
+          >
+            <Text>Create a Cluster</Text>
+          </Box>
+        </Drawer>
         {children}
       </Box>
     </AppShell>
