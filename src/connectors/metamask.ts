@@ -11,6 +11,7 @@ import { publicProvider } from '@wagmi/core/providers/public';
 import { InjectedConnector } from '@wagmi/core/connectors/injected';
 import CKBConnector from './base';
 import {
+  BI,
   Script,
   Transaction,
   commons,
@@ -19,6 +20,7 @@ import {
 } from '@ckb-lumos/lumos';
 import { defaultWalletValue } from '@/state/wallet';
 import * as omnilock from './lock/omnilock';
+import { isSameScript } from '@/utils/script';
 
 export default class MetaMaskConnector extends CKBConnector {
   public type = 'MetaMask';

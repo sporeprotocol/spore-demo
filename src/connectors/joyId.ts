@@ -1,11 +1,13 @@
 import { Script } from '@ckb-lumos/base';
-import { Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
+import { BI, Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
 // @ts-ignore
 import { initConfig, connect, signMessage } from '@joyid/evm';
 // @ts-ignore
 import CKBConnector from './base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import * as omnilock from './lock/omnilock';
+import { isSameScript } from '@/utils/script';
+import { bytes } from '@ckb-lumos/codec';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
@@ -66,11 +68,30 @@ export default class JoyIdConnector extends CKBConnector {
     txSkeleton: helpers.TransactionSkeletonType,
   ): Promise<Transaction> {
     const { data: ethAddress } = this.getData();
+
+    const outputs = txSkeleton.get('outputs')!;
+    outputs.forEach((output, index) => {
+      const { lock, type } = output.cellOutput;
+
+      if (!type && isSameScript(lock, this.lock)) {
+        txSkeleton = txSkeleton.update('outputs', (outputs) => {
+          output.cellOutput.capacity = BI.from(output.cellOutput.capacity)
+            .sub(1000)
+            .toHexString();
+          return outputs.set(index, output);
+        });
+      }
+    });
+
     const transaction = await omnilock.signTransaction(
       txSkeleton,
       this.lock!,
-      (message) => signMessage(message, ethAddress),
+      async (message) => {
+        const signature = await signMessage(bytes.bytify(message), ethAddress)
+        return '0x' + signature;
+      },
     );
+    console.log(transaction);
     return transaction;
   }
 }
