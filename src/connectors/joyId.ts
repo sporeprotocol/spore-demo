@@ -1,88 +1,93 @@
-import { bytes } from '@ckb-lumos/codec';
-import { Script, blockchain } from '@ckb-lumos/base';
-import { TransactionSkeletonType } from '@ckb-lumos/helpers';
-import { Transaction, helpers } from '@ckb-lumos/lumos';
+import { Script } from '@ckb-lumos/base';
+import { BI, Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
 // @ts-ignore
-import { initConfig, connect, signChallenge } from '@joyid/ckb';
+import { initConfig, connect, signMessage } from '@joyid/evm';
 // @ts-ignore
-import { verifyCredential } from '@joyid/core';
 import CKBConnector from './base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
-import { common } from '@ckb-lumos/common-scripts';
-
-const JOY_ID_URL = 'https://app.joyid.dev';
-const JOY_ID_SERVER_URL = 'https://api.joyid.dev';
+import * as omnilock from './lock/omnilock';
+import { isSameScript } from '@/utils/script';
+import { bytes } from '@ckb-lumos/codec';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
 
   constructor() {
     super();
-    this.enable = false;
 
     initConfig({
       name: 'Spore Demo',
-      joyidAppURL: JOY_ID_URL,
-      joyidServerURL: JOY_ID_SERVER_URL,
+      joyidAppURL: 'https://poc.joyid.dev',
     });
   }
 
-  async connect(): Promise<void> {
-    const authData = await connect();
-    const { address } = authData;
-    this.store.set(walletAtom, {
+  private setAddress(ethAddress: `0x${string}` | undefined) {
+    if (!ethAddress) {
+      this.setData(defaultWalletValue);
+      return;
+    }
+    config.initializeConfig(config.predefined.AGGRON4);
+    const lock = commons.omnilock.createOmnilockScript({
+      auth: { flag: 'ETHEREUM', content: ethAddress ?? '0x' },
+    });
+    const address = helpers.encodeToAddress(lock, {
+      config: config.predefined.AGGRON4,
+    });
+    this.setData({
       address,
       connectorType: this.type.toLowerCase(),
-      data: authData,
+      data: ethAddress,
     });
+  }
+
+  public async connect(): Promise<void> {
+    const ethAddress = await connect();
+    this.setAddress(ethAddress);
     this.isConnected = true;
   }
 
-  disconnect(): Promise<void> | void {
+  public async disconnect(): Promise<void> {
     this.store.set(walletAtom, defaultWalletValue);
     this.isConnected = false;
   }
 
-  getAnyoneCanPayLock(): Script {
-    throw new Error('Method not implemented.');
+  public getAnyoneCanPayLock(minimalCkb = 0, minimalUdt = 0): Script {
+    const lock = this.getLockFromAddress();
+    return omnilock.getAnyoneCanPayLock(lock, minimalCkb, minimalUdt);
   }
 
-  isOwned(targetLock: Script): boolean {
-    throw new Error('Method not implemented.');
+  public isOwned(targetLock: Script): boolean {
+    const lock = this.getLockFromAddress();
+    return omnilock.isOwned(lock, targetLock);
   }
 
-  async signTransaction(
-    txSkeleton: TransactionSkeletonType,
+  public async signTransaction(
+    txSkeleton: helpers.TransactionSkeletonType,
   ): Promise<Transaction> {
-    const { data } = this.store.get(walletAtom);
-    const { keyType, address, pubkey, alg } = data;
-    if (keyType === 'main_session_key' || keyType === 'sub_session_key') {
-      const isValid = await verifyCredential(pubkey, address, keyType, alg);
-      if (!isValid) {
-        throw new Error(
-          'Your key is expired, please re-authenticate with JoyID',
-        );
+    const { data: ethAddress } = this.getData();
+
+    const outputs = txSkeleton.get('outputs')!;
+    outputs.forEach((output, index) => {
+      const { lock, type } = output.cellOutput;
+
+      if (!type && isSameScript(lock, this.lock)) {
+        txSkeleton = txSkeleton.update('outputs', (outputs) => {
+          output.cellOutput.capacity = BI.from(output.cellOutput.capacity)
+            .sub(1000)
+            .toHexString();
+          return outputs.set(index, output);
+        });
       }
-    }
-
-    let tx = common.prepareSigningEntries(txSkeleton);
-    const signingEntries = txSkeleton.get('signingEntries');
-    const witnesses = txSkeleton.get('witnesses');
-
-    const { message, index } = signingEntries.get(0)!;
-    const { signature } = await signChallenge(message, address);
-    const witness = witnesses.get(index)!;
-    const signedWitness = bytes.hexify(
-      blockchain.WitnessArgs.pack({
-        ...blockchain.WitnessArgs.unpack(witness),
-        lock: signature,
-      }),
-    );
-    tx = tx.update('witnesses', (witnesses) => {
-      return witnesses.set(index, signedWitness);
     });
 
-    const signedTx = helpers.createTransactionFromSkeleton(tx);
-    return signedTx;
+    const transaction = await omnilock.signTransaction(
+      txSkeleton,
+      this.lock!,
+      async (message) => {
+        const signature = await signMessage(bytes.bytify(message), ethAddress);
+        return signature;
+      },
+    );
+    return transaction;
   }
 }
