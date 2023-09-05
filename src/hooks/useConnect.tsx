@@ -83,6 +83,13 @@ export const useConnect = () => {
     });
   }, [connectors]);
 
+  const disconnect = useCallback(() => {
+      if (!connector) {
+        throw new Error(`Connector ${connectorType} not found`);
+      }
+      connector.disconnect();
+  }, [connector, connectorType]);
+
   const isOwned = useCallback(
     (lock: Script) => {
       if (!connector) {
@@ -119,6 +126,7 @@ export const useConnect = () => {
     connected,
     lock,
     connect,
+    disconnect,
     isOwned,
     getAnyoneCanPayLock,
     signTransaction,

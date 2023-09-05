@@ -13,6 +13,7 @@ import {
   Button,
   Drawer,
   MediaQuery,
+  Stack,
 } from '@mantine/core';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
@@ -116,7 +117,7 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
   const [drawerOpened, drawer] = useDisclosure(false);
-  const { connect, connected } = useConnect();
+  const { connect, connected, disconnect } = useConnect();
 
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
@@ -175,10 +176,17 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
             hidden={!opened}
           >
             {connected ? (
-              <Button className={classes.create} onClick={drawer.open}>
-                <IconPlus />
-                <Text>Create</Text>
-              </Button>
+              <Stack>
+                <Button className={classes.create} onClick={drawer.open}>
+                  <IconPlus />
+                  <Text>Create</Text>
+                </Button>
+                {router.query.dev && (
+                  <Button className={classes.connect} onClick={disconnect}>
+                    Disconnect
+                  </Button>
+                )}
+              </Stack>
             ) : (
               <Button className={classes.connect} onClick={connect}>
                 Connect Wallet
