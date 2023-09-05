@@ -19,7 +19,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/server": "^11.11.0",
     "@hapi/boom": "^10.0.1",
-    "@joyid/evm": "^0.1.0",
+    "@joyid/evm": "0.1.0-beta.0",
     "@mantine/core": "^6.0.17",
     "@mantine/dropzone": "^6.0.17",
     "@mantine/form": "^6.0.17",
