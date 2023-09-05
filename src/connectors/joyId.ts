@@ -17,6 +17,7 @@ export default class JoyIdConnector extends CKBConnector {
 
     initConfig({
       name: 'Spore Demo',
+      joyidAppURL: 'https://poc.joyid.dev',
     });
   }
 
@@ -40,13 +41,9 @@ export default class JoyIdConnector extends CKBConnector {
   }
 
   public async connect(): Promise<void> {
-    try {
-      const ethAddress = await connect();
-      this.setAddress(ethAddress);
-      this.isConnected = true;
-    } catch (e) {
-      console.log(e);
-    }
+    const ethAddress = await connect();
+    this.setAddress(ethAddress);
+    this.isConnected = true;
   }
 
   public async disconnect(): Promise<void> {
@@ -87,11 +84,10 @@ export default class JoyIdConnector extends CKBConnector {
       txSkeleton,
       this.lock!,
       async (message) => {
-        const signature = await signMessage(bytes.bytify(message), ethAddress)
-        return '0x' + signature;
+        const signature = await signMessage(bytes.bytify(message), ethAddress);
+        return signature;
       },
     );
-    console.log(transaction);
     return transaction;
   }
 }

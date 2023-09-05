@@ -1,8 +1,12 @@
-import { getAnyoneCanPayMinimumCapacity, isAnyoneCanPay, isSameScript } from "@/utils/script";
-import { Script, Transaction, blockchain} from "@ckb-lumos/base";
-import { bytes, number } from "@ckb-lumos/codec";
-import { common } from "@ckb-lumos/common-scripts";
-import { BI, commons, config, helpers } from "@ckb-lumos/lumos";
+import {
+  getAnyoneCanPayMinimumCapacity,
+  isAnyoneCanPay,
+  isSameScript,
+} from '@/utils/script';
+import { Script, Transaction, blockchain } from '@ckb-lumos/base';
+import { bytes, number } from '@ckb-lumos/codec';
+import { common } from '@ckb-lumos/common-scripts';
+import { BI, commons, config, helpers } from '@ckb-lumos/lumos';
 
 export function getAnyoneCanPayLock(
   sourceLock: Script,
@@ -95,9 +99,7 @@ export async function signTransaction(
         continue;
       }
 
-      console.log(message);
       let signature = await signMessage(message);
-      console.log(signature);
 
       // Fix ECDSA recoveryId v parameter
       // https://bitcoin.stackexchange.com/questions/38351/ecdsa-v-r-s-what-is-v
@@ -106,8 +108,6 @@ export async function signTransaction(
       signature = ('0x' +
         signature.slice(2, -2) +
         v.toString(16).padStart(2, '0')) as `0x${string}`;
-
-      console.log(signature);
 
       const signedWitness = bytes.hexify(
         blockchain.WitnessArgs.pack({

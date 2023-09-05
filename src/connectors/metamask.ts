@@ -11,7 +11,6 @@ import { publicProvider } from '@wagmi/core/providers/public';
 import { InjectedConnector } from '@wagmi/core/connectors/injected';
 import CKBConnector from './base';
 import {
-  BI,
   Script,
   Transaction,
   commons,
@@ -20,7 +19,8 @@ import {
 } from '@ckb-lumos/lumos';
 import { defaultWalletValue } from '@/state/wallet';
 import * as omnilock from './lock/omnilock';
-import { isSameScript } from '@/utils/script';
+import { bytes } from '@ckb-lumos/codec';
+import { ethers } from 'ethers';
 
 export default class MetaMaskConnector extends CKBConnector {
   public type = 'MetaMask';
@@ -40,14 +40,14 @@ export default class MetaMaskConnector extends CKBConnector {
     });
   }
 
-  private setAddress(account: `0x${string}` | undefined) {
-    if (!account) {
+  private setAddress(ethAddress: `0x${string}` | undefined) {
+    if (!ethAddress) {
       this.setData(defaultWalletValue);
       return;
     }
     config.initializeConfig(config.predefined.AGGRON4);
     const lock = commons.omnilock.createOmnilockScript({
-      auth: { flag: 'ETHEREUM', content: account ?? '0x' },
+      auth: { flag: 'ETHEREUM', content: ethAddress ?? '0x' },
     });
     const address = helpers.encodeToAddress(lock, {
       config: config.predefined.AGGRON4,
@@ -55,6 +55,7 @@ export default class MetaMaskConnector extends CKBConnector {
     this.setData({
       address,
       connectorType: this.type.toLowerCase(),
+      data: ethAddress,
     });
   }
 
@@ -96,7 +97,10 @@ export default class MetaMaskConnector extends CKBConnector {
     const transaction = await omnilock.signTransaction(
       txSkeleton,
       this.lock!,
-      (message) => signMessage({ message: { raw: message } as any }),
+      async (message) => {
+        const signature = await signMessage({ message: { raw: message } as any })
+        return signature;
+      },
     );
     return transaction;
   }
