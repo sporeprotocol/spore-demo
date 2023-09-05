@@ -75,6 +75,7 @@ export default class JoyIdConnector extends CKBConnector {
 
     const { message, index } = signingEntries.get(0)!;
     const { signature } = await signChallenge(message, address);
+    console.log(signature);
     const witness = witnesses.get(index)!;
     const signedWitness = bytes.hexify(
       blockchain.WitnessArgs.pack({
