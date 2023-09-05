@@ -46,10 +46,12 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         outPoint: cluster.cell.outPoint!,
         useCapacityMarginAsFee: false,
         fromInfos: [address],
-        toLock: helpers.parseAddress(values.to, { config: config.predefined.AGGRON4 }),
+        toLock: helpers.parseAddress(values.to, {
+          config: config.predefined.AGGRON4,
+        }),
         config: predefinedSporeConfigs.Aggron4,
       });
-      showSuccess('Cluster Transferred!')
+      showSuccess('Cluster Transferred!');
       modals.close(modalId);
     },
     [address, cluster, transferClusterMutation, modalId],
@@ -59,17 +61,24 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Transfer cluster',
+        title: `Transfer "${cluster!.name}"?`,
         onClose: close,
         closeOnEscape: !transferClusterMutation.isLoading,
         withCloseButton: !transferClusterMutation.isLoading,
         closeOnClickOutside: !transferClusterMutation.isLoading,
-        children: <TransferModal onSubmit={handleSubmit} />,
+        children: <TransferModal type="cluster" onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);
     }
-  }, [transferClusterMutation.isLoading, handleSubmit, opened, close, modalId]);
+  }, [
+    cluster,
+    transferClusterMutation.isLoading,
+    handleSubmit,
+    opened,
+    close,
+    modalId,
+  ]);
 
   return {
     open,

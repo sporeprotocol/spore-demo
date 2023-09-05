@@ -3,7 +3,6 @@ import { config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { notifications } from '@mantine/notifications';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
 import { Spore } from '@/spore';
@@ -66,7 +65,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         closeOnEscape: !transferSporeMutation.isLoading,
         withCloseButton: !transferSporeMutation.isLoading,
         closeOnClickOutside: !transferSporeMutation.isLoading,
-        children: <TransferModal onSubmit={handleSubmit} />,
+        children: <TransferModal type="spore" onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);

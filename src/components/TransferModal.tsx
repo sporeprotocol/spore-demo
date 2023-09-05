@@ -1,10 +1,22 @@
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { isValidAddress } from '@/utils/helpers';
-import { Text, Button, Group, TextInput, createStyles } from '@mantine/core';
+import {
+  Text,
+  Button,
+  Group,
+  Stack,
+  TextInput,
+  createStyles,
+  em,
+  getBreakpointValue,
+  useMantineTheme,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
 
 export interface TransferModalProps {
+  type: 'cluster' | 'spore';
   onSubmit: (values: { to: string }) => Promise<void>;
 }
 
@@ -25,6 +37,10 @@ const useStyles = createStyles((theme) => ({
     border: '1px solid #CDCFD5',
     borderRadius: '8px',
 
+    [`@media (max-width: ${em(getBreakpointValue(theme.breakpoints.sm))})`]: {
+      height: '48px',
+    },
+
     '&:focus': {
       borderWidth: '2px',
       borderStyle: 'solid',
@@ -44,8 +60,10 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function TransferModal(props: TransferModalProps) {
-  const { onSubmit } = props;
+  const { type, onSubmit } = props;
   const { classes } = useStyles();
+  const theme = useMantineTheme();
+  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -76,29 +94,42 @@ export default function TransferModal(props: TransferModalProps) {
   );
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
-      <TextInput
-        classNames={{
-          root: classes.root,
-          label: classes.label,
-          input: classes.input,
-          error: classes.error,
-        }}
-        label="Transfer to"
-        placeholder="e.g. ckt1q7eiwlwk...3cv86p9wcmwejo32owejwp"
-        withAsterisk
-        {...form.getInputProps('to')}
-      />
-      {error && (
-        <Text size="sm" color="functional.0">
-          {getFriendlyErrorMessage(error.message)}
+    <Stack>
+      {type === 'cluster' && !largerThanSM && (
+        <Text color="text.1">
+          Transferring this Cluster won’t affect the ownership of the Spores
+          within it.
         </Text>
       )}
-      <Group position="right" mt={'32px'}>
-        <Button className={classes.submit} type="submit" loading={loading}>
-          Submit
-        </Button>
-      </Group>
-    </form>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <TextInput
+          classNames={{
+            root: classes.root,
+            label: classes.label,
+            input: classes.input,
+            error: classes.error,
+          }}
+          label="Transfer to"
+          placeholder="e.g. ckt1q7eiwlwk...3cv86p9wcmwejo32owejwp"
+          withAsterisk
+          {...form.getInputProps('to')}
+        />
+        {error && (
+          <Text size="sm" color="functional.0">
+            {getFriendlyErrorMessage(error.message)}
+          </Text>
+        )}
+        <Group position="right" mt={'32px'}>
+          <Button
+            className={classes.submit}
+            type="submit"
+            loading={loading}
+            fullWidth={!largerThanSM}
+          >
+            Submit
+          </Button>
+        </Group>
+      </form>
+    </Stack>
   );
 }

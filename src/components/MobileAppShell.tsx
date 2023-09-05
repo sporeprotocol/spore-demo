@@ -23,7 +23,6 @@ import { IconPlus } from '@tabler/icons-react';
 import { NAVS } from '@/constants';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import DropMenu from './DropMenu';
 import { useDisclosure } from '@mantine/hooks';
 
 const useStyles = createStyles((theme) => ({
@@ -41,6 +40,7 @@ const useStyles = createStyles((theme) => ({
   },
   header: {
     height: '56px',
+    backgroundColor: theme.colors.brand[0],
     backgroundImage: 'url(/images/noise-on-yellow.png)',
   },
   navbar: {
