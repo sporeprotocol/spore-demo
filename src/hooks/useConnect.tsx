@@ -1,6 +1,7 @@
 import ConnectModal from '@/components/ConnectModal';
 import CKBConnector from '@/connectors/base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
+import { showError } from '@/utils/notifications';
 import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
 import { modals } from '@mantine/modals';
 import { useAtom } from 'jotai';
@@ -10,6 +11,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from 'react';
 
 export const ConnectContext = createContext<{
@@ -25,6 +27,7 @@ export const ConnectProvider = ConnectContext.Provider;
 export const useConnect = () => {
   const { connectors, autoConnect } = useContext(ConnectContext);
   const [{ address, connectorType }, setWallet] = useAtom(walletAtom);
+  const [autoConnected, setAuthConnected] = useState(false);
   const connected = !!address;
 
   const lock = useMemo(() => {
@@ -43,10 +46,17 @@ export const useConnect = () => {
 
   // auto connect
   useEffect(() => {
-    if (address && autoConnect && !connector?.isConnected) {
-      connector?.connect();
+    if (autoConnected) {
+      return;
     }
-  }, [autoConnect, connector, address, setWallet]);
+
+    if (address && autoConnect && !connector?.isConnected) {
+      setAuthConnected(true);
+      connector?.connect().catch((e) => {
+        showError((e as Error).message);
+      });
+    }
+  }, [autoConnected, autoConnect, connector, address, setWallet]);
 
   // clear wallet when connector is removed
   useEffect(() => {
@@ -71,9 +81,13 @@ export const useConnect = () => {
     }
 
     if (connectors.length === 1) {
-      const [connector] = connectors;
-      connector.connect();
-      return;
+      try {
+        const [connector] = connectors;
+        connector.connect();
+        return;
+      } catch (e) {
+        showError((e as Error).message);
+      }
     }
 
     modals.open({
@@ -84,10 +98,10 @@ export const useConnect = () => {
   }, [connectors]);
 
   const disconnect = useCallback(() => {
-      if (!connector) {
-        throw new Error(`Connector ${connectorType} not found`);
-      }
-      connector.disconnect();
+    if (!connector) {
+      throw new Error(`Connector ${connectorType} not found`);
+    }
+    connector.disconnect();
   }, [connector, connectorType]);
 
   const isOwned = useCallback(
