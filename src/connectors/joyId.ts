@@ -88,8 +88,14 @@ export default class JoyIdConnector extends CKBConnector {
       txSkeleton,
       this.lock!,
       async (message) => {
-        const signature = await signMessage(bytes.bytify(message), ethAddress);
-        return signature;
+        return new Promise((resolve) => {
+          const button = document.createElement('button');
+          button.onclick = async () => {
+            const signature = await signMessage(bytes.bytify(message), ethAddress);
+            resolve(signature);
+          };
+          button.click();
+        })
       },
     );
     return transaction;
