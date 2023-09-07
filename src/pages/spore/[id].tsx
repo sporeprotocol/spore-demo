@@ -313,15 +313,15 @@ export default function SporePage() {
                   <Flex align="center">
                     <Text component="span">
                       {address === owner ? (
-                        <>
-                          <Text size="lg">Me (</Text>
+                        <Text component="span">
+                          <Text component="span" size="lg">Me (</Text>
                           <Link href={`/my`} style={{ textDecoration: 'none' }}>
-                            <Text size="lg" color="brand.1">
+                            <Text component="span" size="lg" color="brand.1">
                               {owner.slice(0, 10)}...{owner.slice(-10)}
                             </Text>
                           </Link>
-                          <Text size="lg">)</Text>
-                        </>
+                          <Text component="span" size="lg">)</Text>
+                        </Text>
                       ) : (
                         <Link
                           href={`/${owner}`}
