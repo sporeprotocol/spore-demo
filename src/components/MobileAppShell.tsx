@@ -169,10 +169,10 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
         </MantineHeader>
       }
       navbar={
-        <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+        <MediaQuery largerThan="lg" styles={{ display: 'none' }}>
           <Navbar
             className={classes.navbar}
-            hiddenBreakpoint="sm"
+            hiddenBreakpoint="lg"
             hidden={!opened}
           >
             {connected ? (

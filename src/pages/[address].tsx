@@ -122,22 +122,36 @@ export default function AccountPage() {
           </Flex>
           <Flex px="24px" w="100%" justify="center" align="center">
             <Flex align="center">
-              <Text size="xl" align="center" color="text.0" mr="sm">
+              <Text
+                component="span"
+                size="xl"
+                align="center"
+                color="text.0"
+                mr="sm"
+              >
                 Address:
               </Text>
-              <Text size="xl" weight="bold" color="text.0" mr="5px">
+              <Text
+                component="span"
+                size="xl"
+                weight="bold"
+                color="text.0"
+                mr="5px"
+              >
                 {address.slice(0, 8)}...{address.slice(-8)}
               </Text>
-              <Flex
+              <Text
+                component="span"
                 sx={{ cursor: 'pointer' }}
                 onClick={() => {
                   clipboard.copy(address);
                   showSuccess('Copied!');
                 }}
+                h="22px"
                 ml="3px"
               >
                 <IconCopy size="22px" color={theme.colors.text[0]} />
-              </Flex>
+              </Text>
             </Flex>
           </Flex>
         </Flex>

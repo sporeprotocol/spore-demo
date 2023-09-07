@@ -148,6 +148,46 @@ export default function SporePage() {
 
   const isLoading = !spore;
 
+  const pager = cluster && spores && spores.length > 1 && (
+    <Flex justify="space-between">
+      {prevSporeIndex >= 0 ? (
+        <Link
+          href={`/spore/${spores[prevSporeIndex].id}`}
+          style={{ textDecoration: 'none' }}
+          prefetch
+        >
+          <Image
+            src="/svg/icon-chevron-left.svg"
+            width="32"
+            height="32"
+            alt="Previus Spore"
+          />
+        </Link>
+      ) : (
+        <Box h="32px" w="32px" />
+      )}
+      <Text size="xl" color="text.0">
+        {nextSporeIndex} / {spores.length}
+      </Text>
+      {nextSporeIndex < spores.length ? (
+        <Link
+          href={`/spore/${spores[nextSporeIndex].id}`}
+          style={{ textDecoration: 'none' }}
+          prefetch
+        >
+          <Image
+            src="/svg/icon-chevron-right.svg"
+            width="32"
+            height="32"
+            alt="Previus Spore"
+          />
+        </Link>
+      ) : (
+        <Box h="32px" w="32px" />
+      )}
+    </Flex>
+  );
+
   return (
     <Layout>
       <Head>
@@ -197,6 +237,11 @@ export default function SporePage() {
               )}
             </Box>
           </Grid.Col>
+          {isMobile && (
+            <Grid.Col span={12}>
+              <Box mb="24px">{pager}</Box>
+            </Grid.Col>
+          )}
           <Grid.Col span={isMobile ? 12 : 6}>
             <Flex h="100%" direction="column" justify="center">
               <Flex align="center" mb="32px">
@@ -208,25 +253,30 @@ export default function SporePage() {
                     borderRadius="16px"
                   />
                 ) : (
-                  <>
-                    <Box className={classes.title}>
-                      <Title order={2} color="text.0" mr="3px">
+                  <Flex className={classes.title}>
+                    <Text component="span">
+                      <Text
+                        component="span"
+                        size="32px"
+                        weight="bold"
+                        color="text.0"
+                      >
                         {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
-                      </Title>
-                    </Box>
-                    <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-                      <Flex
+                      </Text>
+                      <Text
+                        component="span"
                         sx={{ cursor: 'pointer' }}
                         onClick={() => {
                           clipboard.copy(spore!.id);
                           showSuccess('Copied!');
                         }}
-                        ml="3px"
+                        h="30px"
+                        ml="5px"
                       >
                         <IconCopy size="30px" color={theme.colors.text[0]} />
-                      </Flex>
-                    </MediaQuery>
-                  </>
+                      </Text>
+                    </Text>
+                  </Flex>
                 )}
               </Flex>
               <Flex mb={isTablet ? '32px' : '64px'}>
@@ -261,36 +311,40 @@ export default function SporePage() {
                   />
                 ) : (
                   <Flex align="center">
-                    {address === owner ? (
-                      <>
-                        <Text size="lg">Me (</Text>
-                        <Link href={`/my`} style={{ textDecoration: 'none' }}>
+                    <Text component="span">
+                      {address === owner ? (
+                        <>
+                          <Text size="lg">Me (</Text>
+                          <Link href={`/my`} style={{ textDecoration: 'none' }}>
+                            <Text size="lg" color="brand.1">
+                              {owner.slice(0, 10)}...{owner.slice(-10)}
+                            </Text>
+                          </Link>
+                          <Text size="lg">)</Text>
+                        </>
+                      ) : (
+                        <Link
+                          href={`/${owner}`}
+                          style={{ textDecoration: 'none' }}
+                        >
                           <Text size="lg" color="brand.1">
                             {owner.slice(0, 10)}...{owner.slice(-10)}
                           </Text>
                         </Link>
-                        <Text size="lg">)</Text>
-                      </>
-                    ) : (
-                      <Link
-                        href={`/${owner}`}
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Text size="lg" color="brand.1">
-                          {owner.slice(0, 10)}...{owner.slice(-10)}
-                        </Text>
-                      </Link>
-                    )}
-                    <Flex
+                      )}
+                    </Text>
+                    <Text
+                      component="span"
                       sx={{ cursor: 'pointer' }}
                       onClick={() => {
                         clipboard.copy(owner);
                         showSuccess('Copied!');
                       }}
-                      ml="3px"
+                      h="22px"
+                      ml="5px"
                     >
                       <IconCopy size="22px" color={theme.colors.text[0]} />
-                    </Flex>
+                    </Text>
                   </Flex>
                 )}
               </Flex>
@@ -316,46 +370,12 @@ export default function SporePage() {
               )}
             </Flex>
           </Grid.Col>
+          {!isMobile && (
+            <Grid.Col span={12}>
+              <Box mt="80px">{pager}</Box>
+            </Grid.Col>
+          )}
         </Grid>
-        {cluster && spores && spores.length > 1 && (
-          <Flex justify="space-between" mt="80px">
-            {prevSporeIndex >= 0 ? (
-              <Link
-                href={`/spore/${spores[prevSporeIndex].id}`}
-                style={{ textDecoration: 'none' }}
-                prefetch
-              >
-                <Image
-                  src="/svg/icon-chevron-left.svg"
-                  width="32"
-                  height="32"
-                  alt="Previus Spore"
-                />
-              </Link>
-            ) : (
-              <Box h="32px" w="32px" />
-            )}
-            <Text size="xl" color="text.0">
-              {nextSporeIndex} / {spores.length}
-            </Text>
-            {nextSporeIndex < spores.length ? (
-              <Link
-                href={`/spore/${spores[nextSporeIndex].id}`}
-                style={{ textDecoration: 'none' }}
-                prefetch
-              >
-                <Image
-                  src="/svg/icon-chevron-right.svg"
-                  width="32"
-                  height="32"
-                  alt="Previus Spore"
-                />
-              </Link>
-            ) : (
-              <Box h="32px" w="32px" />
-            )}
-          </Flex>
-        )}
       </Container>
     </Layout>
   );

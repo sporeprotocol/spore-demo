@@ -210,7 +210,7 @@ export default function ClusterPage() {
               </Flex>
               <Flex mb="24px">
                 <Flex
-                  direction={{ base: 'column', xs: 'row' }}
+                  direction={{ base: 'column', sm: 'row' }}
                   gap={{ base: '8px', sx: '0px' }}
                 >
                   <Title order={2} mr="md" className={classes.name}>
@@ -258,36 +258,43 @@ export default function ClusterPage() {
               </Title>
               <Flex mb="24px">
                 <Flex align="center">
-                  {address === owner ? (
-                    <>
-                      <Text size="lg">Me (</Text>
-                      <Link href={`/my`} style={{ textDecoration: 'none' }}>
+                  <Text component="span">
+                    {address === owner ? (
+                      <>
+                        <Text size="lg">Me (</Text>
+                        <Link href={`/my`} style={{ textDecoration: 'none' }}>
+                          <Text size="lg" color="brand.1">
+                            {owner.slice(0, 10)}...{owner.slice(-10)}
+                          </Text>
+                        </Link>
+                        <Text size="lg">)</Text>
+                      </>
+                    ) : (
+                      <Link
+                        href={`/${owner}`}
+                        style={{ textDecoration: 'none' }}
+                      >
                         <Text size="lg" color="brand.1">
                           {owner.slice(0, 10)}...{owner.slice(-10)}
                         </Text>
                       </Link>
-                      <Text size="lg">)</Text>
-                    </>
-                  ) : (
-                    <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
-                      <Text size="lg" color="brand.1">
-                        {owner.slice(0, 10)}...{owner.slice(-10)}
-                      </Text>
-                    </Link>
-                  )}
-                  <Flex
+                    )}
+                  </Text>
+                  <Text
+                    component="span"
                     sx={{ cursor: 'pointer' }}
                     onClick={() => {
                       clipboard.copy(owner);
                       showSuccess('Copied!');
                     }}
-                    ml="3px"
+                    h="22px"
+                    ml="5px"
                   >
                     <IconCopy size="22px" color={theme.colors.text[0]} />
-                  </Flex>
+                  </Text>
                 </Flex>
               </Flex>
-              <Flex direction={{ base: 'column', xs: 'row' }} gap="md">
+              <Flex direction={{ base: 'column', sm: 'row' }} gap="md">
                 {(isPublic || owner === address) && (
                   <Button
                     className={classes.button}

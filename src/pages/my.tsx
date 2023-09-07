@@ -149,22 +149,36 @@ export default function MySpacePage() {
             justify="space-around"
           >
             <Flex align="center">
-              <Text size="xl" align="center" color="text.0" mr="sm">
+              <Text
+                component="span"
+                size="xl"
+                align="center"
+                color="text.0"
+                mr="sm"
+              >
                 Address:
               </Text>
-              <Text size="xl" weight="bold" color="text.0" mr="5px">
+              <Text
+                component="span"
+                size="xl"
+                weight="bold"
+                color="text.0"
+                mr="5px"
+              >
                 {address.slice(0, 10)}...{address.slice(-10)}
               </Text>
-              <Flex
+              <Text
+                component="span"
                 sx={{ cursor: 'pointer' }}
                 onClick={() => {
                   clipboard.copy(address);
                   showSuccess('Copied!');
                 }}
+                h="22px"
                 ml="3px"
               >
                 <IconCopy size="22px" color={theme.colors.text[0]} />
-              </Flex>
+              </Text>
             </Flex>
             <Flex align="center">
               <Text size="xl" align="center" color="text.0" mr="sm">

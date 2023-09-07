@@ -9,6 +9,7 @@ import {
   Box,
   AppShell,
   MediaQuery,
+  Center,
 } from '@mantine/core';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
@@ -94,64 +95,66 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
         >
           <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
             <Container size="xl">
-              <Grid align="center" mx={'44px'}>
-                <Grid.Col span={2}>
-                  <Flex justify="start">
-                    <Logo />
-                  </Flex>
-                </Grid.Col>
-                <Grid.Col span={8}>
-                  <Flex justify="center" gap="50px">
-                    {navs.map((nav) => (
-                      <Link
-                        key={nav.name}
-                        href={nav.href}
-                        target={nav.target}
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Text
-                          className={
-                            nav.href === router.pathname
-                              ? classes.active
-                              : classes.nav
-                          }
+              <Center>
+                <Grid align="center" w="1200px">
+                  <Grid.Col span={2}>
+                    <Flex justify="start">
+                      <Logo />
+                    </Flex>
+                  </Grid.Col>
+                  <Grid.Col span={8}>
+                    <Flex justify="center" gap="50px">
+                      {navs.map((nav) => (
+                        <Link
+                          key={nav.name}
+                          href={nav.href}
+                          target={nav.target}
+                          style={{ textDecoration: 'none' }}
                         >
-                          {nav.name}
-                        </Text>
-                      </Link>
-                    ))}
-                  </Flex>
-                </Grid.Col>
-                <Grid.Col span={2}>
-                  <Flex justify="end">
-                    {connected ? (
-                      <DropMenu
-                        menu={[
-                          {
-                            key: 'mint-spore',
-                            title: 'Mint a Spore',
-                            onClick: mintSporeModal.open,
-                          },
-                          {
-                            key: 'create-cluster',
-                            title: 'Create a Cluster',
-                            onClick: createClusterModal.open,
-                          },
-                        ]}
-                      >
-                        <Button className={classes.create}>
-                          <IconPlus />
-                          <Text>Create</Text>
+                          <Text
+                            className={
+                              nav.href === router.pathname
+                                ? classes.active
+                                : classes.nav
+                            }
+                          >
+                            {nav.name}
+                          </Text>
+                        </Link>
+                      ))}
+                    </Flex>
+                  </Grid.Col>
+                  <Grid.Col span={2}>
+                    <Flex justify="end">
+                      {connected ? (
+                        <DropMenu
+                          menu={[
+                            {
+                              key: 'mint-spore',
+                              title: 'Mint a Spore',
+                              onClick: mintSporeModal.open,
+                            },
+                            {
+                              key: 'create-cluster',
+                              title: 'Create a Cluster',
+                              onClick: createClusterModal.open,
+                            },
+                          ]}
+                        >
+                          <Button className={classes.create}>
+                            <IconPlus />
+                            <Text>Create</Text>
+                          </Button>
+                        </DropMenu>
+                      ) : (
+                        <Button className={classes.connect} onClick={connect}>
+                          Connect Wallet
                         </Button>
-                      </DropMenu>
-                    ) : (
-                      <Button className={classes.connect} onClick={connect}>
-                        Connect Wallet
-                      </Button>
-                    )}
-                  </Flex>
-                </Grid.Col>
-              </Grid>
+                      )}
+                    </Flex>
+                  </Grid.Col>
+                </Grid>
+              </Center>
             </Container>
           </MediaQuery>
         </MantineHeader>

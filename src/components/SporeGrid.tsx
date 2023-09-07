@@ -5,6 +5,8 @@ import { Cluster } from '@/cluster';
 import EmptyPlaceholder from './EmptyPlaceholder';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useRouter } from 'next/router';
+import { useMediaQuery } from '@mantine/hooks';
+import { useMemo } from 'react';
 
 export interface SporeGridProps {
   title: string;
@@ -20,6 +22,14 @@ export default function SporeGrid(props: SporeGridProps) {
   const { title, spores, isLoading } = props;
   const router = useRouter();
   const theme = useMantineTheme();
+  const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
+  const lg = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
+  const loadingCount = useMemo(() => {
+    if (!md && lg) return 3;
+    if (md) return 2;
+    return 4;
+  }, [md, lg]);
+
   const mintSporeModal = useMintSporeModal();
 
   if (!isLoading && spores.length === 0) {
@@ -60,7 +70,7 @@ export default function SporeGrid(props: SporeGridProps) {
           ]}
           mt="24px"
         >
-          {Array(4)
+          {Array(loadingCount)
             .fill(0)
             .map((_, index) => {
               return <SporeSkeletonCard key={`spore_skeleton_${index}`} />;

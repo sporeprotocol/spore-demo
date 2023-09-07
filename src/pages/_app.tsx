@@ -36,6 +36,10 @@ const useStyles = createStyles((theme) => ({
     padding: '32px',
     paddingBottom: '16px',
     backgroundColor: theme.colors.background[0],
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      padding: '24px',
+    },
   },
   title: {
     fontSize: '18px',
@@ -46,6 +50,12 @@ const useStyles = createStyles((theme) => ({
     paddingLeft: '32px',
     paddingRight: '32px',
     paddingBottom: '32px',
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      paddingLeft: '24px',
+      paddingRight: '24px',
+      paddingBottom: '24px',
+    },
   },
   content: {
     backgroundColor: theme.colors.background[0],

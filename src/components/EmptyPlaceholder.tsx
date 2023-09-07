@@ -1,8 +1,17 @@
-import { Text, Box, Button, Flex, Title, createStyles } from "@mantine/core";
+import {
+  Text,
+  Box,
+  Button,
+  Flex,
+  Title,
+  createStyles,
+  useMantineTheme,
+} from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import Image from 'next/image';
 
 const useStyles = createStyles((theme) => ({
-  mint: {
+  button: {
     backgroundColor: 'transparent',
     color: theme.colors.brand[1],
     border: `2px solid ${theme.colors.brand[1]}`,
@@ -25,6 +34,8 @@ export interface EmptyPlaceholderProps {
 export default function EmptyPlaceholder(props: EmptyPlaceholderProps) {
   const { classes } = useStyles();
   const { title, description, submitLabel, onClick } = props;
+  const them = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${them.breakpoints.sm})`);
 
   return (
     <Flex direction="column" align="center">
@@ -39,10 +50,14 @@ export default function EmptyPlaceholder(props: EmptyPlaceholderProps) {
       <Title order={3} mb="md">
         {title}
       </Title>
-      <Text color="text.1" mb="32px">
+      <Text color="text.1" mb="32px" align={isMobile ? 'center' : 'left'}>
         {description}
       </Text>
-      <Button classNames={{ root: classes.mint }} onClick={onClick}>
+      <Button
+        classNames={{ root: classes.button }}
+        onClick={onClick}
+        fullWidth={isMobile}
+      >
         {submitLabel}
       </Button>
     </Flex>
