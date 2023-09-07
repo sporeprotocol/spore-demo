@@ -8,7 +8,6 @@ import { useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
-import { DefaultSeo } from 'next-seo';
 import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
@@ -37,6 +36,10 @@ const useStyles = createStyles((theme) => ({
     padding: '32px',
     paddingBottom: '16px',
     backgroundColor: theme.colors.background[0],
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      padding: '24px',
+    },
   },
   title: {
     fontSize: '18px',
@@ -47,6 +50,12 @@ const useStyles = createStyles((theme) => ({
     paddingLeft: '32px',
     paddingRight: '32px',
     paddingBottom: '32px',
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      paddingLeft: '24px',
+      paddingRight: '24px',
+      paddingBottom: '24px',
+    },
   },
   content: {
     backgroundColor: theme.colors.background[0],
@@ -71,7 +80,7 @@ function UIProvider({ children }: React.PropsWithChildren<{}>) {
         classNames: classes,
       }}
     >
-      <Notifications position="bottom-center" />
+      <Notifications position="bottom-center" limit={1} />
       {children}
     </ModalsProvider>
   );

@@ -1,10 +1,12 @@
 import { Cluster } from '@/cluster';
 import { Spore } from '@/spore';
-import { Box, Flex, SimpleGrid, Title } from '@mantine/core';
+import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import ClusterCard, { ClusterSkeletonCard } from './ClusterCard';
 import EmptyPlaceholder from './EmptyPlaceholder';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useRouter } from 'next/router';
+import { useMemo } from 'react';
+import { useMediaQuery } from '@mantine/hooks';
 
 export interface ClusterGridProps {
   title: string | JSX.Element;
@@ -16,6 +18,15 @@ export interface ClusterGridProps {
 export default function ClusterGrid(props: ClusterGridProps) {
   const { title, clusters, spores, isLoading } = props;
   const router = useRouter();
+  const theme = useMantineTheme();
+  const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
+  const lg = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
+  const loadingCount = useMemo(() => {
+    if (!md && lg) return 3;
+    if (md) return 2;
+    return 4;
+  }, [md, lg]);
+
   const createClusterModal = useCreateClusterModal();
 
   if (!isLoading && clusters.length === 0) {
@@ -54,13 +65,13 @@ export default function ClusterGrid(props: ClusterGridProps) {
           cols={4}
           spacing="24px"
           breakpoints={[
-            { maxWidth: '80rem', cols: 3 },
-            { maxWidth: '60rem', cols: 2 },
-            { maxWidth: '36rem', cols: 1 },
+            { maxWidth: theme.breakpoints.lg, cols: 3 },
+            { maxWidth: theme.breakpoints.md, cols: 2 },
+            { maxWidth: theme.breakpoints.xs, cols: 1 },
           ]}
           mt="24px"
         >
-          {Array(4)
+          {Array(loadingCount)
             .fill(0)
             .map((_, index) => {
               return <ClusterSkeletonCard key={`cluster_skeleton_${index}`} />;
@@ -71,9 +82,9 @@ export default function ClusterGrid(props: ClusterGridProps) {
           cols={4}
           spacing="24px"
           breakpoints={[
-            { maxWidth: '80rem', cols: 3 },
-            { maxWidth: '60rem', cols: 2 },
-            { maxWidth: '36rem', cols: 1 },
+            { maxWidth: theme.breakpoints.lg, cols: 3 },
+            { maxWidth: theme.breakpoints.md, cols: 2 },
+            { maxWidth: theme.breakpoints.xs, cols: 1 },
           ]}
           mt="24px"
         >

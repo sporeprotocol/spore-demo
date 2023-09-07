@@ -8,7 +8,10 @@ import {
   Image,
   Overlay,
   createStyles,
+  useMantineTheme,
+  MediaQuery,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useEffect, useMemo, useState } from 'react';
 
 export interface ImageSporeRenderProps {
@@ -67,6 +70,10 @@ const usePreviewStyles = createStyles(
       width: '616px',
       height: '260px',
       imageRendering: params?.pixelated ? 'pixelated' : 'auto',
+
+      [`@media (max-width: ${theme.breakpoints.sm})`]: {
+        width: 'auto',
+      },
     },
     change: {
       height: '48px',
@@ -82,6 +89,8 @@ const usePreviewStyles = createStyles(
 
 export function ImagePreviewRender(props: ImagePreviewRenderProps) {
   const { content, loading, onClick } = props;
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [hovered, setHovered] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
   const { classes } = usePreviewStyles({
@@ -106,9 +115,9 @@ export function ImagePreviewRender(props: ImagePreviewRenderProps) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <AspectRatio ratio={616 / 260}>
+      <AspectRatio ratio={(isMobile ? 295 : 616) / 260}>
         <Image
-          width="616px"
+          width="100%"
           height="260px"
           className={classes.image}
           src={dataUrl.toString()}
@@ -116,13 +125,15 @@ export function ImagePreviewRender(props: ImagePreviewRenderProps) {
           fit="contain"
         />
         {hovered && !loading && (
-          <Overlay color="#E0E0E0" opacity={0.7} sx={{ borderRadius: '6px' }}>
-            <Center className={classes.change} onClick={onClick}>
-              <Text color="text.0" weight="bold">
-                Change Image
-              </Text>
-            </Center>
-          </Overlay>
+          <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+            <Overlay color="#E0E0E0" opacity={0.7} sx={{ borderRadius: '6px' }}>
+              <Center className={classes.change} onClick={onClick}>
+                <Text color="text.0" weight="bold">
+                  Change Image
+                </Text>
+              </Center>
+            </Overlay>
+          </MediaQuery>
         )}
       </AspectRatio>
     </Box>

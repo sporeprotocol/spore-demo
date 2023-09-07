@@ -1,4 +1,5 @@
 import CKBConnector from '@/connectors/base';
+import { showError } from '@/utils/notifications';
 import { Button, Flex, createStyles } from '@mantine/core';
 import { useState } from 'react';
 
@@ -28,9 +29,13 @@ export default function ConnectModal(props: ConnectModalProps) {
   const [connectingConnector, setConnectingConnector] = useState('');
 
   const connect = async (connector: CKBConnector) => {
-    setConnectingConnector(connector.type);
-    await connector.connect();
-    setConnectingConnector('');
+    try {
+      setConnectingConnector(connector.type);
+      await connector.connect();
+      setConnectingConnector('');
+    } catch (e) {
+      showError((e as Error).message);
+    }
   };
 
   return (

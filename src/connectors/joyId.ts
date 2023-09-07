@@ -1,7 +1,7 @@
 import { Script } from '@ckb-lumos/base';
 import { BI, Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
 // @ts-ignore
-import { initConfig, connect, signMessage } from '@joyid/evm';
+import { initConfig, openPopup, connect, signMessage } from '@joyid/evm';
 // @ts-ignore
 import CKBConnector from './base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
@@ -88,8 +88,18 @@ export default class JoyIdConnector extends CKBConnector {
       txSkeleton,
       this.lock!,
       async (message) => {
-        const signature = await signMessage(bytes.bytify(message), ethAddress);
-        return signature;
+        return new Promise((resolve, reject) => {
+          const button = document.createElement('button');
+          button.onclick = async () => {
+            try {
+              const signature = await signMessage(bytes.bytify(message), ethAddress);
+              resolve(signature);
+            } catch (e) {
+              reject(e);
+            }
+          };
+          button.click();
+        })
       },
     );
     return transaction;

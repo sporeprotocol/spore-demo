@@ -32,9 +32,12 @@ dependencies:
   '@hapi/boom':
     specifier: ^10.0.1
     version: 10.0.1
+  '@joyid/core':
+    specifier: ^0.1.3
+    version: 0.1.3
   '@joyid/evm':
-    specifier: ^0.1.0
-    version: 0.1.0
+    specifier: 0.1.0-beta.0
+    version: 0.1.0-beta.0
   '@mantine/core':
     specifier: ^6.0.17
     version: 6.0.17(@emotion/react@11.11.1)(@mantine/hooks@6.0.17)(@types/react@18.2.16)(react-dom@18.2.0)(react@18.2.0)
@@ -769,8 +772,16 @@ packages:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: false
 
-  /@joyid/evm@0.1.0:
-    resolution: {integrity: sha512-OXvs+TD1wtXDtK/89zPOdOyt1mHK9uXDIJyTEeDxS7G3uAFAeQResZBnqfM48PlLFPhTP+Fc4I9DpGwL5YWxdA==}
+  /@joyid/core@0.1.3:
+    resolution: {integrity: sha512-az6MX4l5D0s5LM1i09mdCgVl/1/qS70AIKnwgyyWu8yeuDZsq/7HTWf3Ib8qeOwcfPkEgfR2MHQsn5d4AgxRSA==}
+    optionalDependencies:
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@joyid/evm@0.1.0-beta.0:
+    resolution: {integrity: sha512-ixjt1u5fbWrumcftQUoWaypsoBs9hRgqhqPBA3d0lvuympsf4CPcc/aea3odrDrUY/gpDcp1Rki1PONW2tRZhA==}
     dev: false
 
   /@ledgerhq/connect-kit-loader@1.1.2:
@@ -5717,6 +5728,7 @@ packages:
 
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+    requiresBuild: true
     dev: false
 
   /tsconfig-paths@3.14.2:
@@ -5993,6 +6005,7 @@ packages:
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
+    requiresBuild: true
     dev: false
 
   /webpack-bundle-analyzer@4.7.0:
@@ -6021,6 +6034,7 @@ packages:
 
   /whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
+    requiresBuild: true
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1

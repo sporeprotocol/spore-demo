@@ -7,8 +7,10 @@ import {
   Button,
   createStyles,
   Radio,
+  useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
 
 export interface CreateClusterModalProps {
@@ -37,6 +39,10 @@ const useStyles = createStyles((theme) => ({
       borderColor: theme.colors.brand[1],
       boxShadow: '0px 0px 4px 0px rgba(109, 87, 203, 0.50)',
     },
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      height: '48px',
+    },
   },
   radio: {
     color: theme.colors.text[0],
@@ -52,6 +58,8 @@ const useStyles = createStyles((theme) => ({
 export default function CreateClusterModal(props: CreateClusterModalProps) {
   const { onSubmit } = props;
   const { classes } = useStyles();
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -139,12 +147,13 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
             {getFriendlyErrorMessage(error.message)}
           </Text>
         )}
-        <Group position="right" mt={error ? "24px" : "48px"}>
+        <Group position="right" mt={error ? '24px' : '48px'}>
           <Button
             type="submit"
             className={classes.submit}
             loading={loading}
             disabled={!form.values['name'] || !form.values['description']}
+            fullWidth={isMobile}
           >
             Create
           </Button>

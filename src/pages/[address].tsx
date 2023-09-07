@@ -13,7 +13,6 @@ import {
   Button,
   Group,
   Title,
-  Tooltip,
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
@@ -102,55 +101,72 @@ export default function AccountPage() {
     return null;
   }
 
+  const header = (
+    <Flex align="center" className={classes.banner}>
+      <Container size="xl" className={classes.container}>
+        <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
+          <Image
+            className={classes.illus}
+            src="/svg/my-space-illus.svg"
+            width="251"
+            height="263"
+            alt="My Space Illus"
+          />
+        </MediaQuery>
+        <Flex direction="column" justify="center" align="center" gap="32px">
+          <Flex>
+            <Title order={2}>
+              {address.slice(0, 8)}...{address.slice(-8)}
+              {"'s Space"}
+            </Title>
+          </Flex>
+          <Flex px="24px" w="100%" justify="center" align="center">
+            <Flex align="center">
+              <Text
+                component="span"
+                size="xl"
+                align="center"
+                color="text.0"
+                mr="sm"
+              >
+                Address:
+              </Text>
+              <Text
+                component="span"
+                size="xl"
+                weight="bold"
+                color="text.0"
+                mr="5px"
+              >
+                {address.slice(0, 8)}...{address.slice(-8)}
+              </Text>
+              <Text
+                component="span"
+                sx={{ cursor: 'pointer' }}
+                onClick={() => {
+                  clipboard.copy(address);
+                  showSuccess('Copied!');
+                }}
+                h="22px"
+                ml="3px"
+              >
+                <IconCopy size="22px" color={theme.colors.text[0]} />
+              </Text>
+            </Flex>
+          </Flex>
+        </Flex>
+      </Container>
+    </Flex>
+  );
+
   return (
-    <Layout>
+    <Layout header={header}>
       <Head>
         <title>
           {address.slice(0, 8)}...{address.slice(-8)}
           {"'s Space"}
         </title>
       </Head>
-      <Flex align="center" className={classes.banner}>
-        <Container size="xl" mt="80px" className={classes.container}>
-          <MediaQuery query="(max-width: 80rem)" styles={{ display: 'none' }}>
-            <Image
-              className={classes.illus}
-              src="/svg/my-space-illus.svg"
-              width="251"
-              height="263"
-              alt="My Space Illus"
-            />
-          </MediaQuery>
-          <Flex direction="column" justify="center" align="center" gap="32px">
-            <Flex>
-              <Title order={2}>
-                {address.slice(0, 8)}...{address.slice(-8)}
-                {"'s Space"}
-              </Title>
-            </Flex>
-            <Flex px="24px" w="100%" justify="center" align="center">
-              <Flex align="center">
-                <Text size="xl" align="center" color="text.0" mr="sm">
-                  Address:
-                </Text>
-                <Text size="xl" weight="bold" color="text.0" mr="5px">
-                  {address.slice(0, 8)}...{address.slice(-8)}
-                </Text>
-                <Flex
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    clipboard.copy(address);
-                    showSuccess('Copied!');
-                  }}
-                  ml="3px"
-                >
-                  <IconCopy size="22px" color={theme.colors.text[0]} />
-                </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
-        </Container>
-      </Flex>
       <Container size="xl" py="48px">
         <Flex justify="center" mb="48px">
           <Group spacing={0} className={classes.buttonGroup}>

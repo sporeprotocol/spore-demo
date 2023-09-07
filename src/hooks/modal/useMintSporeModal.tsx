@@ -1,6 +1,6 @@
 import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useDisclosure, useId } from '@mantine/hooks';
+import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '../useConnect';
@@ -10,9 +10,12 @@ import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
+import { useMantineTheme } from '@mantine/core';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
   const router = useRouter();
   const modalId = useId();
@@ -87,8 +90,8 @@ export default function useMintSporeModal(id?: string) {
         onClose: close,
         styles: {
           content: {
-            minWidth: '680px',
-            minHeight: '525px',
+            minWidth: isMobile ? 'auto' : '680px',
+            minHeight: isMobile ? 'auto' : '525px',
           },
         },
         closeOnEscape: !addSporeMutation.isLoading,
@@ -106,6 +109,7 @@ export default function useMintSporeModal(id?: string) {
       modals.close(modalId);
     }
   }, [
+    isMobile,
     modalId,
     addSporeMutation.isLoading,
     selectableClusters,

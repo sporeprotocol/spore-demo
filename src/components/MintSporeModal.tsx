@@ -19,10 +19,11 @@ import {
   useMantineTheme,
   Flex,
   Popover,
-  Tooltip,
+  MediaQuery,
+  Stack,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { useClipboard, useDisclosure } from '@mantine/hooks';
+import { useClipboard, useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconChevronDown, IconCopy } from '@tabler/icons-react';
 import { useState, useCallback, forwardRef, useRef, useMemo } from 'react';
 import { ImagePreviewRender } from './renders/image';
@@ -116,6 +117,10 @@ const useStyles = createStyles((theme) => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      width: '100%',
+    },
   },
   submit: {
     backgroundColor: theme.colors.brand[1],
@@ -123,6 +128,13 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: '#7F6BD1',
       borderRadius: '4px',
     },
+  },
+  change: {
+    borderColor: theme.colors.brand[1],
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    color: theme.colors.brand[1],
+    boxShadow: 'none !important',
   },
   popover: {
     backgroundColor: theme.colors.brand[1],
@@ -160,6 +172,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const theme = useMantineTheme();
   const { address } = useConnect();
   const clipboard = useClipboard();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const dropzoneOpenRef = useRef<() => void>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(
     defaultClusterId,
@@ -208,7 +221,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
             sx={{ cursor: 'pointer' }}
             onClick={() => {
               clipboard.copy(address);
-              showSuccess('Copied!')
+              showSuccess('Copied!');
             }}
           >
             <IconCopy size="17px" color={theme.colors.text[0]} />
@@ -271,17 +284,22 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         >
           <Flex direction="column" align="center">
             <Flex align="center" mb="16px">
-              <Text size="xl">Drag or</Text>
-              <Text
-                size="xl"
-                color="brand.1"
-                sx={{ textDecoration: 'underline' }}
-                mx="5px"
-                inline
-              >
-                upload
-              </Text>
-              <Text size="xl">an image here</Text>
+              <MediaQuery smallerThan="sm" styles={{ textAlign: 'center' }}>
+                <Text size="xl">
+                  Drag or
+                  <Text
+                    component="span"
+                    size="xl"
+                    color="brand.1"
+                    sx={{ textDecoration: 'underline' }}
+                    mx="5px"
+                    inline
+                  >
+                    upload
+                  </Text>
+                  an image here
+                </Text>
+              </MediaQuery>
             </Flex>
             <Text size="sm" color="text.1">
               The file cannot exceed {MAX_SIZE_LIMIT} KB
@@ -333,16 +351,41 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           {getFriendlyErrorMessage(error.message)}
         </Text>
       )}
-      <Group position="right" mt="32px">
-        <Button
-          className={classes.submit}
-          disabled={!content}
-          onClick={handleSubmit}
-          loading={loading}
-        >
-          Mint
-        </Button>
-      </Group>
+      {!isMobile ? (
+        <Group position="right" mt="32px">
+          <Button
+            className={classes.submit}
+            disabled={!content}
+            onClick={handleSubmit}
+            loading={loading}
+          >
+            Mint
+          </Button>
+        </Group>
+      ) : (
+        <Stack mt="32px">
+          {content && (
+            <Button
+              className={classes.change}
+              variant="outline"
+              onClick={() => dropzoneOpenRef.current?.()}
+              loading={loading}
+              fullWidth
+            >
+              Change Image
+            </Button>
+          )}
+          <Button
+            className={classes.submit}
+            disabled={!content}
+            onClick={handleSubmit}
+            loading={loading}
+            fullWidth
+          >
+            Mint
+          </Button>
+        </Stack>
+      )}
     </Box>
   );
 }

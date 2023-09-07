@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { useDisclosure, useId } from '@mantine/hooks';
+import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
@@ -9,10 +9,13 @@ import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
+import { useMantineTheme } from '@mantine/core';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
   const router = useRouter();
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const modalId = useId();
 
@@ -72,7 +75,7 @@ export default function useCreateClusterModal() {
         onClose: close,
         styles: {
           content: {
-            minWidth: '500px',
+            minWidth: isMobile ? 'auto' : '500px',
           },
         },
         closeOnEscape: !addClusterMutation.isLoading,
@@ -83,7 +86,14 @@ export default function useCreateClusterModal() {
     } else {
       modals.close(modalId);
     }
-  }, [modalId, addClusterMutation.isLoading, handleSubmit, opened, close]);
+  }, [
+    modalId,
+    addClusterMutation.isLoading,
+    handleSubmit,
+    opened,
+    close,
+    isMobile,
+  ]);
 
   return {
     open,

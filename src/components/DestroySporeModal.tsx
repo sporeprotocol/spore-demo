@@ -1,7 +1,17 @@
 import { Spore } from '@/spore';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { BI } from '@ckb-lumos/lumos';
-import { Text, Box, Button, Flex, Group, createStyles } from '@mantine/core';
+import {
+  Text,
+  Box,
+  Button,
+  Flex,
+  Group,
+  createStyles,
+  useMantineTheme,
+  Stack,
+} from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
 
 export interface DestroySporeModalProps {
@@ -32,6 +42,8 @@ const useStyles = createStyles((theme) => ({
 export default function DestroySporeModal(props: DestroySporeModalProps) {
   const { spore, onSubmit, onClose } = props;
   const { classes } = useStyles();
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -65,22 +77,43 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
       )}
 
       <Flex direction="row" justify="flex-end">
-        <Group>
-          <Button
-            classNames={{ root: classes.cancel, label: classes.label }}
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button
-            className={classes.destory}
-            onClick={handleSubmit}
-            loading={loading}
-          >
-            Confirm
-          </Button>
-        </Group>
+        {!isMobile ? (
+          <Group>
+            <Button
+              classNames={{ root: classes.cancel, label: classes.label }}
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={classes.destory}
+              onClick={handleSubmit}
+              loading={loading}
+            >
+              Confirm
+            </Button>
+          </Group>
+        ) : (
+          <Stack w="100%">
+            <Button
+              className={classes.destory}
+              onClick={handleSubmit}
+              loading={loading}
+              fullWidth
+            >
+              Confirm
+            </Button>
+            <Button
+              classNames={{ root: classes.cancel, label: classes.label }}
+              onClick={onClose}
+              disabled={loading}
+              fullWidth
+            >
+              Cancel
+            </Button>
+          </Stack>
+        )}
       </Flex>
     </Box>
   );
