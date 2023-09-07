@@ -41,6 +41,10 @@ export default class JoyIdConnector extends CKBConnector {
   }
 
   public async connect(): Promise<void> {
+    const { address, connectorType } = this.getData();
+    if (connectorType === this.type.toLowerCase() && address) {
+      return;
+    }
     const ethAddress = await connect();
     this.setAddress(ethAddress);
     this.isConnected = true;
