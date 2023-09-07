@@ -185,6 +185,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       await onSubmit(content, clusterId);
       setLoading(false);
     } catch (err) {

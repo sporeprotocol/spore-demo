@@ -42,6 +42,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
   const handleSubmit = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       await onSubmit();
       setLoading(false);
     } catch (err) {

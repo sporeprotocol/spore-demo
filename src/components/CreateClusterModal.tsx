@@ -67,6 +67,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
     async (values: { name: string; description: string; public: string }) => {
       try {
         setLoading(true);
+        setError(null);
         await onSubmit(values);
         setLoading(false);
       } catch (err) {

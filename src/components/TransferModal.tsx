@@ -1,5 +1,6 @@
+import { getFriendlyErrorMessage } from '@/utils/error';
 import { isValidAddress } from '@/utils/helpers';
-import { Button, Group, TextInput, createStyles } from '@mantine/core';
+import { Text, Button, Group, TextInput, createStyles } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useCallback, useState } from 'react';
 
@@ -46,6 +47,7 @@ export default function TransferModal(props: TransferModalProps) {
   const { onSubmit } = props;
   const { classes } = useStyles();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -62,10 +64,11 @@ export default function TransferModal(props: TransferModalProps) {
         }
 
         setLoading(true);
+        setError(null);
         await onSubmit(values);
         setLoading(false);
       } catch (err) {
-        form.setFieldError('to', (err as Error).message);
+        setError(err as Error);
         setLoading(false);
       }
     },
@@ -86,6 +89,11 @@ export default function TransferModal(props: TransferModalProps) {
         withAsterisk
         {...form.getInputProps('to')}
       />
+      {error && (
+        <Text size="sm" color="functional.0">
+          {getFriendlyErrorMessage(error.message)}
+        </Text>
+      )}
       <Group position="right" mt={'32px'}>
         <Button className={classes.submit} type="submit" loading={loading}>
           Submit

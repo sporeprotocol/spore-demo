@@ -16,7 +16,7 @@ export function getFriendlyErrorMessage(message: string) {
     }
     case 'Unable to open a popup for loginWithPopup - window.open returned `null`': {
       return (
-        <Flex direction="column">
+        <Flex direction="column" mb="md">
           <Text>
             Unable to open popup window, please check browser settings.
           </Text>
