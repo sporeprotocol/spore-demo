@@ -5,7 +5,7 @@ import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
 import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
-import { showError } from '@/utils/notifications';
+import { showError, showSuccess } from '@/utils/notifications';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -19,10 +19,11 @@ import {
   useMantineTheme,
   Flex,
   Popover,
+  Tooltip,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
-import { useDisclosure } from '@mantine/hooks';
-import { IconChevronDown } from '@tabler/icons-react';
+import { useClipboard, useDisclosure } from '@mantine/hooks';
+import { IconChevronDown, IconCopy } from '@tabler/icons-react';
 import { useState, useCallback, forwardRef, useRef, useMemo } from 'react';
 import { ImagePreviewRender } from './renders/image';
 
@@ -158,6 +159,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const { defaultClusterId, clusters, onSubmit } = props;
   const theme = useMantineTheme();
   const { address } = useConnect();
+  const clipboard = useClipboard();
   const dropzoneOpenRef = useRef<() => void>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(
     defaultClusterId,
@@ -193,18 +195,37 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   return (
     <Box>
-      <Flex mb="24px">
-        <Text color="text.0" mr="5px">
-          Balance:
-        </Text>
-        <Text color="text.0" weight="700">
-          {balance} CKB
-        </Text>
-        {content && balance - onChainSize > 0 && (
-          <Text color="text.1" ml="5px">
-            (will be ~{balance - onChainSize} CKB after minting)
+      <Flex direction="column" mb="24px">
+        <Flex align="center">
+          <Text color="text.0" mr="5px">
+            Address:
           </Text>
-        )}
+          <Text color="text.0" weight="700" mr="5px">
+            {address.slice(0, 10)}...{address.slice(-10)}
+          </Text>
+          <Flex
+            sx={{ cursor: 'pointer' }}
+            onClick={() => {
+              clipboard.copy(address);
+              showSuccess('Copied!')
+            }}
+          >
+            <IconCopy size="17px" color={theme.colors.text[0]} />
+          </Flex>
+        </Flex>
+        <Flex>
+          <Text color="text.0" mr="5px">
+            Balance:
+          </Text>
+          <Text color="text.0" weight="700">
+            {balance} CKB
+          </Text>
+          {content && balance - onChainSize > 0 && (
+            <Text color="text.1" ml="5px">
+              (will be ~{balance - onChainSize} CKB after minting)
+            </Text>
+          )}
+        </Flex>
       </Flex>
       <Select
         mb="md"

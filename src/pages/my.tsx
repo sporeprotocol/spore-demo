@@ -6,6 +6,7 @@ import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
+import { showSuccess } from '@/utils/notifications';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -112,9 +113,7 @@ export default function MySpacePage() {
   return (
     <Layout>
       <Head>
-        <title>
-          My Spore - Spore Demo
-        </title>
+        <title>My Spore - Spore Demo</title>
       </Head>
       <Flex align="center" className={classes.banner}>
         <Container size="xl" mt="80px" className={classes.container}>
@@ -146,17 +145,15 @@ export default function MySpacePage() {
                 <Text size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 10)}...{address.slice(-10)}
                 </Text>
-                <Tooltip
-                  label={clipboard.copied ? 'Copied!' : 'Copy'}
-                  withArrow
+                <Flex
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    clipboard.copy(address);
+                    showSuccess('Copied!');
+                  }}
                 >
-                  <Flex
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => clipboard.copy(address)}
-                  >
-                    <IconCopy size="22px" color={theme.colors.text[0]} />
-                  </Flex>
-                </Tooltip>
+                  <IconCopy size="22px" color={theme.colors.text[0]} />
+                </Flex>
               </Flex>
               <Flex align="center">
                 <Text size="xl" align="center" color="text.0" mr="sm">

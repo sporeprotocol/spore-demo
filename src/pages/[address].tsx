@@ -2,6 +2,7 @@ import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
 import { trpc } from '@/server';
+import { showSuccess } from '@/utils/notifications';
 import {
   Text,
   Container,
@@ -135,18 +136,16 @@ export default function AccountPage() {
                 <Text size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 8)}...{address.slice(-8)}
                 </Text>
-                <Tooltip
-                  label={clipboard.copied ? 'Copied!' : 'Copy'}
-                  withArrow
+                <Flex
+                  sx={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    clipboard.copy(address);
+                    showSuccess('Copied!');
+                  }}
+                  ml="3px"
                 >
-                  <Flex
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => clipboard.copy(address)}
-                    ml="3px"
-                  >
-                    <IconCopy size="22px" color={theme.colors.text[0]} />
-                  </Flex>
-                </Tooltip>
+                  <IconCopy size="22px" color={theme.colors.text[0]} />
+                </Flex>
               </Flex>
             </Flex>
           </Flex>

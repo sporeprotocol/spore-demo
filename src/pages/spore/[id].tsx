@@ -31,6 +31,7 @@ import { SporeOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
 import ImageSporeRender from '@/components/renders/image';
+import { showSuccess } from '@/utils/notifications';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -196,18 +197,16 @@ export default function SporePage() {
                     <Title order={2} mr="3px">
                       {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
                     </Title>
-                    <Tooltip
-                      label={clipboard.copied ? 'Copied!' : 'Copy'}
-                      withArrow
+                    <Flex
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        clipboard.copy(spore!.id);
+                        showSuccess('Copied!');
+                      }}
+                      ml="3px"
                     >
-                      <Flex
-                        sx={{ cursor: 'pointer' }}
-                        onClick={() => clipboard.copy(spore!.id)}
-                        ml="3px"
-                      >
-                        <IconCopy size="30px" color={theme.colors.text[0]} />
-                      </Flex>
-                    </Tooltip>
+                      <IconCopy size="30px" color={theme.colors.text[0]} />
+                    </Flex>
                   </>
                 )}
               </Flex>
@@ -263,18 +262,16 @@ export default function SporePage() {
                         </Text>
                       </Link>
                     )}
-                    <Tooltip
-                      label={clipboard.copied ? 'Copied!' : 'Copy'}
-                      withArrow
+                    <Flex
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        clipboard.copy(owner);
+                        showSuccess('Copied!')
+                      }}
+                      ml="3px"
                     >
-                      <Flex
-                        sx={{ cursor: 'pointer' }}
-                        onClick={() => clipboard.copy(address)}
-                        ml="3px"
-                      >
-                        <IconCopy size="22px" color={theme.colors.text[0]} />
-                      </Flex>
-                    </Tooltip>
+                      <IconCopy size="22px" color={theme.colors.text[0]} />
+                    </Flex>
                   </Flex>
                 )}
               </Flex>

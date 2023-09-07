@@ -31,6 +31,7 @@ import Skeleton from 'react-loading-skeleton';
 import { ClusterOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import ClusterService from '@/cluster';
+import { showSuccess } from '@/utils/notifications';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -258,18 +259,16 @@ export default function ClusterPage() {
                           </Text>
                         </Link>
                       )}
-                      <Tooltip
-                        label={clipboard.copied ? 'Copied!' : 'Copy'}
-                        withArrow
-                      >
                         <Flex
                           sx={{ cursor: 'pointer' }}
-                          onClick={() => clipboard.copy(address)}
+                          onClick={() => {
+                            clipboard.copy(owner);
+                            showSuccess('Copied!');
+                          }}
                           ml="3px"
                         >
                           <IconCopy size="22px" color={theme.colors.text[0]} />
                         </Flex>
-                      </Tooltip>
                     </Flex>
                   )}
                 </Flex>
