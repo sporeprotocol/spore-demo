@@ -1,17 +1,24 @@
 ## Spore Demo
 
-A Spore Protocol Demo based on Next.js + React + Spore SDK, which implements basic functionalities such as
-the creation and transfer of clusters, as well as minting, transferring, and destroying of spores.
-
 ![](https://github.com/ahonn/spore-demo/assets/9718515/b478387b-3dfa-49e5-89db-509467962744)
+
+A Spore Protocol Demo based on Next.js + React + [Spore SDK](https://github.com/sporeprotocol/spore-sdk), which implements basic functionalities such as
+the creation and transfer of clusters, as well as minting, transferring, and destroying of spores.
 
 ## Technology Stack
 
 - **Next.js** - A JavaScript framework created by Vercel. Perfect for efficient React web applications.
 - **React** - A JavaScript library for building user interfaces.
 - **Mantine** - A Fully Featured React components library.
-- **TRPC** - A framework for building typesafe APIs, leveraged in this project for efficient communication between frontend and backend.
-- **Spore SDK** - A Software Development Kit for interacting with the Spore Protocol.
+- **tRPC** - A framework for building typesafe APIs, leveraged in this project for efficient communication between frontend and backend.
+- **Spore SDK** - A SDK for interacting with the Spore Protocol.
+
+## Supported Wallets
+
+This project currently supports the following wallets:
+
+- [MetaMask](https://metamask.io) - A crypto wallet & gateway to blockchain apps.
+- [JoyID](https://joy.id) - Universal Account Protocol for Web3 Mass-adoption.
 
 ## Installation
 
