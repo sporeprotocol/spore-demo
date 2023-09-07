@@ -36,8 +36,8 @@ dependencies:
     specifier: ^0.1.3
     version: 0.1.3
   '@joyid/evm':
-    specifier: ^0.1.0
-    version: 0.1.0
+    specifier: ^0.1.1
+    version: 0.1.1
   '@mantine/core':
     specifier: ^6.0.17
     version: 6.0.17(@emotion/react@11.11.1)(@mantine/hooks@6.0.17)(@types/react@18.2.16)(react-dom@18.2.0)(react@18.2.0)
@@ -780,8 +780,8 @@ packages:
       - encoding
     dev: false
 
-  /@joyid/evm@0.1.0:
-    resolution: {integrity: sha512-OXvs+TD1wtXDtK/89zPOdOyt1mHK9uXDIJyTEeDxS7G3uAFAeQResZBnqfM48PlLFPhTP+Fc4I9DpGwL5YWxdA==}
+  /@joyid/evm@0.1.1:
+    resolution: {integrity: sha512-aVVPZIQX5y9KfW9p20f9bG9RJA1F+0QSFMdV9O2CukQvrt9mlPEHV4NL7uhLvZH0tbInhzaWirKQiR8qgS6uSQ==}
     dev: false
 
   /@ledgerhq/connect-kit-loader@1.1.2:
