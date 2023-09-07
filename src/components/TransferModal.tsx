@@ -7,8 +7,6 @@ import {
   Stack,
   TextInput,
   createStyles,
-  em,
-  getBreakpointValue,
   useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -37,7 +35,7 @@ const useStyles = createStyles((theme) => ({
     border: '1px solid #CDCFD5',
     borderRadius: '8px',
 
-    [`@media (max-width: ${em(getBreakpointValue(theme.breakpoints.sm))})`]: {
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
       height: '48px',
     },
 
@@ -63,7 +61,7 @@ export default function TransferModal(props: TransferModalProps) {
   const { type, onSubmit } = props;
   const { classes } = useStyles();
   const theme = useMantineTheme();
-  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -95,7 +93,7 @@ export default function TransferModal(props: TransferModalProps) {
 
   return (
     <Stack>
-      {type === 'cluster' && !largerThanSM && (
+      {type === 'cluster' && isMobile && (
         <Text color="text.1">
           Transferring this Cluster won’t affect the ownership of the Spores
           within it.
@@ -124,7 +122,7 @@ export default function TransferModal(props: TransferModalProps) {
             className={classes.submit}
             type="submit"
             loading={loading}
-            fullWidth={!largerThanSM}
+            fullWidth={isMobile}
           >
             Submit
           </Button>

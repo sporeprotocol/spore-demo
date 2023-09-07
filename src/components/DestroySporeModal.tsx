@@ -43,7 +43,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
   const { spore, onSubmit, onClose } = props;
   const { classes } = useStyles();
   const theme = useMantineTheme();
-  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -77,7 +77,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
       )}
 
       <Flex direction="row" justify="flex-end">
-        {largerThanSM ? (
+        {!isMobile ? (
           <Group>
             <Button
               classNames={{ root: classes.cancel, label: classes.label }}

@@ -46,7 +46,7 @@ const useStyles = createStyles((theme) => ({
 export default function HomePage() {
   const { classes } = useStyles();
   const theme = useMantineTheme();
-  const smallerThenXS = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();
@@ -98,8 +98,8 @@ export default function HomePage() {
             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
               <Image
                 src={'/images/demo-title.mobile.png'}
-                width={smallerThenXS ? '213' : '331'}
-                height={smallerThenXS ? '96' : '136'}
+                width={isMobile ? '213' : '331'}
+                height={isMobile ? '96' : '136'}
                 alt="Spore Demo"
               />
             </MediaQuery>

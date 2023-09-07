@@ -110,7 +110,7 @@ export default function ClusterPage() {
   const theme = useMantineTheme();
   const { address } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
-  const smallerThenXS = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
   const { data: spores } = trpc.spore.list.useQuery({ clusterId: id } as {
@@ -140,7 +140,7 @@ export default function ClusterPage() {
     <Flex align="center" className={classes.header}>
       <Container w="100%" size="xl">
         <Grid>
-          <Grid.Col span={smallerThenXS ? 12 : 8}>
+          <Grid.Col span={isMobile ? 12 : 8}>
             <Flex direction="column">
               <Flex align="center" mb="8px">
                 <Box mr="8px">
@@ -171,7 +171,7 @@ export default function ClusterPage() {
               />
             </Flex>
           </Grid.Col>
-          <Grid.Col span={smallerThenXS ? 12 : 4}>
+          <Grid.Col span={isMobile ? 12 : 4}>
             <Flex direction="column">
               <Title mb="8px" order={5}>
                 Owned by
@@ -193,7 +193,7 @@ export default function ClusterPage() {
     <Flex align="center" className={classes.header}>
       <Container w="100%" size="xl">
         <Grid>
-          <Grid.Col span={smallerThenXS ? 12 : 8}>
+          <Grid.Col span={isMobile ? 12 : 8}>
             <Flex direction="column">
               <Flex align="center" mb="8px">
                 <Box mr="8px">
@@ -251,7 +251,7 @@ export default function ClusterPage() {
               </Text>
             </Flex>
           </Grid.Col>
-          <Grid.Col span={smallerThenXS ? 12 : 4}>
+          <Grid.Col span={isMobile ? 12 : 4}>
             <Flex direction="column">
               <Title mb="8px" order={5}>
                 Owned by

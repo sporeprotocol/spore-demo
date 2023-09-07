@@ -8,8 +8,6 @@ import {
   Image,
   Overlay,
   createStyles,
-  em,
-  getBreakpointValue,
   useMantineTheme,
   MediaQuery,
 } from '@mantine/core';
@@ -73,7 +71,7 @@ const usePreviewStyles = createStyles(
       height: '260px',
       imageRendering: params?.pixelated ? 'pixelated' : 'auto',
 
-      [`@media (max-width: ${em(getBreakpointValue(theme.breakpoints.xs))})`]: {
+      [`@media (max-width: ${theme.breakpoints.sm})`]: {
         width: 'auto',
       },
     },
@@ -92,7 +90,7 @@ const usePreviewStyles = createStyles(
 export function ImagePreviewRender(props: ImagePreviewRenderProps) {
   const { content, loading, onClick } = props;
   const theme = useMantineTheme();
-  const largerThanXS = useMediaQuery(`(min-width: ${theme.breakpoints.xs})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [hovered, setHovered] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | ArrayBuffer | null>(null);
   const { classes } = usePreviewStyles({
@@ -117,7 +115,7 @@ export function ImagePreviewRender(props: ImagePreviewRenderProps) {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <AspectRatio ratio={(largerThanXS ? 616 : 295) / 260}>
+      <AspectRatio ratio={(isMobile ? 295 : 616) / 260}>
         <Image
           width="100%"
           height="260px"

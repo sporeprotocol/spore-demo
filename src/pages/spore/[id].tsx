@@ -113,8 +113,8 @@ export default function SporePage() {
 
   const { data: spore } = trpc.spore.get.useQuery({ id: id as string });
   const { classes, cx } = useStyles();
-  const smallerThenXS = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`);
-  const smallerThenSM = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const isTablet = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
 
   const { data: cluster } = trpc.cluster.get.useQuery(
     { id: spore?.clusterId ?? undefined },
@@ -177,7 +177,7 @@ export default function SporePage() {
           <Box mb="32px" h="28px" />
         )}
         <Grid gutter="24px">
-          <Grid.Col span={smallerThenXS ? 12 : 6}>
+          <Grid.Col span={isMobile ? 12 : 6}>
             <Box>
               {isLoading ? (
                 <AspectRatio ratio={1} className={classes.image}>
@@ -197,7 +197,7 @@ export default function SporePage() {
               )}
             </Box>
           </Grid.Col>
-          <Grid.Col span={smallerThenXS ? 12 : 6}>
+          <Grid.Col span={isMobile ? 12 : 6}>
             <Flex h="100%" direction="column" justify="center">
               <Flex align="center" mb="32px">
                 {isLoading ? (
@@ -229,7 +229,7 @@ export default function SporePage() {
                   </>
                 )}
               </Flex>
-              <Flex mb={smallerThenSM ? '32px' : '64px'}>
+              <Flex mb={isTablet ? '32px' : '64px'}>
                 {isLoading ? (
                   <Skeleton
                     baseColor={theme.colors.background[1]}
@@ -298,7 +298,7 @@ export default function SporePage() {
                 <Flex
                   direction={{ base: 'column', xs: 'row' }}
                   gap="24px"
-                  mt={smallerThenSM ? '32px' : '64px'}
+                  mt={isTablet ? '32px' : '64px'}
                 >
                   <Button
                     className={cx(classes.button, classes.transfer)}

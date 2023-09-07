@@ -15,7 +15,7 @@ export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
   const router = useRouter();
   const theme = useMantineTheme();
-  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const modalId = useId();
 
@@ -75,7 +75,7 @@ export default function useCreateClusterModal() {
         onClose: close,
         styles: {
           content: {
-            minWidth: largerThanSM ? '500px' : 'auto',
+            minWidth: isMobile ? 'auto' : '500px',
           },
         },
         closeOnEscape: !addClusterMutation.isLoading,
@@ -86,7 +86,14 @@ export default function useCreateClusterModal() {
     } else {
       modals.close(modalId);
     }
-  }, [modalId, addClusterMutation.isLoading, handleSubmit, opened, close, largerThanSM]);
+  }, [
+    modalId,
+    addClusterMutation.isLoading,
+    handleSubmit,
+    opened,
+    close,
+    isMobile,
+  ]);
 
   return {
     open,

@@ -15,7 +15,7 @@ import { useMantineTheme } from '@mantine/core';
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
   const theme = useMantineTheme();
-  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
   const router = useRouter();
   const modalId = useId();
@@ -90,8 +90,8 @@ export default function useMintSporeModal(id?: string) {
         onClose: close,
         styles: {
           content: {
-            minWidth: largerThanSM ? '680px' : 'auto',
-            minHeight: largerThanSM ? '525px' : 'auto',
+            minWidth: isMobile ? 'auto' : '680px',
+            minHeight: isMobile ? 'auto' : '525px',
           },
         },
         closeOnEscape: !addSporeMutation.isLoading,
@@ -109,7 +109,7 @@ export default function useMintSporeModal(id?: string) {
       modals.close(modalId);
     }
   }, [
-    largerThanSM,
+    isMobile,
     modalId,
     addSporeMutation.isLoading,
     selectableClusters,

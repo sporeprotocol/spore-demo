@@ -7,8 +7,6 @@ import {
   Button,
   createStyles,
   Radio,
-  em,
-  getBreakpointValue,
   useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -42,7 +40,7 @@ const useStyles = createStyles((theme) => ({
       boxShadow: '0px 0px 4px 0px rgba(109, 87, 203, 0.50)',
     },
 
-    [`@media (max-width: ${em(getBreakpointValue(theme.breakpoints.sm))})`]: {
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
       height: '48px',
     },
   },
@@ -61,7 +59,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
   const { onSubmit } = props;
   const { classes } = useStyles();
   const theme = useMantineTheme();
-  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -155,7 +153,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
             className={classes.submit}
             loading={loading}
             disabled={!form.values['name'] || !form.values['description']}
-            fullWidth={!largerThanSM}
+            fullWidth={isMobile}
           >
             Create
           </Button>

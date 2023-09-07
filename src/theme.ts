@@ -13,6 +13,13 @@ const kulimPark = Kulim_Park({
 const baseTheme: MantineThemeOverride = {
   colorScheme: 'light',
   primaryShade: 0,
+  breakpoints: {
+    xs: '30em',
+    sm: '48em',
+    md: '64em',
+    lg: '80em',
+    xl: '90em',
+  },
   colors: {
     brand: ['#FCEB71', '#6D57CB'],
     background: ['#FFFDDD', '#F4F5F9', '#FFFFFF'],

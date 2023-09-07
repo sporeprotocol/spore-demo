@@ -19,8 +19,6 @@ import {
   useMantineTheme,
   Flex,
   Popover,
-  getBreakpointValue,
-  em,
   MediaQuery,
   Stack,
 } from '@mantine/core';
@@ -120,7 +118,7 @@ const useStyles = createStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
 
-    [`@media (max-width: ${em(getBreakpointValue(theme.breakpoints.sm))})`]: {
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
       width: '100%',
     },
   },
@@ -174,7 +172,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const theme = useMantineTheme();
   const { address } = useConnect();
   const clipboard = useClipboard();
-  const largerThanSM = useMediaQuery(`(min-width: ${theme.breakpoints.sm})`);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const dropzoneOpenRef = useRef<() => void>(null);
   const [clusterId, setClusterId] = useState<string | undefined>(
     defaultClusterId,
@@ -353,7 +351,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           {getFriendlyErrorMessage(error.message)}
         </Text>
       )}
-      {largerThanSM ? (
+      {!isMobile ? (
         <Group position="right" mt="32px">
           <Button
             className={classes.submit}
