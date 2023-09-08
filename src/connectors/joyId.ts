@@ -1,7 +1,7 @@
 import { Script } from '@ckb-lumos/base';
 import { BI, Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
 // @ts-ignore
-import { initConfig, openPopup, connect, signMessage } from '@joyid/evm';
+import { initConfig, connect, signMessage } from '@joyid/evm';
 // @ts-ignore
 import CKBConnector from './base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
@@ -17,7 +17,7 @@ export default class JoyIdConnector extends CKBConnector {
 
     initConfig({
       name: 'Spore Demo',
-      joyidAppURL: 'https://poc.joyid.dev',
+      joyidAppURL: 'https://joyid-app-git-hd-staging-nervina.vercel.app',
     });
   }
 
