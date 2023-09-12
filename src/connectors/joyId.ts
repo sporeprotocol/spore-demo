@@ -17,7 +17,7 @@ export default class JoyIdConnector extends CKBConnector {
 
     initConfig({
       name: 'Spore Demo',
-      joyidAppURL: 'https://joyid-app-git-hd-staging-nervina.vercel.app',
+      joyidAppURL: 'https://testnet.joyid.dev',
     });
   }
 
