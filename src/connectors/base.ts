@@ -7,6 +7,7 @@ export default abstract class CKBConnector {
   private _enable: boolean = true;
   protected store = store;
   abstract type: string;
+  abstract icon: string;
 
   protected set isConnected(val: boolean) {
     this._isConnected = val;

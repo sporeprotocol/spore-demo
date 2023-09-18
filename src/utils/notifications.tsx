@@ -7,11 +7,17 @@ const styles: Parameters<(typeof notifications)['show']>[0]['styles'] = (
 ) => ({
   root: {
     backgroundColor: theme.colors.brand[0],
+    border: '1px solid #111318',
     borderRadius: '8px',
     boxShadow: '4px 4px 0 #111318',
     padding: '16px',
     width: '375px',
     maxWidth: '70vw',
+
+    [`@media (max-width: ${theme.breakpoints.sm})`]: {
+      maxWidth: 'none',
+      width: '100%',
+    },
   },
 });
 

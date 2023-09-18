@@ -202,6 +202,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
             <DropMenu
               menu={[
                 {
+                  type: 'item',
                   key: 'transfer-spore',
                   title: (
                     <Flex align="center">

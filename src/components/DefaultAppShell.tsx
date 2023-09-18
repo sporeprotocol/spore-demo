@@ -10,17 +10,23 @@ import {
   AppShell,
   MediaQuery,
   Center,
+  Divider,
 } from '@mantine/core';
+import Image from 'next/image';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
-import DropMenu from './DropMenu';
-import { IconPlus } from '@tabler/icons-react';
+import DropMenu, { DropMenuProps } from './DropMenu';
+import { IconCopy, IconPlus } from '@tabler/icons-react';
 import { NAVS } from '@/constants';
+import { trpc } from '@/server';
+import { BI } from '@ckb-lumos/lumos';
+import { useClipboard } from '@mantine/hooks';
+import { showSuccess } from '@/utils/notifications';
 
 const useStyles = createStyles((theme) => ({
   connect: {
@@ -65,14 +71,49 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: '#7F6BD1',
     },
   },
+  profile: {
+    paddingLeft: '16px !important',
+    paddingRight: '16px !important',
+    paddingTop: '10px !important',
+    paddingBottom: '10px !important',
+    backgroundColor: '#1A202C',
+
+    '&:hover': {
+      backgroundColor: '#2C323D',
+    },
+  },
+  avatar: {
+    width: '26px',
+    height: '26px',
+    borderRadius: '22px',
+    border: `2px solid ${theme.white}`
+  },
 }));
 
 export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
   const { children } = props;
   const { classes } = useStyles();
-  const { connected, connect } = useConnect();
+  const { connected, connect, address, disconnect, connector } = useConnect();
+  const clipboard = useClipboard();
   const router = useRouter();
 
+  useEffect(() => {
+    if (!address) return;
+    // @ts-ignore
+    import('jazzicon').then((jazzicon) => {
+      const avatarEl = jazzicon.default(22, address);
+      const avatar = document.getElementById('wallet-avatar');
+      if (avatar) {
+        avatar.innerHTML = '';
+        avatar.appendChild(avatarEl);
+      }
+    });
+  }, [address]);
+
+  const { data: capacity = 0 } = trpc.accout.balance.useQuery(
+    { address },
+    { enabled: !!address },
+  );
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 
@@ -82,6 +123,83 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     }
     return NAVS;
   }, [connected]);
+
+  const createMenu = useMemo(() => {
+    return [
+      {
+        type: 'item',
+        key: 'mint-spore',
+        title: 'Mint a Spore',
+        onClick: mintSporeModal.open,
+      },
+      {
+        type: 'item',
+        key: 'create-cluster',
+        title: 'Create a Cluster',
+        onClick: createClusterModal.open,
+      },
+    ] as DropMenuProps['menu'];
+  }, [createClusterModal, mintSporeModal]);
+
+  const profileMenu = useMemo(() => {
+    if (!connected) return [];
+    return [
+      {
+        type: 'item',
+        key: 'address',
+        title: (
+          <Flex align="center" justify="space-between">
+            <Flex align="center" gap="xs">
+              <Image
+                src={connector!.icon}
+                alt={connector!.type}
+                width="24"
+                height="24"
+              />
+              <Text size="md">
+                {address.slice(0, 10)}...{address.slice(-10)}
+              </Text>
+            </Flex>
+            <IconCopy size={18} />
+          </Flex>
+        ),
+        onClick: () => {
+          clipboard.copy(address);
+          showSuccess('Copied!');
+        },
+      },
+      {
+        type: 'item',
+        key: 'my-space',
+        title: (
+          <Flex align="center" gap="xs">
+            <Image src="/svg/icon-user.svg" alt="user" width="24" height="24" />
+            <Text size="md">My Space</Text>
+          </Flex>
+        ),
+        onClick: () => router.push(`/my`),
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'item',
+        key: 'disconnect',
+        title: (
+          <Flex align="center" gap="xs">
+            <Image
+              src="/svg/icon-log-out.svg"
+              alt="disconnect"
+              width="24"
+              height="24"
+            />
+            <Text size="md">Disconnect</Text>
+          </Flex>
+        ),
+        onClick: () => disconnect(),
+      },
+    ] as DropMenuProps['menu'];
+  }, [router, disconnect, address, connected, connector, clipboard]);
 
   return (
     <AppShell
@@ -97,12 +215,12 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
             <Container size="xl">
               <Center>
                 <Grid align="center" w="1200px">
-                  <Grid.Col span={2}>
+                  <Grid.Col span={4}>
                     <Flex justify="start">
                       <Logo />
                     </Flex>
                   </Grid.Col>
-                  <Grid.Col span={8}>
+                  <Grid.Col span={4}>
                     <Flex justify="center" gap="50px">
                       {navs.map((nav) => (
                         <Link
@@ -124,23 +242,10 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                       ))}
                     </Flex>
                   </Grid.Col>
-                  <Grid.Col span={2}>
-                    <Flex justify="end">
+                  <Grid.Col span={4}>
+                    <Flex justify="end" gap="md">
                       {connected ? (
-                        <DropMenu
-                          menu={[
-                            {
-                              key: 'mint-spore',
-                              title: 'Mint a Spore',
-                              onClick: mintSporeModal.open,
-                            },
-                            {
-                              key: 'create-cluster',
-                              title: 'Create a Cluster',
-                              onClick: createClusterModal.open,
-                            },
-                          ]}
-                        >
+                        <DropMenu menu={createMenu}>
                           <Button className={classes.create}>
                             <IconPlus />
                             <Text>Create</Text>
@@ -150,6 +255,28 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                         <Button className={classes.connect} onClick={connect}>
                           Connect Wallet
                         </Button>
+                      )}
+                      {connected && (
+                        <DropMenu width={260} menu={profileMenu}>
+                          <Button className={classes.profile}>
+                            <Box mr="4px">
+                              <Image
+                                src="/svg/icon-wallet.svg"
+                                alt="wallet"
+                                width="24"
+                                height="24"
+                              />
+                            </Box>
+                            <Text>
+                              {Math.floor(
+                                BI.from(capacity).toNumber() / 10 ** 8,
+                              )}{' '}
+                              CKB
+                            </Text>
+                            <Divider mx="md" size="sm" orientation="vertical" />
+                            <Box className={classes.avatar} id="wallet-avatar" />
+                          </Button>
+                        </DropMenu>
                       )}
                     </Flex>
                   </Grid.Col>

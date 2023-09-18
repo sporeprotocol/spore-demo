@@ -1,4 +1,4 @@
-import { Menu, createStyles } from '@mantine/core';
+import { Menu, createStyles, useMantineTheme } from '@mantine/core';
 import { FloatingPosition } from '@mantine/core/lib/Floating';
 import { MouseEventHandler } from 'react';
 
@@ -42,25 +42,36 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: theme.colors.background[0],
     },
   },
+  divider: {
+    marginTop: '0px',
+    marginBottom: '0px',
+    borderTopColor: theme.colors.text[0],
+    borderTopWidth: '2px'
+  },
 }));
 
 export interface DropMenuProps extends React.PropsWithChildren<{}> {
-  menu: {
-    key: string;
-    title: React.ReactNode | string;
-    onClick: MouseEventHandler<HTMLButtonElement>;
-  }[];
+  menu: (
+    | {
+        key: string;
+        type: 'item';
+        title: React.ReactNode | string;
+        onClick?: MouseEventHandler<HTMLButtonElement>;
+      }
+    | { type: 'divider' }
+  )[];
   position?: FloatingPosition;
+  width?: number;
 }
 
 export default function DropMenu(props: DropMenuProps) {
   const { classes } = useStyles();
-  const { menu, position, children } = props;
+  const { menu, position, children, width = 180 } = props;
 
   return (
     <Menu
-      width={180}
-      position={position ?? "bottom"}
+      width={width}
+      position={position ?? 'bottom'}
       trigger="hover"
       classNames={{
         dropdown: classes.dropdown,
@@ -69,19 +80,27 @@ export default function DropMenu(props: DropMenuProps) {
       }}
       arrowSize={10}
       arrowPosition="center"
-      withArrow
     >
-      <Menu.Target>
-        {children}
-      </Menu.Target>
+      <Menu.Target>{children}</Menu.Target>
 
       <Menu.Dropdown>
-        {menu.map(({ key, title, onClick }) => {
-          return (
-            <Menu.Item key={key} onClick={onClick}>
-              {title}
-            </Menu.Item>
-          );
+        {menu.map((item, index) => {
+          if (item.type === 'divider')
+            return (
+              <Menu.Divider
+                className={classes.divider}
+                key={`divider_${index}`}
+              />
+            );
+          if (item.type === 'item') {
+            const { key, title, onClick } = item;
+            return (
+              <Menu.Item key={key} onClick={onClick}>
+                {title}
+              </Menu.Item>
+            );
+          }
+          return null;
         })}
       </Menu.Dropdown>
     </Menu>

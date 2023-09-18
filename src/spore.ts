@@ -5,6 +5,7 @@ import {
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
 import pick from 'lodash-es/pick';
+import { SUPPORTED_MIME_TYPE } from './utils/mime';
 
 export interface Spore {
   id: string;
@@ -76,7 +77,7 @@ export default class SporeService {
       type: { ...this.script, args: '0x' },
     });
 
-    const spores: Spore[] = [];
+    let spores: Spore[] = [];
     for await (const cell of collector.collect()) {
       const spore = SporeService.getSporeFromCell(
         cell,
@@ -84,6 +85,10 @@ export default class SporeService {
       );
       spores.push(spore);
     }
+
+    spores = spores.filter((spore) =>
+      SUPPORTED_MIME_TYPE.includes(spore.contentType as any),
+    );
 
     if (clusterId) {
       return spores.filter((spore) => spore.clusterId === clusterId);
@@ -101,7 +106,7 @@ export default class SporeService {
       lock,
     });
 
-    const spores: Spore[] = [];
+    let spores: Spore[] = [];
     for await (const cell of collector.collect()) {
       const spore = SporeService.getSporeFromCell(
         cell,
@@ -109,6 +114,10 @@ export default class SporeService {
       );
       spores.push(spore);
     }
+
+    spores = spores.filter((spore) =>
+      SUPPORTED_MIME_TYPE.includes(spore.contentType as any),
+    );
 
     if (clusterId) {
       return spores.filter((spore) => spore.clusterId === clusterId);
