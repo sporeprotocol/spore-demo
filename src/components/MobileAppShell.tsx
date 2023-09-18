@@ -20,11 +20,14 @@ import Logo from './Logo';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useMemo, useState } from 'react';
-import { IconPlus } from '@tabler/icons-react';
-import { NAVS } from '@/constants';
+import { IconCopy, IconPlus } from '@tabler/icons-react';
+import { MOBILE_NAVS } from '@/constants';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useDisclosure } from '@mantine/hooks';
+import { trpc } from '@/server';
+import { BI } from '@ckb-lumos/lumos';
+import Image from 'next/image';
 
 const useStyles = createStyles((theme) => ({
   burger: {
@@ -45,6 +48,9 @@ const useStyles = createStyles((theme) => ({
     backgroundImage: 'url(/images/noise-on-yellow.png)',
   },
   navbar: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     padding: theme.spacing.md,
     backgroundColor: theme.colors.brand[0],
   },
@@ -108,6 +114,27 @@ const useStyles = createStyles((theme) => ({
   drawerBody: {
     padding: 0,
   },
+  disconnect: {
+    color: theme.colors.text[0],
+    backgroundColor: 'transparent',
+    border: `2px solid ${theme.colors.text[0]}`,
+    boxShadow: 'none !important',
+
+    '&:hover': {
+      color: theme.colors.text[0],
+      backgroundColor: 'transparent',
+      opacity: '0.7',
+    },
+  },
+  wallet: {
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid',
+    borderTopColor: theme.colors.text[0],
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    marginLeft: '-16px',
+    marginRight: '-16px',
+  },
 }));
 
 export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
@@ -117,16 +144,20 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
   const [drawerOpened, drawer] = useDisclosure(false);
-  const { connect, connected, disconnect } = useConnect();
+  const { connect, connected, address, connector, disconnect } = useConnect();
 
+  const { data: balance = 0 } = trpc.accout.balance.useQuery(
+    { address },
+    { enabled: !!address },
+  );
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 
   const navs = useMemo(() => {
     if (!connected) {
-      return NAVS.filter((nav) => !nav.needConnect);
+      return MOBILE_NAVS.filter((nav) => !nav.needConnect);
     }
-    return NAVS;
+    return MOBILE_NAVS;
   }, [connected]);
 
   return (
@@ -175,45 +206,85 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
             hiddenBreakpoint="lg"
             hidden={!opened}
           >
-            {connected ? (
-              <Stack>
-                <Button className={classes.create} onClick={drawer.open}>
-                  <IconPlus />
-                  <Text>Create</Text>
+            <Box>
+              {connected ? (
+                <Stack>
+                  <Button className={classes.create} onClick={drawer.open}>
+                    <IconPlus />
+                    <Text>Create</Text>
+                  </Button>
+                </Stack>
+              ) : (
+                <Button className={classes.connect} onClick={connect}>
+                  Connect Wallet
                 </Button>
-                {router.query.dev && (
-                  <Button className={classes.connect} onClick={disconnect}>
+              )}
+              <Box mt="md">
+                <Flex direction="column" justify="center">
+                  {navs.map((nav) => (
+                    <Link
+                      key={nav.name}
+                      href={nav.href}
+                      target={nav.target}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <Text
+                        className={
+                          nav.href === router.pathname
+                            ? classes.active
+                            : classes.nav
+                        }
+                      >
+                        {nav.name}
+                      </Text>
+                    </Link>
+                  ))}
+                </Flex>
+              </Box>
+            </Box>
+            {connected && connector && (
+              <Stack className={classes.wallet}>
+                <Flex justify="space-between" py="12px">
+                  <Text weight="bold">My Wallet</Text>
+                  <Text weight="bold">
+                    {Math.floor(BI.from(balance).toNumber() / 10 ** 8)} CKB
+                  </Text>
+                </Flex>
+                <Flex justify="space-between" mb="32px">
+                  <Flex align="center">
+                    <Box mr="xs">
+                      <Image
+                        src={connector.icon}
+                        alt={connector.type}
+                        width="24"
+                        height="24"
+                      />
+                    </Box>
+                    <Text>
+                      {address.slice(0, 10)}...{address.slice(-10)}
+                    </Text>
+                  </Flex>
+                  <IconCopy size={20} />
+                </Flex>
+                <Box mb="md">
+                  <Button
+                    className={classes.disconnect}
+                    onClick={disconnect}
+                    fullWidth
+                  >
+                    <Box mr="xs">
+                      <Image
+                        src="/svg/icon-log-out.svg"
+                        alt="disconnect"
+                        width="24"
+                        height="24"
+                      />
+                    </Box>
                     Disconnect
                   </Button>
-                )}
+                </Box>
               </Stack>
-            ) : (
-              <Button className={classes.connect} onClick={connect}>
-                Connect Wallet
-              </Button>
             )}
-            <Box mt="md">
-              <Flex direction="column" justify="center">
-                {navs.map((nav) => (
-                  <Link
-                    key={nav.name}
-                    href={nav.href}
-                    target={nav.target}
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <Text
-                      className={
-                        nav.href === router.pathname
-                          ? classes.active
-                          : classes.nav
-                      }
-                    >
-                      {nav.name}
-                    </Text>
-                  </Link>
-                ))}
-              </Flex>
-            </Box>
           </Navbar>
         </MediaQuery>
       }

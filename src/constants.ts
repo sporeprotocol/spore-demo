@@ -23,3 +23,25 @@ export const NAVS: NavItem[] = [
     target: '_blank',
   },
 ];
+
+export const MOBILE_NAVS: NavItem[] = [
+  {
+    name: 'Explore',
+    href: '/',
+  },
+  {
+    name: 'My Space',
+    href: '/my',
+    needConnect: true,
+  },
+  {
+    name: 'What is Spore?',
+    href: 'https://spore.pro',
+    target: '_blank',
+  },
+  {
+    name: 'GitHub',
+    href: 'https://github.com/sporeprotocol/spore-demo',
+    target: '_blank',
+  },
+];

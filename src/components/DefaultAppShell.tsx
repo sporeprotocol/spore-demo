@@ -173,7 +173,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
           <Flex align="center" gap="xs">
             <Image
               src="/svg/icon-log-out.svg"
-              alt="user"
+              alt="disconnect"
               width="24"
               height="24"
             />
