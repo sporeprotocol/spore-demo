@@ -13,11 +13,6 @@ export const NAVS: NavItem[] = [
     href: '/',
   },
   {
-    name: 'My Space',
-    href: '/my',
-    needConnect: true,
-  },
-  {
     name: 'What is Spore?',
     href: 'https://spore.pro',
     target: '_blank',

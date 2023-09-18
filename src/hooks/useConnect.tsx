@@ -137,6 +137,7 @@ export const useConnect = () => {
 
   return {
     address,
+    connector,
     connected,
     lock,
     connect,
