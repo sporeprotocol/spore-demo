@@ -17,7 +17,7 @@ import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import DropMenu, { DropMenuProps } from './DropMenu';
@@ -83,7 +83,10 @@ const useStyles = createStyles((theme) => ({
     },
   },
   avatar: {
-    borderRadius: '24px',
+    width: '26px',
+    height: '26px',
+    borderRadius: '22px',
+    border: `2px solid ${theme.white}`
   },
 }));
 
@@ -93,6 +96,19 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
   const { connected, connect, address, disconnect, connector } = useConnect();
   const clipboard = useClipboard();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!address) return;
+    // @ts-ignore
+    import('jazzicon').then((jazzicon) => {
+      const avatarEl = jazzicon.default(22, address);
+      const avatar = document.getElementById('wallet-avatar');
+      if (avatar) {
+        avatar.innerHTML = '';
+        avatar.appendChild(avatarEl);
+      }
+    });
+  }, [address]);
 
   const { data: capacity = 0 } = trpc.accout.balance.useQuery(
     { address },
@@ -258,13 +274,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                               CKB
                             </Text>
                             <Divider mx="md" size="sm" orientation="vertical" />
-                            <Image
-                              className={classes.avatar}
-                              src="/images/avatar.png"
-                              alt="wallet"
-                              width="24"
-                              height="24"
-                            />
+                            <Box className={classes.avatar} id="wallet-avatar" />
                           </Button>
                         </DropMenu>
                       )}

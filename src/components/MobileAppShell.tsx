@@ -24,10 +24,11 @@ import { IconCopy, IconPlus } from '@tabler/icons-react';
 import { MOBILE_NAVS } from '@/constants';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useDisclosure } from '@mantine/hooks';
+import { useClipboard, useDisclosure } from '@mantine/hooks';
 import { trpc } from '@/server';
 import { BI } from '@ckb-lumos/lumos';
 import Image from 'next/image';
+import { showSuccess } from '@/utils/notifications';
 
 const useStyles = createStyles((theme) => ({
   burger: {
@@ -142,6 +143,7 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
   const { children } = props;
   const router = useRouter();
   const theme = useMantineTheme();
+  const clipboard = useClipboard();
   const [opened, setOpened] = useState(false);
   const [drawerOpened, drawer] = useDisclosure(false);
   const { connect, connected, address, connector, disconnect } = useConnect();
@@ -209,13 +211,17 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
             <Box>
               {connected ? (
                 <Stack>
-                  <Button className={classes.create} onClick={drawer.open}>
+                  <Button
+                    className={classes.create}
+                    onClick={drawer.open}
+                    fullWidth
+                  >
                     <IconPlus />
                     <Text>Create</Text>
                   </Button>
                 </Stack>
               ) : (
-                <Button className={classes.connect} onClick={connect}>
+                <Button className={classes.connect} onClick={connect} fullWidth>
                   Connect Wallet
                 </Button>
               )}
@@ -264,7 +270,13 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
                       {address.slice(0, 10)}...{address.slice(-10)}
                     </Text>
                   </Flex>
-                  <IconCopy size={20} />
+                  <IconCopy
+                    size={20}
+                    onClick={() => {
+                      clipboard.copy(address);
+                      showSuccess('Copied!');
+                    }}
+                  />
                 </Flex>
                 <Box mb="md">
                   <Button
