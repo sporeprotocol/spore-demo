@@ -146,7 +146,7 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
   const [drawerOpened, drawer] = useDisclosure(false);
   const { connect, connected, address, connector, disconnect } = useConnect();
 
-  const { data: balance = 0 } = trpc.accout.balance.useQuery(
+  const { data: capacity = 0 } = trpc.accout.balance.useQuery(
     { address },
     { enabled: !!address },
   );
@@ -247,7 +247,7 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
                 <Flex justify="space-between" py="12px">
                   <Text weight="bold">My Wallet</Text>
                   <Text weight="bold">
-                    {Math.floor(BI.from(balance).toNumber() / 10 ** 8)} CKB
+                    {Math.floor(BI.from(capacity).toNumber() / 10 ** 8)} CKB
                   </Text>
                 </Flex>
                 <Flex justify="space-between" mb="32px">

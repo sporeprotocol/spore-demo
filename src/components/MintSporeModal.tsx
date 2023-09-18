@@ -25,7 +25,14 @@ import {
 import { Dropzone, DropzoneProps } from '@mantine/dropzone';
 import { useClipboard, useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconChevronDown, IconCopy } from '@tabler/icons-react';
-import { useState, useCallback, forwardRef, useRef, useMemo } from 'react';
+import {
+  useState,
+  useCallback,
+  forwardRef,
+  useRef,
+  useMemo,
+  useEffect,
+} from 'react';
 import { ImagePreviewRender } from './renders/image';
 
 const MAX_SIZE_LIMIT = parseInt(
@@ -190,9 +197,16 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
   }, [capacity]);
 
+  useEffect(() => {
+    if (onChainSize > balance) {
+      setError(new Error('Insufficient balance'));
+    }
+  }, [onChainSize, balance]);
+
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
     setContent(file);
+    setError(null);
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -234,11 +248,6 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           <Text color="text.0" weight="700">
             {balance} CKB
           </Text>
-          {content && balance - onChainSize > 0 && (
-            <Text color="text.1" ml="5px">
-              (will be ~{balance - onChainSize} CKB after minting)
-            </Text>
-          )}
         </Flex>
       </Flex>
       <Select
@@ -308,43 +317,57 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         </Dropzone>
       )}
       {content && (
-        <Flex direction="column" my="md">
-          <Flex>
-            <Text color="text.0">Estimated On-chain Size</Text>
+        <>
+          <Flex direction="column" my="8px">
+            <Flex align="center">
+              <Text color="text.0" mr="5px">
+                Estimated On-chain Size:
+              </Text>
+              <Text weight="bold" color="text.0" mr="5px">
+                ≈ {onChainSize} CKB
+              </Text>
+              <Popover
+                width={356}
+                classNames={{ dropdown: classes.popover, arrow: classes.arrow }}
+                arrowOffset={15}
+                position="top-start"
+                opened={opened}
+                withArrow
+              >
+                <Popover.Target>
+                  <Image
+                    src="/svg/icon-info.svg"
+                    alt="info"
+                    width="20"
+                    height="20"
+                    sx={{ cursor: 'pointer' }}
+                    onMouseEnter={open}
+                    onMouseLeave={close}
+                  />
+                </Popover.Target>
+                <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
+                  <Text color="white" size="sm">
+                    By creating a spore, you are reserving this amount of CKB
+                    for on-chain storage. You can always destroy spores to
+                    redeem your reserved CKB.
+                  </Text>
+                </Popover.Dropdown>
+              </Popover>
+            </Flex>
           </Flex>
-          <Flex align="center">
-            <Text weight="bold" color="text.0" mr="5px">
-              ≈ {onChainSize} CKB
-            </Text>
-            <Popover
-              width={356}
-              classNames={{ dropdown: classes.popover, arrow: classes.arrow }}
-              arrowOffset={15}
-              position="top-start"
-              opened={opened}
-              withArrow
-            >
-              <Popover.Target>
-                <Image
-                  src="/svg/icon-info.svg"
-                  alt="info"
-                  width="20"
-                  height="20"
-                  sx={{ cursor: 'pointer' }}
-                  onMouseEnter={open}
-                  onMouseLeave={close}
-                />
-              </Popover.Target>
-              <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
-                <Text color="white" size="sm">
-                  By creating a spore, you are reserving this amount of CKB for
-                  on-chain storage. You can always destroy spores to redeem your
-                  reserved CKB.
+          {onChainSize <= balance && (
+            <Flex direction="column" my="8px">
+              <Flex align="center">
+                <Text color="text.0" mr="5px">
+                  Remaining Balance:
                 </Text>
-              </Popover.Dropdown>
-            </Popover>
-          </Flex>
-        </Flex>
+                <Text weight="bold" color="text.0" mr="5px">
+                  ≈ {balance - onChainSize} CKB
+                </Text>
+              </Flex>
+            </Flex>
+          )}
+        </>
       )}
       {error && (
         <Text size="sm" color="functional.0">
@@ -355,7 +378,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         <Group position="right" mt="32px">
           <Button
             className={classes.submit}
-            disabled={!content}
+            disabled={!content || !!error}
             onClick={handleSubmit}
             loading={loading}
           >
@@ -377,7 +400,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           )}
           <Button
             className={classes.submit}
-            disabled={!content}
+            disabled={!content || !!error}
             onClick={handleSubmit}
             loading={loading}
             fullWidth

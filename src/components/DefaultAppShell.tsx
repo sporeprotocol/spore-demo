@@ -94,7 +94,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
   const clipboard = useClipboard();
   const router = useRouter();
 
-  const { data: balance = 0 } = trpc.accout.balance.useQuery(
+  const { data: capacity = 0 } = trpc.accout.balance.useQuery(
     { address },
     { enabled: !!address },
   );
@@ -253,7 +253,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                             </Box>
                             <Text>
                               {Math.floor(
-                                BI.from(balance).toNumber() / 10 ** 8,
+                                BI.from(capacity).toNumber() / 10 ** 8,
                               )}{' '}
                               CKB
                             </Text>
