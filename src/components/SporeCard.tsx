@@ -153,6 +153,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
             <DropMenu
               menu={[
                 {
+                  type: 'item',
                   key: 'transfer-spore',
                   title: (
                     <Flex align="center">
@@ -172,6 +173,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
                   },
                 },
                 {
+                  type: 'item',
                   key: 'destroy-spore',
                   title: (
                     <Flex align="center">
