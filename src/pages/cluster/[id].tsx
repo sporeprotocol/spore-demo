@@ -261,13 +261,17 @@ export default function ClusterPage() {
                   <Text component="span">
                     {address === owner ? (
                       <>
-                        <Text size="lg">Me (</Text>
+                        <Text size="lg" component="span">
+                          Me (
+                        </Text>
                         <Link href={`/my`} style={{ textDecoration: 'none' }}>
-                          <Text size="lg" color="brand.1">
+                          <Text size="lg" color="brand.1" component="span">
                             {owner.slice(0, 10)}...{owner.slice(-10)}
                           </Text>
                         </Link>
-                        <Text size="lg">)</Text>
+                        <Text size="lg" component="span">
+                          )
+                        </Text>
                       </>
                     ) : (
                       <Link
