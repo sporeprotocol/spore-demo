@@ -19,11 +19,10 @@ import {
 } from '@ckb-lumos/lumos';
 import { defaultWalletValue } from '@/state/wallet';
 import * as omnilock from './lock/omnilock';
-import { bytes } from '@ckb-lumos/codec';
-import { ethers } from 'ethers';
 
 export default class MetaMaskConnector extends CKBConnector {
   public type = 'MetaMask';
+  public icon = '/images/metamask-icon.png';
   private listeners: Array<() => void> = [];
   public config: any;
 
