@@ -184,7 +184,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
                         alt="transfer"
                         mr="8px"
                       />
-                      <Text>Destory</Text>
+                      <Text>Destroy</Text>
                     </Flex>
                   ),
                   onClick: (e) => {
