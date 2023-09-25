@@ -12,7 +12,6 @@ import {
   Button,
   useMantineTheme,
   Box,
-  MediaQuery,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { trpc } from '@/server';
@@ -29,8 +28,8 @@ import { useClipboard, useMediaQuery } from '@mantine/hooks';
 import { SporeOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
-import ImageSporeRender from '@/components/renders/image';
 import { showSuccess } from '@/utils/notifications';
+import SporeCoverRender from '@/components/SporeCoverRender';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -232,7 +231,7 @@ export default function SporePage() {
                 </AspectRatio>
               ) : (
                 <Box className={classes.image}>
-                  <ImageSporeRender spore={spore} />
+                  <SporeCoverRender spore={spore} />
                 </Box>
               )}
             </Box>
@@ -314,13 +313,17 @@ export default function SporePage() {
                     <Text component="span">
                       {address === owner ? (
                         <Text component="span">
-                          <Text component="span" size="lg">Me (</Text>
+                          <Text component="span" size="lg">
+                            Me (
+                          </Text>
                           <Link href={`/my`} style={{ textDecoration: 'none' }}>
                             <Text component="span" size="lg" color="brand.1">
                               {owner.slice(0, 10)}...{owner.slice(-10)}
                             </Text>
                           </Link>
-                          <Text component="span" size="lg">)</Text>
+                          <Text component="span" size="lg">
+                            )
+                          </Text>
                         </Text>
                       ) : (
                         <Link

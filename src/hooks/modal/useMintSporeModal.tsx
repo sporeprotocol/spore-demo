@@ -86,7 +86,7 @@ export default function useMintSporeModal(id?: string) {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Add New spore',
+        title: 'Add New Spore',
         onClose: close,
         styles: {
           content: {

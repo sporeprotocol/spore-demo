@@ -23,7 +23,7 @@ import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import { useConnect } from '@/hooks/useConnect';
 import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
-import ImageSporeRender from './renders/image';
+import SporeCoverRender from './SporeCoverRender';
 
 export interface SporeCardProps {
   cluster: Cluster | undefined;
@@ -127,7 +127,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
       >
         <Card p={0} className={classes.card}>
           <Card.Section px="md" pt="md">
-            <ImageSporeRender spore={spore} />
+            <SporeCoverRender spore={spore} />
           </Card.Section>
           <Box p="24px">
             <Flex direction="column">

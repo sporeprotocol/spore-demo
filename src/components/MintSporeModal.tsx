@@ -33,7 +33,7 @@ import {
   useMemo,
   useEffect,
 } from 'react';
-import { ImagePreviewRender } from './renders/image';
+import PreviewRender from './PreviewRender';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -274,17 +274,15 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       />
 
       {content ? (
-        <ImagePreviewRender
-          content={content}
-          onClick={() => dropzoneOpenRef.current?.()}
-        />
+        <PreviewRender content={content} />
       ) : (
         <Dropzone
           openRef={dropzoneOpenRef}
           onDrop={handleDrop}
           classNames={{ root: classes.dropzone }}
           accept={SUPPORTED_MIME_TYPE}
-          onReject={() => {
+          onReject={(e) => {
+            console.log(e[0].file.type);
             showError(
               `Only image files are supported, and the size cannot exceed ${MAX_SIZE_LIMIT}KB.`,
             );
@@ -292,6 +290,13 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           maxSize={MAX_SIZE_LIMIT * 1000}
         >
           <Flex direction="column" align="center">
+            <Image
+              src="/images/upload.png"
+              mb="24px"
+              alt="upload"
+              width="90"
+              height="85"
+            />
             <Flex align="center" mb="16px">
               <MediaQuery smallerThan="sm" styles={{ textAlign: 'center' }}>
                 <Text size="xl">
@@ -310,6 +315,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                 </Text>
               </MediaQuery>
             </Flex>
+            <Text size="sm" color="text.1">
+              Supported formats: JPG, PNG, GIF, SVG, TXT, MD
+            </Text>
             <Text size="sm" color="text.1">
               The file cannot exceed {MAX_SIZE_LIMIT} KB
             </Text>
