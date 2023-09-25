@@ -10,13 +10,23 @@ import {
   createStyles,
   MediaQuery,
   useMantineTheme,
+  Group,
+  Button,
 } from '@mantine/core';
 import groupBy from 'lodash-es/groupBy';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import SporeGrid from '@/components/SporeGrid';
 import ClusterGrid from '@/components/ClusterGrid';
 import { useMediaQuery } from '@mantine/hooks';
+import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { TEXT_MIME_TYPE } from '@/utils/mime';
+
+enum SporeContentType {
+  All = 'All',
+  Image = 'Image',
+  Text = 'Text',
+}
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -31,22 +41,48 @@ const useStyles = createStyles((theme) => ({
       minHeight: '232px',
     },
   },
-
   container: {
     position: 'relative',
   },
-
   illus: {
     position: 'absolute',
     left: '-387px',
     top: '-25px',
   },
+  type: {
+    height: '32px',
+    border: '1px solid #CDCFD5',
+    backgroundColor: '#FFF',
+    borderRadius: '20px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    cursor: 'pointer',
+  },
+  active: {
+    backgroundColor: theme.colors.brand[1],
+    color: '#FFF',
+  },
+  more: {
+    color: theme.colors.brand[1],
+    backgroundColor: 'transparent',
+    borderWidth: '2px',
+    borderColor: theme.colors.brand[1],
+    borderStyle: 'solid',
+    boxShadow: 'none !important',
+
+    '&:hover': {
+      backgroundColor: theme.colors.brand[1],
+      color: theme.white,
+    },
+  },
 }));
 
 export default function HomePage() {
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const [contentType, setContentType] = useState(SporeContentType.All);
+  const [sporeCount, setSporeCount] = useState<number>(12);
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();
@@ -54,6 +90,23 @@ export default function HomePage() {
     trpc.spore.list.useQuery();
 
   const isLoading = isClusterLoading || isSporesLoading;
+
+  const filteredSpores = useMemo(() => {
+    if (contentType === SporeContentType.All) {
+      return spores;
+    }
+    if (contentType === SporeContentType.Image) {
+      return spores.filter((spore) =>
+        IMAGE_MIME_TYPE.includes(spore.contentType as any),
+      );
+    }
+    if (contentType === SporeContentType.Text) {
+      return spores.filter((spore) =>
+        TEXT_MIME_TYPE.includes(spore.contentType as any),
+      );
+    }
+    return spores;
+  }, [spores, contentType]);
 
   const peekClusters = useMemo(() => {
     const sporesByCluster = groupBy(spores, (spore) => spore.clusterId);
@@ -116,8 +169,8 @@ export default function HomePage() {
 
   return (
     <Layout header={header}>
-      <Container py="48px" size="xl">
-        <Box mb="60px">
+      <Box bg="background.0">
+        <Container py="48px" size="xl">
           <ClusterGrid
             title={
               <Flex justify="space-between">
@@ -133,13 +186,49 @@ export default function HomePage() {
             spores={spores}
             isLoading={isLoading}
           />
-        </Box>
+        </Container>
+      </Box>
+      <Container py="48px" size="xl">
         <SporeGrid
           title="Explore All Spores"
-          spores={spores}
+          spores={filteredSpores.slice(0, sporeCount)}
           cluster={(id) => clusters.find((c) => c.id === id) ?? undefined}
+          filter={
+            <Group mt="16px">
+              {[
+                SporeContentType.All,
+                SporeContentType.Image,
+                SporeContentType.Text,
+              ].map((type) => {
+                return (
+                  <Flex
+                    key={type}
+                    align="center"
+                    className={cx(classes.type, {
+                      [classes.active]: type === contentType,
+                    })}
+                    onClick={() => setContentType(type)}
+                  >
+                    <Text>{type}</Text>
+                  </Flex>
+                );
+              })}
+            </Group>
+          }
           isLoading={isSporesLoading}
         />
+        {sporeCount < filteredSpores.length && (
+          <Group position="center" mt="48px">
+            <Button
+              className={classes.more}
+              onClick={() =>
+                setSporeCount(Math.min(filteredSpores.length, sporeCount + 12))
+              }
+            >
+              Load More
+            </Button>
+          </Group>
+        )}
       </Container>
     </Layout>
   );

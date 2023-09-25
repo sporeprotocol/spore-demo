@@ -2,7 +2,7 @@ import { Cluster } from '@/cluster';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
-import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
+import { SUPPORTED_MIME_TYPE, getMIMETypeByName } from '@/utils/mime';
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError, showSuccess } from '@/utils/notifications';
@@ -282,10 +282,14 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           classNames={{ root: classes.dropzone }}
           accept={SUPPORTED_MIME_TYPE}
           onReject={(e) => {
-            console.log(e[0].file.type);
-            showError(
-              `Only image files are supported, and the size cannot exceed ${MAX_SIZE_LIMIT}KB.`,
-            );
+            const [{ file, errors }] = e;
+            const mimeType = getMIMETypeByName(file.name);
+            if (SUPPORTED_MIME_TYPE.includes(mimeType as any)) {
+              handleDrop([file]);
+              return;
+            }
+            const [error] = errors;
+            showError(error.message);
           }}
           maxSize={MAX_SIZE_LIMIT * 1000}
         >

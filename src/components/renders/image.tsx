@@ -24,7 +24,7 @@ const useStyles = createStyles((_, params?: { pixelated: boolean }) => ({
   },
 }));
 
-export default function ImageSporeRender(props: ImageSporeRenderProps) {
+export function ImageSporeCoverRender(props: ImageSporeRenderProps) {
   const { spore, ratio = 1 } = props;
   const capacity = useMemo(
     () => BI.from(spore.cell.cellOutput.capacity ?? 0).toNumber(),
@@ -45,6 +45,8 @@ export default function ImageSporeRender(props: ImageSporeRenderProps) {
     </AspectRatio>
   );
 }
+
+export const ImageSporeContentRender = ImageSporeCoverRender;
 
 export interface ImagePreviewRenderProps {
   content: Blob;

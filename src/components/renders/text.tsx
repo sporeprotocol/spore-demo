@@ -8,6 +8,7 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
+import { useRemark } from 'react-remark';
 
 export interface TextSporeRenderProps {
   spore: Spore;
@@ -30,7 +31,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function TextSporeRender(props: TextSporeRenderProps) {
+export function TextSporeCoverRender(props: TextSporeRenderProps) {
   const { spore, ratio = 1 } = props;
   const [text, setText] = useState<string | ArrayBuffer | null>(null);
   const { classes } = useStyles();
@@ -54,6 +55,28 @@ export default function TextSporeRender(props: TextSporeRenderProps) {
         readOnly
       />
     </AspectRatio>
+  );
+}
+
+export function TextSporeContentRender(props: TextSporeRenderProps) {
+  const { spore } = props;
+  const [reactContent, setMarkdownSource] = useRemark();
+
+  useEffect(() => {
+    fetch(`/api/v1/media/${spore.id}`).then(async (res) => {
+      const text = await res.text();
+      setMarkdownSource(text);
+    });
+  }, [spore, setMarkdownSource]);
+
+  if (!reactContent) {
+    return null;
+  }
+
+  return (
+    <Box>
+      {reactContent}
+    </Box>
   );
 }
 
@@ -115,3 +138,4 @@ export function TextPreviewRender(props: TextPreviewRenderProps) {
     </Box>
   );
 }
+

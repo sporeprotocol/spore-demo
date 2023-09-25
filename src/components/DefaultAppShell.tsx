@@ -287,7 +287,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
         </MantineHeader>
       }
     >
-      <Box bg="background.0" mih="100vh" mt="80px">
+      <Box mih="100vh" mt="80px">
         {children}
       </Box>
     </AppShell>
