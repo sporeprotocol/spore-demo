@@ -14,6 +14,7 @@ import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
 import { cache } from '@/utils/cache';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
+import { GoogleAnalytics } from 'nextjs-google-analytics';
 
 function StateProvider({
   children,
@@ -112,6 +113,7 @@ function App({ Component, pageProps }: AppProps) {
           <StateProvider pageProps={pageProps}>
             <UIProvider>
               <GlobalOpenGraph />
+              <GoogleAnalytics trackPageViews />
               <Component {...pageProps} />
             </UIProvider>
           </StateProvider>
