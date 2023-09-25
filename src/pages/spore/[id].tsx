@@ -93,7 +93,7 @@ const useStyles = createStyles((theme) => ({
       color: theme.white,
     },
   },
-  destory: {
+  destroy: {
     borderColor: theme.colors.functional[0],
     color: theme.colors.functional[0],
 
@@ -126,7 +126,7 @@ export default function SporePage() {
   );
 
   const transferSpore = useTransferSporeModal(spore);
-  const destorySpore = useDestroySporeModal(spore);
+  const destroySpore = useDestroySporeModal(spore);
 
   const amount = spore
     ? Math.ceil(BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8)
@@ -361,10 +361,10 @@ export default function SporePage() {
                     Transfer
                   </Button>
                   <Button
-                    className={cx(classes.button, classes.destory)}
-                    onClick={destorySpore.open}
+                    className={cx(classes.button, classes.destroy)}
+                    onClick={destroySpore.open}
                   >
-                    Destory
+                    Destroy
                   </Button>
                 </Flex>
               )}

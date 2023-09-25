@@ -31,7 +31,7 @@ const useStyles = createStyles((theme) => ({
     color: `${theme.colors.brand[1]} !important`,
   },
 
-  destory: {
+  destroy: {
     backgroundColor: theme.colors.functional[0],
     '&:hover': {
       backgroundColor: theme.fn.lighten(theme.colors.functional[0], 0.1),
@@ -87,7 +87,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
               Cancel
             </Button>
             <Button
-              className={classes.destory}
+              className={classes.destroy}
               onClick={handleSubmit}
               loading={loading}
             >
@@ -97,7 +97,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
         ) : (
           <Stack w="100%">
             <Button
-              className={classes.destory}
+              className={classes.destroy}
               onClick={handleSubmit}
               loading={loading}
               fullWidth
