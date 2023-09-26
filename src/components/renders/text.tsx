@@ -79,6 +79,16 @@ export function TextSporeContentRender(props: TextSporeRenderProps) {
 }
 
 const usePreviewStyles = createStyles((theme) => ({
+  container: {
+    width: '616px !important',
+    height: '260px !important',
+    borderColor: theme.colors.text[0],
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderRadius: '6px',
+    backgroundColor: theme.colors.background[1],
+    overflow: 'hidden',
+  },
   text: {
     width: '616px !important',
     height: '260px !important',
@@ -125,7 +135,7 @@ export function TextPreviewRender(props: TextPreviewRenderProps) {
   console.log(text.toString());
 
   return (
-    <Box>
+    <Box className={classes.container}>
       <AspectRatio ratio={(isMobile ? 295 : 616) / 260}>
         <Textarea
           classNames={{ input: classes.text }}

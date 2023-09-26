@@ -2,7 +2,11 @@ import { Cluster } from '@/cluster';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
-import { SUPPORTED_MIME_TYPE, getMIMETypeByName } from '@/utils/mime';
+import {
+  SUPPORTED_MIME_TYPE,
+  TEXT_MIME_TYPE,
+  getMIMETypeByName,
+} from '@/utils/mime';
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError, showSuccess } from '@/utils/notifications';
@@ -22,7 +26,7 @@ import {
   MediaQuery,
   Stack,
 } from '@mantine/core';
-import { Dropzone, DropzoneProps } from '@mantine/dropzone';
+import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useClipboard, useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconChevronDown, IconCopy } from '@tabler/icons-react';
 import {
@@ -197,6 +201,18 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
   }, [capacity]);
 
+  const isImageType = useMemo(() => {
+    if (!content) return false;
+    const mimeType = content.type || getMIMETypeByName(content.name);
+    return IMAGE_MIME_TYPE.includes(mimeType as any);
+  }, [content]);
+
+  const isTextType = useMemo(() => {
+    if (!content) return false;
+    const mimeType = content.type || getMIMETypeByName(content.name);
+    return TEXT_MIME_TYPE.includes(mimeType as any);
+  }, [content]);
+
   useEffect(() => {
     if (onChainSize > balance) {
       setError(new Error('Insufficient balance'));
@@ -274,7 +290,45 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       />
 
       {content ? (
-        <PreviewRender content={content} />
+        <Stack>
+          <PreviewRender content={content} />
+          <Group position="apart">
+            <Group spacing="8px">
+              {isImageType && (
+                <Image
+                  src="/images/image.png"
+                  alt="image"
+                  width="40"
+                  height="48"
+                />
+              )}
+              {isTextType && (
+                <Image
+                  src="/images/text.png"
+                  alt="image"
+                  width="40"
+                  height="48"
+                />
+              )}
+              <Stack spacing={0}>
+                <Text weight="bold" color="text.0">
+                  {content.name}
+                </Text>
+                <Text size="sm" color="text.1">
+                  {content.size}
+                </Text>
+              </Stack>
+            </Group>
+            <Text
+              color="brand.1"
+              weight="bold"
+              sx={{ cursor: 'pointer' }}
+              onClick={() => dropzoneOpenRef.current?.()}
+            >
+              Change File
+            </Text>
+          </Group>
+        </Stack>
       ) : (
         <Dropzone
           openRef={dropzoneOpenRef}
@@ -330,7 +384,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       )}
       {content && (
         <>
-          <Flex direction="column" my="8px">
+          <Flex direction="column" mt="18px" mb="8px">
             <Flex align="center">
               <Text color="text.0" mr="5px">
                 Estimated On-chain Size:

@@ -55,7 +55,7 @@ export interface ImagePreviewRenderProps {
 
 const usePreviewStyles = createStyles(
   (theme, params?: { pixelated: boolean }) => ({
-    imageContainer: {
+    container: {
       borderColor: theme.colors.text[0],
       borderWidth: '1px',
       borderStyle: 'solid',
@@ -96,7 +96,7 @@ export function ImagePreviewRender(props: ImagePreviewRenderProps) {
   }
 
   return (
-    <Box className={classes.imageContainer}>
+    <Box className={classes.container}>
       <AspectRatio ratio={(isMobile ? 295 : 616) / 260}>
         <Image
           width="100%"

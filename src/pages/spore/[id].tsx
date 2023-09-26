@@ -4,7 +4,6 @@ import {
   Text,
   Image,
   Container,
-  AspectRatio,
   createStyles,
   Title,
   useMantineTheme,
@@ -85,7 +84,9 @@ export default function SporePage() {
   const { address } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
 
-  const { data: spore, isLoading } = trpc.spore.get.useQuery({ id: id as string });
+  const { data: spore, isLoading } = trpc.spore.get.useQuery({
+    id: id as string,
+  });
   const { classes } = useStyles();
   // const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   // const isTablet = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
@@ -120,6 +121,39 @@ export default function SporePage() {
     [spores, id],
   );
 
+  const pager = cluster && spores && spores.length > 1 && (
+    <Group position="apart">
+      {prevSporeIndex >= 0 && (
+        <Link
+          href={`/spore/${spores[prevSporeIndex].id}`}
+          style={{ textDecoration: 'none' }}
+          prefetch
+        >
+          <Image
+            src="/svg/icon-left.svg"
+            width="24"
+            height="24"
+            alt="Previus Spore"
+          />
+        </Link>
+      )}
+      {nextSporeIndex < spores.length && (
+        <Link
+          href={`/spore/${spores[nextSporeIndex].id}`}
+          style={{ textDecoration: 'none' }}
+          prefetch
+        >
+          <Image
+            src="/svg/icon-right.svg"
+            width="24"
+            height="24"
+            alt="Previus Spore"
+          />
+        </Link>
+      )}
+    </Group>
+  );
+
   return (
     <Layout>
       <Head>
@@ -141,13 +175,18 @@ export default function SporePage() {
                       alt="Cluster Icon"
                       width="24px"
                       height="24px"
-                      mr="8px"
                     />
                     <Text size="lg" color="text.0" weight="bold">
                       {cluster.name}
                     </Text>
+                    {spores && (
+                      <Text color="text.0">
+                        ({nextSporeIndex}/{spores.length})
+                      </Text>
+                    )}
                   </Group>
                 </Link>
+                {pager}
               </Group>
             )}
             <Group>
@@ -222,9 +261,7 @@ export default function SporePage() {
                   />
                 ) : (
                   <Group>
-                    <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
-                      <Text color="text.0">{spore!.contentType}</Text>
-                    </Link>
+                    <Text color="text.0">{spore!.contentType}</Text>
                   </Group>
                 )}
               </Stack>
