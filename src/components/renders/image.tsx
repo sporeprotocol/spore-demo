@@ -13,6 +13,7 @@ import { useEffect, useMemo, useState } from 'react';
 export interface ImageSporeRenderProps {
   spore: Spore;
   ratio?: number;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 const useStyles = createStyles((_, params?: { pixelated: boolean }) => ({

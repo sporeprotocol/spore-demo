@@ -13,9 +13,10 @@ import { useRemark } from 'react-remark';
 export interface TextSporeRenderProps {
   spore: Spore;
   ratio?: number;
+  size?: 'sm' | 'md' | 'lg';
 }
 
-const useStyles = createStyles((theme) => ({
+const useStyles = createStyles((theme, props: TextSporeRenderProps) => ({
   wrapper: {
     width: '100%',
     height: '100%',
@@ -24,17 +25,18 @@ const useStyles = createStyles((theme) => ({
     width: '100%',
     height: '100%',
     background: '#FFF',
-    fontSize: '16px',
+    fontSize: props.size === 'sm' ? '12px' : '16px',
     padding: theme.spacing.md,
     color: theme.colors.text[0],
     overflowY: 'hidden',
+    border: 'none',
   },
 }));
 
 export function TextSporeCoverRender(props: TextSporeRenderProps) {
   const { spore, ratio = 1 } = props;
   const [text, setText] = useState<string | ArrayBuffer | null>(null);
-  const { classes } = useStyles();
+  const { classes } = useStyles(props);
 
   useEffect(() => {
     fetch(`/api/v1/media/${spore.id}`).then(async (res) => {
@@ -73,11 +75,7 @@ export function TextSporeContentRender(props: TextSporeRenderProps) {
     return null;
   }
 
-  return (
-    <Box>
-      {reactContent}
-    </Box>
-  );
+  return <Box>{reactContent}</Box>;
 }
 
 const usePreviewStyles = createStyles((theme) => ({
@@ -138,4 +136,3 @@ export function TextPreviewRender(props: TextPreviewRenderProps) {
     </Box>
   );
 }
-

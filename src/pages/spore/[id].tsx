@@ -41,7 +41,7 @@ export async function getStaticProps(
   };
 }
 export const getStaticPaths: GetStaticPaths = async () => {
-  const spores = await SporeService.shared.list();
+  const { items: spores } = await SporeService.shared.list();
   return {
     paths: spores.map((spore) => ({
       params: {

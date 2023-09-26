@@ -12,15 +12,18 @@ import {
   useMantineTheme,
   Group,
   Button,
+  Loader,
 } from '@mantine/core';
 import groupBy from 'lodash-es/groupBy';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import SporeGrid from '@/components/SporeGrid';
 import ClusterGrid from '@/components/ClusterGrid';
 import { useMediaQuery } from '@mantine/hooks';
 import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { TEXT_MIME_TYPE } from '@/utils/mime';
+import { Spore } from '@/spore';
+import { uniqBy } from 'lodash-es';
 
 enum SporeContentType {
   All = 'All',
@@ -82,12 +85,34 @@ export default function HomePage() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [contentType, setContentType] = useState(SporeContentType.All);
-  const [sporeCount, setSporeCount] = useState<number>(12);
+  const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();
-  const { data: spores = [], isLoading: isSporesLoading } =
-    trpc.spore.list.useQuery();
+  const { data: allSpores = [], isLoading: isAllSporesLoading } = trpc.spore.list.useQuery();
+
+  const {
+    data,
+    isLoading: isSporesLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = trpc.spore.infiniteList.useInfiniteQuery(
+    {
+      limit: 12,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      initialCursor: 0,
+    },
+  );
+
+  const spores = useMemo(
+    () =>
+      uniqBy(data?.pages.map(({ items }) => items).flat() as Spore[], 'id') ??
+      [],
+    [data],
+  );
 
   const isLoading = isClusterLoading || isSporesLoading;
 
@@ -122,6 +147,19 @@ export default function HomePage() {
       })
       .slice(0, 4);
   }, [clusters, spores]);
+
+  useEffect(() => {
+    if (isFetchingNextPage || !hasNextPage) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        fetchNextPage();
+      }
+    });
+    if (loadMoreButtonRef.current) {
+      observer.observe(loadMoreButtonRef.current);
+    }
+    return () => observer.disconnect();
+  }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -183,15 +221,15 @@ export default function HomePage() {
               </Flex>
             }
             clusters={peekClusters}
-            spores={spores}
-            isLoading={isLoading}
+            spores={allSpores}
+            isLoading={isClusterLoading || isAllSporesLoading}
           />
         </Container>
       </Box>
       <Container py="48px" size="xl">
         <SporeGrid
           title="Explore All Spores"
-          spores={filteredSpores.slice(0, sporeCount)}
+          spores={filteredSpores}
           cluster={(id) => clusters.find((c) => c.id === id) ?? undefined}
           filter={
             <Group mt="16px">
@@ -217,18 +255,20 @@ export default function HomePage() {
           }
           isLoading={isSporesLoading}
         />
-        {sporeCount < filteredSpores.length && (
-          <Group position="center" mt="48px">
-            <Button
-              className={classes.more}
-              onClick={() =>
-                setSporeCount(Math.min(filteredSpores.length, sporeCount + 12))
-              }
-            >
-              Load More
-            </Button>
-          </Group>
-        )}
+        <Group position="center" mt="48px">
+          {hasNextPage &&
+            (isFetchingNextPage ? (
+              <Loader color="brand.1" />
+            ) : (
+              <Button
+                ref={loadMoreButtonRef}
+                className={classes.more}
+                onClick={() => fetchNextPage()}
+              >
+                Load More
+              </Button>
+            ))}
+        </Group>
       </Container>
     </Layout>
   );

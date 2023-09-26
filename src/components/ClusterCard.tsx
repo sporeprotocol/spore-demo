@@ -75,7 +75,7 @@ export function ClusterSkeletonCard() {
 
   return (
     <Card p={0} className={classes.card}>
-      <Card.Section px="md" pt="md">
+      <Card.Section px="md">
         <AspectRatio ratio={140 / 80}>
           <Skeleton
             className={classes.skeleton}
