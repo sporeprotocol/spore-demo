@@ -216,13 +216,17 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   useEffect(() => {
     if (onChainSize > balance) {
       setError(new Error('Insufficient balance'));
+    } else {
+      if (error?.message === 'Insufficient balance') {
+        setError(null);
+      }
     }
-  }, [onChainSize, balance]);
+  }, [onChainSize, balance, error]);
 
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
-    setContent(file);
     setError(null);
+    setContent(file);
   }, []);
 
   const handleSubmit = useCallback(async () => {

@@ -71,6 +71,7 @@ export default class ClusterService {
   public async list(): Promise<Cluster[]> {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
+      order: 'desc',
     });
 
     const clusters: Cluster[] = [];
@@ -84,6 +85,7 @@ export default class ClusterService {
 
   public async listByLock(lock: Script): Promise<Cluster[]> {
     const collector = this.indexer.collector({
+      order: 'desc',
       type: { ...this.script, args: '0x' },
       lock,
     });
