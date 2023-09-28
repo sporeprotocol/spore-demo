@@ -102,7 +102,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
               loading={loading}
               fullWidth
             >
-              Confirm
+              Destroy
             </Button>
             <Button
               classNames={{ root: classes.cancel, label: classes.label }}

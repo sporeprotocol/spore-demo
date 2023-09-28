@@ -16,6 +16,8 @@ export interface Spore {
 }
 
 export interface QueryOptions {
+  skip?: number;
+  limit?: number;
   includeContent?: boolean;
 }
 
@@ -72,56 +74,73 @@ export default class SporeService {
   public async list(
     clusterId?: string,
     options?: QueryOptions,
-  ): Promise<Spore[]> {
+  ) {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
+      order: 'desc',
+      skip: options?.skip,
     });
 
     let spores: Spore[] = [];
+    let collected = 0;
     for await (const cell of collector.collect()) {
+      collected += 1;
       const spore = SporeService.getSporeFromCell(
         cell,
         options?.includeContent,
       );
-      spores.push(spore);
+      if (SUPPORTED_MIME_TYPE.includes(spore.contentType as any)) {
+        if (clusterId && spore.clusterId !== clusterId) {
+          continue;
+        }
+
+        spores.push(spore);
+        if (options?.limit && spores.length === options.limit) {
+          break;
+        }
+      }
     }
 
-    spores = spores.filter((spore) =>
-      SUPPORTED_MIME_TYPE.includes(spore.contentType as any),
-    );
-
-    if (clusterId) {
-      return spores.filter((spore) => spore.clusterId === clusterId);
-    }
-    return spores;
+    return {
+      items: spores,
+      collected,
+    };
   }
 
   public async listByLock(
     lock: Script,
     clusterId?: string,
     options?: QueryOptions,
-  ): Promise<Spore[]> {
+  ) {
     const collector = this.indexer.collector({
-      type: { ...this.script, args: '0x' },
       lock,
+      type: { ...this.script, args: '0x' },
+      order: 'desc',
+      skip: options?.skip,
     });
 
     let spores: Spore[] = [];
+    let collected = 0;
     for await (const cell of collector.collect()) {
+      collected += 1;
       const spore = SporeService.getSporeFromCell(
         cell,
         options?.includeContent,
       );
-      spores.push(spore);
-    }
+      if (SUPPORTED_MIME_TYPE.includes(spore.contentType as any)) {
+        if (clusterId && spore.clusterId !== clusterId) {
+          continue;
+        }
 
-    spores = spores.filter((spore) =>
-      SUPPORTED_MIME_TYPE.includes(spore.contentType as any),
-    );
-
-    if (clusterId) {
-      return spores.filter((spore) => spore.clusterId === clusterId);
+        spores.push(spore);
+        if (options?.limit && spores.length === options.limit) {
+          break;
+        }
+      }
     }
-    return spores;
+    return {
+      items: spores,
+      collected,
+    };
   }
 }

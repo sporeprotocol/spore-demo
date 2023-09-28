@@ -10,13 +10,26 @@ import {
   createStyles,
   MediaQuery,
   useMantineTheme,
+  Group,
+  Button,
+  Loader,
 } from '@mantine/core';
 import groupBy from 'lodash-es/groupBy';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import SporeGrid from '@/components/SporeGrid';
 import ClusterGrid from '@/components/ClusterGrid';
 import { useMediaQuery } from '@mantine/hooks';
+import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { TEXT_MIME_TYPE } from '@/utils/mime';
+import { Spore } from '@/spore';
+import { uniqBy } from 'lodash-es';
+
+enum SporeContentType {
+  All = 'All',
+  Image = 'Image',
+  Text = 'Text',
+}
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -31,29 +44,99 @@ const useStyles = createStyles((theme) => ({
       minHeight: '232px',
     },
   },
-
   container: {
     position: 'relative',
   },
-
   illus: {
     position: 'absolute',
     left: '-387px',
     top: '-25px',
   },
+  type: {
+    height: '32px',
+    border: '1px solid #CDCFD5',
+    backgroundColor: '#FFF',
+    borderRadius: '20px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    cursor: 'pointer',
+
+    '&:hover': {
+      backgroundColor: 'rgba(26, 32, 44, 0.08)',
+    },
+  },
+  active: {
+    backgroundColor: theme.colors.brand[1],
+    color: '#FFF',
+  },
+  more: {
+    color: theme.colors.brand[1],
+    backgroundColor: 'transparent',
+    borderWidth: '2px',
+    borderColor: theme.colors.brand[1],
+    borderStyle: 'solid',
+    boxShadow: 'none !important',
+
+    '&:hover': {
+      backgroundColor: theme.colors.brand[1],
+      color: theme.white,
+    },
+  },
 }));
 
 export default function HomePage() {
-  const { classes } = useStyles();
+  const { classes, cx } = useStyles();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const [contentType, setContentType] = useState(SporeContentType.All);
+  const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();
-  const { data: spores = [], isLoading: isSporesLoading } =
+  const { data: allSpores = [], isLoading: isAllSporesLoading } =
     trpc.spore.list.useQuery();
 
+  const {
+    data,
+    isLoading: isSporesLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = trpc.spore.infiniteList.useInfiniteQuery(
+    {
+      limit: 12,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      initialCursor: 0,
+    },
+  );
+
+  const spores = useMemo(
+    () =>
+      uniqBy(data?.pages.map(({ items }) => items).flat() as Spore[], 'id') ??
+      [],
+    [data],
+  );
+
   const isLoading = isClusterLoading || isSporesLoading;
+
+  const filteredSpores = useMemo(() => {
+    if (contentType === SporeContentType.All) {
+      return spores;
+    }
+    if (contentType === SporeContentType.Image) {
+      return spores.filter((spore) =>
+        IMAGE_MIME_TYPE.includes(spore.contentType as any),
+      );
+    }
+    if (contentType === SporeContentType.Text) {
+      return spores.filter((spore) =>
+        TEXT_MIME_TYPE.includes(spore.contentType as any),
+      );
+    }
+    return spores;
+  }, [spores, contentType]);
 
   const peekClusters = useMemo(() => {
     const sporesByCluster = groupBy(spores, (spore) => spore.clusterId);
@@ -69,6 +152,19 @@ export default function HomePage() {
       })
       .slice(0, 4);
   }, [clusters, spores]);
+
+  useEffect(() => {
+    if (isFetchingNextPage || !hasNextPage) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        fetchNextPage();
+      }
+    });
+    if (loadMoreButtonRef.current) {
+      observer.observe(loadMoreButtonRef.current);
+    }
+    return () => observer.disconnect();
+  }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -116,8 +212,8 @@ export default function HomePage() {
 
   return (
     <Layout header={header}>
-      <Container py="48px" size="xl">
-        <Box mb="60px">
+      <Box bg="background.0">
+        <Container py="48px" size="xl">
           <ClusterGrid
             title={
               <Flex justify="space-between">
@@ -130,16 +226,54 @@ export default function HomePage() {
               </Flex>
             }
             clusters={peekClusters}
-            spores={spores}
-            isLoading={isLoading}
+            spores={allSpores}
+            isLoading={isClusterLoading || isAllSporesLoading}
           />
-        </Box>
+        </Container>
+      </Box>
+      <Container py="48px" size="xl">
         <SporeGrid
           title="Explore All Spores"
-          spores={spores}
+          spores={filteredSpores}
           cluster={(id) => clusters.find((c) => c.id === id) ?? undefined}
+          filter={
+            <Group mt="16px">
+              {[
+                SporeContentType.All,
+                SporeContentType.Image,
+                SporeContentType.Text,
+              ].map((type) => {
+                return (
+                  <Flex
+                    key={type}
+                    align="center"
+                    className={cx(classes.type, {
+                      [classes.active]: type === contentType,
+                    })}
+                    onClick={() => setContentType(type)}
+                  >
+                    <Text>{type}</Text>
+                  </Flex>
+                );
+              })}
+            </Group>
+          }
           isLoading={isSporesLoading}
         />
+        <Group position="center" mt="48px">
+          {hasNextPage &&
+            (isFetchingNextPage ? (
+              <Loader color="brand.1" />
+            ) : (
+              <Button
+                ref={loadMoreButtonRef}
+                className={classes.more}
+                onClick={() => fetchNextPage()}
+              >
+                Load More
+              </Button>
+            ))}
+        </Group>
       </Container>
     </Layout>
   );

@@ -301,7 +301,7 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
         </MediaQuery>
       }
     >
-      <Box bg="background.0" mih="100vh" mt="56px">
+      <Box mih="100vh" mt="56px">
         <Drawer
           opened={drawerOpened}
           transitionProps={{
