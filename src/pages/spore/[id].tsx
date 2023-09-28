@@ -208,17 +208,22 @@ export default function SporePage() {
               ) : (
                 <Group>
                   <Box className={classes.title}>
-                    <Text
-                      size="32px"
-                      weight="bold"
-                      color="text.0"
-                      sx={{
-                        fontFamily: theme.headings.fontFamily,
-                        lineHeight: 1.3,
-                      }}
+                    <Tooltip
+                      label={`Unique ID of Spore`}
+                      withArrow
                     >
-                      {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
-                    </Text>
+                      <Text
+                        size="32px"
+                        weight="bold"
+                        color="text.0"
+                        sx={{
+                          fontFamily: theme.headings.fontFamily,
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
+                      </Text>
+                    </Tooltip>
                   </Box>
                   <Tooltip label={'View on explorer'} withArrow>
                     <Link
@@ -270,16 +275,21 @@ export default function SporePage() {
                   borderRadius="16px"
                 />
               ) : (
-                <Title
-                  order={2}
-                  bg="brand.0"
-                  px="8px"
-                  sx={{
-                    display: 'inline',
-                  }}
+                <Tooltip
+                  label={`The amount of CKB occupied by on-chain storage, which can be get back when destroyed`}
+                  withArrow
                 >
-                  {amount} CKB
-                </Title>
+                  <Title
+                    order={2}
+                    bg="brand.0"
+                    px="8px"
+                    sx={{
+                      display: 'inline',
+                    }}
+                  >
+                    {amount} CKB
+                  </Title>
+                </Tooltip>
               )}
             </Group>
             <Group spacing="48px">
