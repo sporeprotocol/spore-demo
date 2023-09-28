@@ -18,6 +18,7 @@ import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
 import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -131,15 +132,21 @@ export default function AccountPage() {
               >
                 Address:
               </Text>
-              <Text
-                component="span"
-                size="xl"
-                weight="bold"
-                color="text.0"
-                mr="5px"
+              <Link
+                href={`https://pudge.explorer.nervos.org/address/${address}`}
+                target="_blank"
+                style={{ textDecoration: 'none' }}
               >
-                {address.slice(0, 8)}...{address.slice(-8)}
-              </Text>
+                <Text
+                  component="span"
+                  size="xl"
+                  weight="bold"
+                  color="text.0"
+                  mr="5px"
+                >
+                  {address.slice(0, 8)}...{address.slice(-8)}
+                </Text>
+              </Link>
               <Text
                 component="span"
                 sx={{ cursor: 'pointer' }}

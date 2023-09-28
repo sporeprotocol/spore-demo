@@ -20,6 +20,7 @@ import {
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 const useStyles = createStyles((theme) => ({
@@ -158,15 +159,21 @@ export default function MySpacePage() {
               >
                 Address:
               </Text>
-              <Text
-                component="span"
-                size="xl"
-                weight="bold"
-                color="text.0"
-                mr="5px"
+              <Link
+                href={`https://pudge.explorer.nervos.org/address/${address}`}
+                target="_blank"
+                style={{ textDecoration: "none" }}
               >
-                {address.slice(0, 10)}...{address.slice(-10)}
-              </Text>
+                <Text
+                  component="span"
+                  size="xl"
+                  weight="bold"
+                  color="text.0"
+                  mr="5px"
+                >
+                  {address.slice(0, 10)}...{address.slice(-10)}
+                </Text>
+              </Link>
               <Text
                 component="span"
                 sx={{ cursor: 'pointer' }}
