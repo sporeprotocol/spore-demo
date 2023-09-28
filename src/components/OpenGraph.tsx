@@ -1,6 +1,7 @@
 import { Cluster } from '@/cluster';
 import { trpc } from '@/server';
 import { Spore } from '@/spore';
+import { IMAGE_MIME_TYPE } from '@/utils/mime';
 import { useMantineTheme } from '@mantine/core';
 import { DefaultSeo, NextSeo } from 'next-seo';
 
@@ -58,13 +59,17 @@ export function SporeOpenGraph(props: { id: string }) {
       description={id}
       openGraph={{
         images: [
-          {
-            url: `/api/v1/media/${id}`,
-            width: 400,
-            height: 400,
-            alt: id,
-            type: spore?.contentType,
-          },
+          ...(IMAGE_MIME_TYPE.includes(spore?.contentType ?? '' as any)
+            ? [
+                {
+                  url: `/api/v1/media/${id}`,
+                  width: 400,
+                  height: 400,
+                  alt: id,
+                  type: spore?.contentType,
+                },
+              ]
+            : []),
         ],
       }}
     />
