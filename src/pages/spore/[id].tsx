@@ -220,7 +220,7 @@ export default function SporePage() {
                       {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
                     </Text>
                   </Box>
-                  <Tooltip label={'Explore'} withArrow>
+                  <Tooltip label={'View on explorer'} withArrow>
                     <Link
                       href={`https://pudge.explorer.nervos.org/transaction/${
                         spore!.cell.outPoint?.txHash
