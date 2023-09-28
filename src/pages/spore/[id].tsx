@@ -10,6 +10,7 @@ import {
   Box,
   Group,
   Stack,
+  Tooltip,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
 import { trpc } from '@/server';
@@ -176,7 +177,14 @@ export default function SporePage() {
                       width="24px"
                       height="24px"
                     />
-                    <Text size="lg" color="text.0" weight="bold">
+                    <Text
+                      size="lg"
+                      color="text.0"
+                      weight="bold"
+                      sx={{
+                        fontFamily: theme.headings.fontFamily,
+                      }}
+                    >
                       {cluster.name}
                     </Text>
                     {spores && (
@@ -204,27 +212,52 @@ export default function SporePage() {
                       size="32px"
                       weight="bold"
                       color="text.0"
-                      sx={{ lineHeight: 1.3 }}
+                      sx={{
+                        fontFamily: theme.headings.fontFamily,
+                        lineHeight: 1.3,
+                      }}
                     >
                       {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
                     </Text>
                   </Box>
-                  <Box sx={{ cursor: 'pointer' }} onClick={transferSpore.open}>
-                    <Image
-                      src="/svg/icon-repeat.svg"
-                      alt="Transfer"
-                      width="24px"
-                      height="24px"
-                    />
-                  </Box>
-                  <Box sx={{ cursor: 'pointer' }} onClick={destroySpore.open}>
-                    <Image
-                      src="/svg/icon-trash-2.svg"
-                      alt="Trash"
-                      width="24px"
-                      height="24px"
-                    />
-                  </Box>
+                  <Tooltip label={'Explore'} withArrow>
+                    <Link
+                      href={`https://pudge.explorer.nervos.org/transaction/${
+                        spore!.cell.outPoint?.txHash
+                      }`}
+                      target="_blank"
+                    >
+                      <Image
+                        src="/svg/icon-global.svg"
+                        alt="Transfer"
+                        width="24px"
+                        height="24px"
+                      />
+                    </Link>
+                  </Tooltip>
+                  <Tooltip label={'Transfer'} withArrow>
+                    <Box
+                      sx={{ cursor: 'pointer' }}
+                      onClick={transferSpore.open}
+                    >
+                      <Image
+                        src="/svg/icon-repeat.svg"
+                        alt="Transfer"
+                        width="24px"
+                        height="24px"
+                      />
+                    </Box>
+                  </Tooltip>
+                  <Tooltip label={'Trash'} withArrow>
+                    <Box sx={{ cursor: 'pointer' }} onClick={destroySpore.open}>
+                      <Image
+                        src="/svg/icon-trash-2.svg"
+                        alt="Trash"
+                        width="24px"
+                        height="24px"
+                      />
+                    </Box>
+                  </Tooltip>
                 </Group>
               )}
             </Group>
@@ -241,7 +274,9 @@ export default function SporePage() {
                   order={2}
                   bg="brand.0"
                   px="8px"
-                  style={{ display: 'inline' }}
+                  sx={{
+                    display: 'inline',
+                  }}
                 >
                   {amount} CKB
                 </Title>
@@ -250,7 +285,7 @@ export default function SporePage() {
             <Group spacing="48px">
               <Stack spacing="4px">
                 <Text size="lg" color="text.0" weight="bold">
-                  ContentType
+                  Content Type
                 </Text>
                 {isLoading ? (
                   <Skeleton

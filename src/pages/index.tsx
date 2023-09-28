@@ -60,6 +60,10 @@ const useStyles = createStyles((theme) => ({
     paddingLeft: '16px',
     paddingRight: '16px',
     cursor: 'pointer',
+
+    '&:hover': {
+      backgroundColor: 'rgba(26, 32, 44, 0.08)',
+    },
   },
   active: {
     backgroundColor: theme.colors.brand[1],
@@ -89,7 +93,8 @@ export default function HomePage() {
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery();
-  const { data: allSpores = [], isLoading: isAllSporesLoading } = trpc.spore.list.useQuery();
+  const { data: allSpores = [], isLoading: isAllSporesLoading } =
+    trpc.spore.list.useQuery();
 
   const {
     data,

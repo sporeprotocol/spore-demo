@@ -315,7 +315,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                   {content.name}
                 </Text>
                 <Text size="sm" color="text.1">
-                  {content.size}
+                  {content.size} CKB
                 </Text>
               </Stack>
             </Group>

@@ -124,7 +124,7 @@ export default function TransferModal(props: TransferModalProps) {
             loading={loading}
             fullWidth={isMobile}
           >
-            Submit
+            Transfer
           </Button>
         </Group>
       </form>
