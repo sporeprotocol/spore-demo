@@ -75,6 +75,7 @@ export default class SporeService {
   ): Promise<Spore[]> {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
+      order: 'desc',
     });
 
     let spores: Spore[] = [];
@@ -102,6 +103,7 @@ export default class SporeService {
     options?: QueryOptions,
   ): Promise<Spore[]> {
     const collector = this.indexer.collector({
+      order: 'desc',
       type: { ...this.script, args: '0x' },
       lock,
     });
