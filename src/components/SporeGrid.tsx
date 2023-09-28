@@ -1,5 +1,11 @@
 import { Spore } from '@/spore';
-import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
+import {
+  Box,
+  Flex,
+  SimpleGrid,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
 import SporeCard, { SporeSkeletonCard } from './SporeCard';
 import { Cluster } from '@/cluster';
 import EmptyPlaceholder from './EmptyPlaceholder';
@@ -16,6 +22,7 @@ export interface SporeGridProps {
     | Cluster
     | undefined;
   isLoading: boolean;
+  filter?: React.ReactNode;
 }
 
 export default function SporeGrid(props: SporeGridProps) {
@@ -59,6 +66,7 @@ export default function SporeGrid(props: SporeGridProps) {
       <Flex>
         <Title order={3}>{title}</Title>
       </Flex>
+      {props.filter}
       {isLoading ? (
         <SimpleGrid
           cols={4}

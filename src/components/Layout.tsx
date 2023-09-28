@@ -18,12 +18,7 @@ export default function Layout({ children, header }: LayoutProps) {
   return (
     <AppShell>
       {header && <Box>{header}</Box>}
-      <MediaQuery
-        largerThan="sm"
-        styles={{ paddingLeft: '22px', paddingRight: '22px' }}
-      >
-        <Box>{children}</Box>
-      </MediaQuery>
+      <Box>{children}</Box>
     </AppShell>
   );
 }

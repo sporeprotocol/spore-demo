@@ -22,7 +22,8 @@ import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
-import ImageSporeRender from './renders/image';
+import { ImageSporeCoverRender } from './renders/image';
+import SporeCoverRender from './SporeCoverRender';
 
 export interface ClusterCardProps {
   cluster: Cluster;
@@ -74,7 +75,7 @@ export function ClusterSkeletonCard() {
 
   return (
     <Card p={0} className={classes.card}>
-      <Card.Section px="md" pt="md">
+      <Card.Section px="md">
         <AspectRatio ratio={140 / 80}>
           <Skeleton
             className={classes.skeleton}
@@ -142,7 +143,7 @@ export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
               <SimpleGrid cols={cols} spacing="1px" bg="text.0">
                 {spores.slice(0, cols * cols).map((spore) => {
                   return (
-                    <ImageSporeRender
+                    <SporeCoverRender
                       key={spore.id}
                       spore={spore}
                       ratio={140 / 80}

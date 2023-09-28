@@ -11,6 +11,7 @@ import { useMutation } from 'react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
+import { getMIMETypeByName } from '@/utils/mime';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -64,9 +65,10 @@ export default function useMintSporeModal(id?: string) {
       }
 
       const contentBuffer = await content.arrayBuffer();
+      const contentType = content.type || getMIMETypeByName(content.name);
       const spore = await addSporeMutation.mutateAsync({
         data: {
-          contentType: content.type,
+          contentType,
           content: new Uint8Array(contentBuffer),
           clusterId,
         },
@@ -86,7 +88,7 @@ export default function useMintSporeModal(id?: string) {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Add New spore',
+        title: 'Add New Spore',
         onClose: close,
         styles: {
           content: {

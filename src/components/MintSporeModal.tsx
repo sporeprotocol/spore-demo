@@ -2,7 +2,11 @@ import { Cluster } from '@/cluster';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
-import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
+import {
+  SUPPORTED_MIME_TYPE,
+  TEXT_MIME_TYPE,
+  getMIMETypeByName,
+} from '@/utils/mime';
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError, showSuccess } from '@/utils/notifications';
@@ -22,7 +26,7 @@ import {
   MediaQuery,
   Stack,
 } from '@mantine/core';
-import { Dropzone, DropzoneProps } from '@mantine/dropzone';
+import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useClipboard, useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { IconChevronDown, IconCopy } from '@tabler/icons-react';
 import {
@@ -33,7 +37,7 @@ import {
   useMemo,
   useEffect,
 } from 'react';
-import { ImagePreviewRender } from './renders/image';
+import PreviewRender from './PreviewRender';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -197,6 +201,18 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
   }, [capacity]);
 
+  const isImageType = useMemo(() => {
+    if (!content) return false;
+    const mimeType = content.type || getMIMETypeByName(content.name);
+    return IMAGE_MIME_TYPE.includes(mimeType as any);
+  }, [content]);
+
+  const isTextType = useMemo(() => {
+    if (!content) return false;
+    const mimeType = content.type || getMIMETypeByName(content.name);
+    return TEXT_MIME_TYPE.includes(mimeType as any);
+  }, [content]);
+
   useEffect(() => {
     if (onChainSize > balance) {
       setError(new Error('Insufficient balance'));
@@ -278,24 +294,71 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       />
 
       {content ? (
-        <ImagePreviewRender
-          content={content}
-          onClick={() => dropzoneOpenRef.current?.()}
-        />
+        <Stack>
+          <PreviewRender content={content} />
+          <Group position="apart">
+            <Group spacing="8px">
+              {isImageType && (
+                <Image
+                  src="/images/image.png"
+                  alt="image"
+                  width="40"
+                  height="48"
+                />
+              )}
+              {isTextType && (
+                <Image
+                  src="/images/text.png"
+                  alt="image"
+                  width="40"
+                  height="48"
+                />
+              )}
+              <Stack spacing={0}>
+                <Text weight="bold" color="text.0">
+                  {content.name}
+                </Text>
+                <Text size="sm" color="text.1">
+                  {content.size} CKB
+                </Text>
+              </Stack>
+            </Group>
+            <Text
+              color="brand.1"
+              weight="bold"
+              sx={{ cursor: 'pointer' }}
+              onClick={() => dropzoneOpenRef.current?.()}
+            >
+              Change File
+            </Text>
+          </Group>
+        </Stack>
       ) : (
         <Dropzone
           openRef={dropzoneOpenRef}
           onDrop={handleDrop}
           classNames={{ root: classes.dropzone }}
           accept={SUPPORTED_MIME_TYPE}
-          onReject={() => {
-            showError(
-              `Only image files are supported, and the size cannot exceed ${MAX_SIZE_LIMIT}KB.`,
-            );
+          onReject={(e) => {
+            const [{ file, errors }] = e;
+            const mimeType = getMIMETypeByName(file.name);
+            if (SUPPORTED_MIME_TYPE.includes(mimeType as any)) {
+              handleDrop([file]);
+              return;
+            }
+            const [error] = errors;
+            showError(error.message);
           }}
           maxSize={MAX_SIZE_LIMIT * 1000}
         >
           <Flex direction="column" align="center">
+            <Image
+              src="/images/upload.png"
+              mb="24px"
+              alt="upload"
+              width="90"
+              height="85"
+            />
             <Flex align="center" mb="16px">
               <MediaQuery smallerThan="sm" styles={{ textAlign: 'center' }}>
                 <Text size="xl">
@@ -315,6 +378,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               </MediaQuery>
             </Flex>
             <Text size="sm" color="text.1">
+              Supported formats: JPG, PNG, GIF, SVG, TXT, MD
+            </Text>
+            <Text size="sm" color="text.1">
               The file cannot exceed {MAX_SIZE_LIMIT} KB
             </Text>
           </Flex>
@@ -322,7 +388,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       )}
       {content && (
         <>
-          <Flex direction="column" my="8px">
+          <Flex direction="column" mt="18px" mb="8px">
             <Flex align="center">
               <Text color="text.0" mr="5px">
                 Estimated On-chain Size:
