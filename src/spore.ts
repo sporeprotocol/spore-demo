@@ -18,6 +18,7 @@ export interface Spore {
 export interface QueryOptions {
   skip?: number;
   limit?: number;
+  contentTypes?: string[];
   includeContent?: boolean;
 }
 
@@ -90,6 +91,10 @@ export default class SporeService {
         options?.includeContent,
       );
       if (SUPPORTED_MIME_TYPE.includes(spore.contentType as any)) {
+        if (options?.contentTypes && !options.contentTypes.includes(spore.contentType)) {
+          continue;
+        }
+
         if (clusterId && spore.clusterId !== clusterId) {
           continue;
         }
@@ -128,6 +133,10 @@ export default class SporeService {
         options?.includeContent,
       );
       if (SUPPORTED_MIME_TYPE.includes(spore.contentType as any)) {
+        if (options?.contentTypes && !options.contentTypes.includes(spore.contentType)) {
+          continue;
+        }
+
         if (clusterId && spore.clusterId !== clusterId) {
           continue;
         }

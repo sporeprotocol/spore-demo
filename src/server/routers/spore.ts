@@ -53,12 +53,19 @@ export const sporeRouter = router({
           cursor: z.number().optional(),
           limit: z.number().optional(),
           owner: z.string().optional(),
+          contentTypes: z.array(z.string()).optional(),
         })
         .optional(),
     )
     .query(async ({ input }) => {
-      const { clusterId, owner, cursor = 0, limit = 10 } = input ?? {};
-      const options = { skip: cursor, limit };
+      const {
+        clusterId,
+        owner,
+        cursor = 0,
+        limit = 10,
+        contentTypes,
+      } = input ?? {};
+      const options = { skip: cursor, limit, contentTypes };
 
       const getSpores = async () => {
         if (owner) {

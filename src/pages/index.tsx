@@ -96,6 +96,16 @@ export default function HomePage() {
   const { data: allSpores = [], isLoading: isAllSporesLoading } =
     trpc.spore.list.useQuery();
 
+  const contentTypes = useMemo(() => {
+    if (contentType === SporeContentType.Image) {
+      return IMAGE_MIME_TYPE;
+    }
+    if (contentType === SporeContentType.Text) {
+      return TEXT_MIME_TYPE;
+    }
+    return undefined;
+  }, [contentType]);
+
   const {
     data,
     isLoading: isSporesLoading,
@@ -105,6 +115,7 @@ export default function HomePage() {
   } = trpc.spore.infiniteList.useInfiniteQuery(
     {
       limit: 12,
+      contentTypes,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
@@ -118,8 +129,6 @@ export default function HomePage() {
       [],
     [data],
   );
-
-  const isLoading = isClusterLoading || isSporesLoading;
 
   const filteredSpores = useMemo(() => {
     if (contentType === SporeContentType.All) {
@@ -139,7 +148,7 @@ export default function HomePage() {
   }, [spores, contentType]);
 
   const peekClusters = useMemo(() => {
-    const sporesByCluster = groupBy(spores, (spore) => spore.clusterId);
+    const sporesByCluster = groupBy(allSpores, (spore) => spore.clusterId);
     const ordererClustersId = Object.entries(sporesByCluster)
       .sort(([, aSpores], [_, bSpores]) => aSpores.length - bSpores.length)
       .map(([clusterId]) => clusterId);
@@ -151,7 +160,7 @@ export default function HomePage() {
         return bIndex - aIndex;
       })
       .slice(0, 4);
-  }, [clusters, spores]);
+  }, [clusters, allSpores]);
 
   useEffect(() => {
     if (isFetchingNextPage || !hasNextPage) return;
