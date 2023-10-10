@@ -22,7 +22,6 @@ import {
   createStyles,
   useMantineTheme,
   Flex,
-  Popover,
   MediaQuery,
   Stack,
 } from '@mantine/core';
@@ -39,6 +38,7 @@ import {
 } from 'react';
 import PreviewRender from './PreviewRender';
 import { isAnyoneCanPay } from '@/utils/script';
+import Popover from './Popover';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -93,11 +93,11 @@ const useStyles = createStyles((theme) => ({
 
     '.mantine-Select-separatorLabel': {
       color: theme.colors.text[1],
-      
+
       '&::after': {
         borderTop: 0,
-      }
-    }
+      },
+    },
   },
   input: {
     height: '50px',
@@ -156,16 +156,6 @@ const useStyles = createStyles((theme) => ({
     color: theme.colors.brand[1],
     boxShadow: 'none !important',
   },
-  popover: {
-    backgroundColor: theme.colors.brand[1],
-    border: 'none',
-    boxShadow: '4px 4px 0 #111318',
-  },
-  arrow: {
-    backgroundColor: theme.colors.brand[1],
-    border: 'none',
-    boxShadow: '4px 2px 0 #111318, 1px 2px 0 #111318',
-  },
 }));
 
 const DropdownContainer: React.ForwardRefRenderFunction<
@@ -198,7 +188,6 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     defaultClusterId,
   );
   const [content, setContent] = useState<Blob | null>(null);
-  const [opened, { close, open }] = useDisclosure(false);
   const onChainSize = useEstimatedOnChainSize(clusterId, content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -439,32 +428,13 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               <Text weight="bold" color="text.0" mr="5px">
                 ≈ {onChainSize} CKB
               </Text>
-              <Popover
-                width={356}
-                classNames={{ dropdown: classes.popover, arrow: classes.arrow }}
-                arrowOffset={15}
-                position="top-start"
-                opened={opened}
-                withArrow
-              >
-                <Popover.Target>
-                  <Image
-                    src="/svg/icon-info.svg"
-                    alt="info"
-                    width="20"
-                    height="20"
-                    sx={{ cursor: 'pointer' }}
-                    onMouseEnter={open}
-                    onMouseLeave={close}
-                  />
-                </Popover.Target>
-                <Popover.Dropdown sx={{ pointerEvents: 'none' }}>
-                  <Text color="white" size="sm">
-                    By creating a spore, you are reserving this amount of CKB
-                    for on-chain storage. You can always destroy spores to
-                    redeem your reserved CKB.
-                  </Text>
-                </Popover.Dropdown>
+              <Popover label="By creating a spore, you are reserving this amount of CKB for on-chain storage. You can always destroy spores to redeem your reserved CKB.">
+                <Image
+                  src="/svg/icon-info.svg"
+                  alt="info"
+                  width="20"
+                  height="20"
+                />
               </Popover>
             </Flex>
           </Flex>

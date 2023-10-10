@@ -29,6 +29,7 @@ import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
 import { showSuccess } from '@/utils/notifications';
 import SporeContentRender from '@/components/SporeContentRender';
+import Popover from '@/components/Popover';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -292,9 +293,10 @@ export default function SporePage() {
                   borderRadius="16px"
                 />
               ) : (
-                <Tooltip
-                  label={`The amount of CKB occupied by on-chain storage, which can be get back when destroyed`}
-                  withArrow
+                <Popover
+                  label={`The amount of CKB held in on-chain storage, redeemable upon destruction`}
+                  width={320}
+                  position="bottom-start"
                 >
                   <Title
                     order={2}
@@ -306,7 +308,7 @@ export default function SporePage() {
                   >
                     {amount} CKB
                   </Title>
-                </Tooltip>
+                </Popover>
               )}
             </Group>
             <Group spacing="48px">
