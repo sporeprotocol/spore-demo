@@ -10,7 +10,7 @@ import {
 import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError, showSuccess } from '@/utils/notifications';
-import { BI } from '@ckb-lumos/lumos';
+import { BI, config, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
   Box,
@@ -38,6 +38,7 @@ import {
   useEffect,
 } from 'react';
 import PreviewRender from './PreviewRender';
+import { isAnyoneCanPay } from '@/utils/script';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -89,6 +90,14 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: theme.colors.background[0],
       color: theme.colors.text[0],
     },
+
+    '.mantine-Select-separatorLabel': {
+      color: theme.colors.text[1],
+      
+      '&::after': {
+        borderTop: 0,
+      }
+    }
   },
   input: {
     height: '50px',
@@ -181,7 +190,7 @@ const DropdownContainerRef = forwardRef(DropdownContainer);
 export default function MintSporeModal(props: MintSporeModalProps) {
   const { defaultClusterId, clusters, onSubmit } = props;
   const theme = useMantineTheme();
-  const { address } = useConnect();
+  const { address, getAnyoneCanPayLock } = useConnect();
   const clipboard = useClipboard();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const dropzoneOpenRef = useRef<() => void>(null);
@@ -241,6 +250,43 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     }
   }, [onSubmit, clusterId, content]);
 
+  const selectableClusters = useMemo(() => {
+    const ownerClusters = clusters.filter((cluster) => {
+      const clusterAddress = helpers.encodeToAddress(
+        cluster.cell.cellOutput.lock,
+        {
+          config: config.predefined.AGGRON4,
+        },
+      );
+      if (clusterAddress === address) return true;
+
+      const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
+        config: config.predefined.AGGRON4,
+      });
+      return clusterAddress === acpAddress;
+    });
+
+    const publicClusters = clusters.filter((cluster) => {
+      const lock = cluster.cell.cellOutput.lock;
+      return (
+        isAnyoneCanPay(lock) && !ownerClusters.some((c) => c.id === cluster.id)
+      );
+    });
+
+    return [
+      ...ownerClusters.map(({ id, name }) => ({
+        value: id,
+        label: name,
+        group: 'My Clusters',
+      })),
+      ...publicClusters.map(({ id, name }) => ({
+        value: id,
+        label: name,
+        group: 'All Public Clusters',
+      })),
+    ];
+  }, [clusters, getAnyoneCanPayLock, address]);
+
   return (
     <Box>
       <Flex direction="column" mb="24px">
@@ -273,6 +319,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       <Select
         mb="md"
         maxDropdownHeight={200}
+        initiallyOpened
         dropdownPosition="bottom"
         placeholder="Select a Cluster (optional)"
         rightSection={<IconChevronDown color={theme.colors.text[0]} />}
@@ -282,10 +329,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           dropdown: classes.dropdown,
           item: classes.dropdownItem,
         }}
-        data={clusters.map(({ id, name }) => ({
-          value: id,
-          label: name,
-        }))}
+        data={selectableClusters}
         value={clusterId}
         onChange={(id) => setClusterId(id || undefined)}
         dropdownComponent={DropdownContainerRef}
