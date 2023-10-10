@@ -83,7 +83,7 @@ export default function SporePage() {
   const router = useRouter();
   const { id } = router.query;
   const theme = useMantineTheme();
-  const { address, getAnyoneCanPayLock } = useConnect();
+  const { connected, address, getAnyoneCanPayLock } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spore, isLoading } = trpc.spore.get.useQuery({
@@ -124,6 +124,10 @@ export default function SporePage() {
   );
 
   const isOwner = useMemo(() => {
+    if (!connected) {
+      return false;
+    }
+
     if (address === owner) {
       return true;
     }
@@ -134,7 +138,7 @@ export default function SporePage() {
       return true;
     }
     return false;
-  }, [address, owner, getAnyoneCanPayLock]);
+  }, [connected, address, owner, getAnyoneCanPayLock]);
 
   const pager = cluster && spores && spores.length > 1 && (
     <Group position="apart">
