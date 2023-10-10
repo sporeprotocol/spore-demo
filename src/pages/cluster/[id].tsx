@@ -6,7 +6,7 @@ import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import { trpc } from '@/server';
 import { isAnyoneCanPay } from '@/utils/script';
-import { helpers } from '@ckb-lumos/lumos';
+import { config, helpers } from '@ckb-lumos/lumos';
 import {
   Text,
   Flex,
