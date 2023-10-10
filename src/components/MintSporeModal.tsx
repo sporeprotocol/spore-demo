@@ -319,7 +319,6 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       <Select
         mb="md"
         maxDropdownHeight={200}
-        initiallyOpened
         dropdownPosition="bottom"
         placeholder="Select a Cluster (optional)"
         rightSection={<IconChevronDown color={theme.colors.text[0]} />}
