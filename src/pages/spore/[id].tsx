@@ -82,7 +82,7 @@ export default function SporePage() {
   const router = useRouter();
   const { id } = router.query;
   const theme = useMantineTheme();
-  const { address } = useConnect();
+  const { address, getAnyoneCanPayLock } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
 
   const { data: spore, isLoading } = trpc.spore.get.useQuery({
@@ -121,6 +121,19 @@ export default function SporePage() {
     () => (spores ?? []).findIndex((sp) => sp.id === id) - 1,
     [spores, id],
   );
+
+  const isOwner = useMemo(() => {
+    if (address === owner) {
+      return true;
+    }
+    const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
+      config: config.predefined.AGGRON4,
+    });
+    if (acpAddress === owner) {
+      return true;
+    }
+    return false;
+  }, [address, owner, getAnyoneCanPayLock]);
 
   const pager = cluster && spores && spores.length > 1 && (
     <Group position="apart">
@@ -208,10 +221,7 @@ export default function SporePage() {
               ) : (
                 <Group>
                   <Box className={classes.title}>
-                    <Tooltip
-                      label={`Unique ID of Spore`}
-                      withArrow
-                    >
+                    <Tooltip label={`Unique ID of Spore`} withArrow>
                       <Text
                         size="32px"
                         weight="bold"
@@ -240,29 +250,36 @@ export default function SporePage() {
                       />
                     </Link>
                   </Tooltip>
-                  <Tooltip label={'Transfer'} withArrow>
-                    <Box
-                      sx={{ cursor: 'pointer' }}
-                      onClick={transferSpore.open}
-                    >
-                      <Image
-                        src="/svg/icon-repeat.svg"
-                        alt="Transfer"
-                        width="24px"
-                        height="24px"
-                      />
-                    </Box>
-                  </Tooltip>
-                  <Tooltip label={'Trash'} withArrow>
-                    <Box sx={{ cursor: 'pointer' }} onClick={destroySpore.open}>
-                      <Image
-                        src="/svg/icon-trash-2.svg"
-                        alt="Trash"
-                        width="24px"
-                        height="24px"
-                      />
-                    </Box>
-                  </Tooltip>
+                  {isOwner && (
+                    <>
+                      <Tooltip label={'Transfer'} withArrow>
+                        <Box
+                          sx={{ cursor: 'pointer' }}
+                          onClick={transferSpore.open}
+                        >
+                          <Image
+                            src="/svg/icon-repeat.svg"
+                            alt="Transfer"
+                            width="24px"
+                            height="24px"
+                          />
+                        </Box>
+                      </Tooltip>
+                      <Tooltip label={'Trash'} withArrow>
+                        <Box
+                          sx={{ cursor: 'pointer' }}
+                          onClick={destroySpore.open}
+                        >
+                          <Image
+                            src="/svg/icon-trash-2.svg"
+                            alt="Trash"
+                            width="24px"
+                            height="24px"
+                          />
+                        </Box>
+                      </Tooltip>
+                    </>
+                  )}
                 </Group>
               )}
             </Group>
