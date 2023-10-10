@@ -294,7 +294,12 @@ export default function ClusterPage() {
                     h="22px"
                     ml="5px"
                   >
-                    <IconCopy size="22px" color={theme.colors.text[0]} />
+                    <Tooltip
+                      label={clipboard.copied ? 'Copied' : 'Copy'}
+                      withArrow
+                    >
+                      <IconCopy size="22px" color={theme.colors.text[0]} />
+                    </Tooltip>
                   </Text>
                 </Flex>
               </Flex>

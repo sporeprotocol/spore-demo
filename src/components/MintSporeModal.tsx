@@ -24,9 +24,10 @@ import {
   Flex,
   MediaQuery,
   Stack,
+  Tooltip,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { useClipboard, useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { useClipboard, useMediaQuery } from '@mantine/hooks';
 import { IconChevronDown, IconCopy } from '@tabler/icons-react';
 import {
   useState,
@@ -293,7 +294,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               showSuccess('Copied!');
             }}
           >
-            <IconCopy size="17px" color={theme.colors.text[0]} />
+            <Tooltip label={clipboard.copied ? 'Copied' : 'Copy'} withArrow>
+              <IconCopy size="17px" color={theme.colors.text[0]} />
+            </Tooltip>
           </Flex>
         </Flex>
         <Flex>

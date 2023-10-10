@@ -29,6 +29,7 @@ const useStyles = createStyles((theme, props: TextSporeRenderProps) => ({
     padding: theme.spacing.md,
     color: theme.colors.text[0],
     overflowY: 'hidden',
+    cursor: 'pointer',
     border: 'none',
   },
 }));

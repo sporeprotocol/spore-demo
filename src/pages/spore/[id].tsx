@@ -190,7 +190,7 @@ export default function SporePage() {
                 >
                   <Group spacing="8px">
                     <Image
-                      src="/svg/cluster-icon.svg"
+                      src="/svg/icon-layers.svg"
                       alt="Cluster Icon"
                       width="24px"
                       height="24px"
@@ -270,14 +270,14 @@ export default function SporePage() {
                           />
                         </Box>
                       </Tooltip>
-                      <Tooltip label={'Trash'} withArrow>
+                      <Tooltip label={'Destroy'} withArrow>
                         <Box
                           sx={{ cursor: 'pointer' }}
                           onClick={destroySpore.open}
                         >
                           <Image
                             src="/svg/icon-trash-2.svg"
-                            alt="Trash"
+                            alt="Destroy"
                             width="24px"
                             height="24px"
                           />
@@ -382,7 +382,12 @@ export default function SporePage() {
                       h="22px"
                       ml="5px"
                     >
-                      <IconCopy size="22px" color={theme.colors.text[0]} />
+                      <Tooltip
+                        label={clipboard.copied ? 'Copied' : 'Copy'}
+                        withArrow
+                      >
+                        <IconCopy size="22px" color={theme.colors.text[0]} />
+                      </Tooltip>
                     </Text>
                   </Group>
                 )}

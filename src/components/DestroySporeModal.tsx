@@ -91,7 +91,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
               onClick={handleSubmit}
               loading={loading}
             >
-              Confirm
+              Destory
             </Button>
           </Group>
         ) : (

@@ -14,6 +14,7 @@ import {
   Drawer,
   MediaQuery,
   Stack,
+  Tooltip,
 } from '@mantine/core';
 import { useConnect } from '@/hooks/useConnect';
 import Logo from './Logo';
@@ -270,13 +271,18 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
                       {address.slice(0, 10)}...{address.slice(-10)}
                     </Text>
                   </Flex>
-                  <IconCopy
-                    size={20}
-                    onClick={() => {
-                      clipboard.copy(address);
-                      showSuccess('Copied!');
-                    }}
-                  />
+                  <Tooltip
+                    label={clipboard.copied ? 'Copied' : 'Copy'}
+                    withArrow
+                  >
+                    <IconCopy
+                      size={20}
+                      onClick={() => {
+                        clipboard.copy(address);
+                        showSuccess('Copied!');
+                      }}
+                    />
+                  </Tooltip>
                 </Flex>
                 <Box mb="md">
                   <Button

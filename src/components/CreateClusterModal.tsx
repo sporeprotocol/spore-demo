@@ -10,8 +10,8 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMediaQuery } from '@mantine/hooks';
-import { useCallback, useState } from 'react';
+import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface CreateClusterModalProps {
   onSubmit: (values: {
@@ -62,6 +62,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const focusTrapRef = useFocusTrap();
 
   const form = useForm({
     initialValues: {
@@ -92,7 +93,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
         All cluster info will be stored on-chain and cannot be altered after
         creation.
       </Text>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
+      <form onSubmit={form.onSubmit(handleSubmit)} ref={focusTrapRef}>
         <TextInput
           classNames={{
             root: classes.root,
@@ -103,6 +104,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
           placeholder="e.g. Ape collection"
           withAsterisk
           disabled={loading}
+          data-autofocus
           {...form.getInputProps('name')}
         />
 

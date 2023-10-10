@@ -13,6 +13,7 @@ import {
   Button,
   Group,
   Title,
+  Tooltip,
 } from '@mantine/core';
 import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
@@ -157,7 +158,9 @@ export default function AccountPage() {
                 h="22px"
                 ml="3px"
               >
-                <IconCopy size="22px" color={theme.colors.text[0]} />
+                <Tooltip label={clipboard.copied ? 'Copied' : 'Copy'} withArrow>
+                  <IconCopy size="22px" color={theme.colors.text[0]} />
+                </Tooltip>
               </Text>
             </Flex>
           </Flex>

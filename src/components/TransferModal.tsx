@@ -10,7 +10,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useMediaQuery } from '@mantine/hooks';
+import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
 
 export interface TransferModalProps {
@@ -64,6 +64,7 @@ export default function TransferModal(props: TransferModalProps) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const focusTrapRef = useFocusTrap();
 
   const form = useForm({
     initialValues: {
@@ -99,7 +100,7 @@ export default function TransferModal(props: TransferModalProps) {
           within it.
         </Text>
       )}
-      <form onSubmit={form.onSubmit(handleSubmit)}>
+      <form onSubmit={form.onSubmit(handleSubmit)} ref={focusTrapRef}>
         <TextInput
           classNames={{
             root: classes.root,
@@ -109,7 +110,9 @@ export default function TransferModal(props: TransferModalProps) {
           }}
           label="Transfer to"
           placeholder="e.g. ckt1q7eiwlwk...3cv86p9wcmwejo32owejwp"
+          autoFocus
           withAsterisk
+          data-autofocus
           {...form.getInputProps('to')}
         />
         {error && (
