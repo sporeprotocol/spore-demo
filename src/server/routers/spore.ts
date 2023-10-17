@@ -1,5 +1,5 @@
 import { publicProcedure, router } from '@/server/trpc';
-import SporeService, { Spore } from '@/spore';
+import SporeService from '@/spore';
 import { config, helpers } from '@ckb-lumos/lumos';
 import z from 'zod';
 

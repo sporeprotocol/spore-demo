@@ -1,10 +1,13 @@
-import { Cell, Indexer, Script } from '@ckb-lumos/lumos';
+import { LiveCell, OutPoint } from '@ckb-lumos/base';
+import { BI, Cell, Indexer, RPC, Script } from '@ckb-lumos/lumos';
 import {
   ClusterData,
   SporeConfig,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
+import { flatten, uniqBy } from 'lodash-es';
 import pick from 'lodash-es/pick';
+import SporeService from './spore';
 
 const hex2String = (hex: string) => {
   return Buffer.from(hex, 'hex').toString('utf-8');
@@ -24,10 +27,12 @@ export interface QueryOptions {
 export default class ClusterService {
   private config: SporeConfig;
   private indexer: Indexer;
+  private rpc: RPC;
 
   constructor(config: SporeConfig) {
     this.config = config;
     this.indexer = new Indexer(this.config.ckbIndexerUrl);
+    this.rpc = new RPC(this.config.ckbNodeUrl);
   }
 
   public static shared = new ClusterService(predefinedSporeConfigs['Aggron4']);
@@ -50,6 +55,7 @@ export default class ClusterService {
   public setConfig(config: SporeConfig) {
     this.config = config;
     this.indexer = new Indexer(this.config.ckbIndexerUrl);
+    this.rpc = new RPC(this.config.ckbNodeUrl);
   }
 
   public async get(id: string): Promise<Cluster | undefined> {
@@ -95,6 +101,18 @@ export default class ClusterService {
       const cluster = ClusterService.getClusterFromCell(cell);
       clusters.push(cluster);
     }
+
+    return clusters;
+  }
+
+  public async recent(limit: number) {
+    const recentSpores = await SporeService.shared.recent(limit, true);
+    const clusterIds = recentSpores.map((spore) => spore.clusterId);
+
+    const clusters = await Promise.all(clusterIds.map(async (id) => {
+      const cluster = await this.get(id!);
+      return cluster!;
+    }));
 
     return clusters;
   }

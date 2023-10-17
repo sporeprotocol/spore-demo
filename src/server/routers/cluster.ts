@@ -47,4 +47,12 @@ export const clusterRouter = router({
       const [clusters = [], acpClusters = []] = await Promise.all(querys);
       return [...clusters, ...acpClusters];
     }),
+  recent: publicProcedure
+    .input(z.object({
+      limit: z.number(),
+    }))
+    .query(async ({ input }) => {
+      const clusters = await ClusterService.shared.recent(input.limit);
+      return clusters;
+    }),
 });

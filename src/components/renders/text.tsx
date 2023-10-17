@@ -133,8 +133,6 @@ export function TextPreviewRender(props: TextPreviewRenderProps) {
     return null;
   }
 
-  console.log(text.toString());
-
   return (
     <Box className={classes.container}>
       <AspectRatio ratio={(isMobile ? 295 : 616) / 260}>

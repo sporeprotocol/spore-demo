@@ -92,7 +92,10 @@ export default function HomePage() {
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
   const { data: clusters = [], isLoading: isClusterLoading } =
-    trpc.cluster.list.useQuery();
+    trpc.cluster.recent.useQuery({ limit: 4 });
+
+  // const { data: clusters = [], isLoading: isClusterLoading } =
+  //   trpc.cluster.list.useQuery();
   const { data: allSpores = [], isLoading: isAllSporesLoading } =
     trpc.spore.list.useQuery();
 
@@ -146,21 +149,6 @@ export default function HomePage() {
     }
     return spores;
   }, [spores, contentType]);
-
-  const peekClusters = useMemo(() => {
-    const sporesByCluster = groupBy(allSpores, (spore) => spore.clusterId);
-    const ordererClustersId = Object.entries(sporesByCluster)
-      .sort(([, aSpores], [_, bSpores]) => aSpores.length - bSpores.length)
-      .map(([clusterId]) => clusterId);
-
-    return clusters
-      .sort((a, b) => {
-        const aIndex = ordererClustersId.indexOf(a.id) ?? 0;
-        const bIndex = ordererClustersId.indexOf(b.id) ?? 0;
-        return bIndex - aIndex;
-      })
-      .slice(0, 4);
-  }, [clusters, allSpores]);
 
   useEffect(() => {
     if (isFetchingNextPage || !hasNextPage) return;
@@ -234,7 +222,7 @@ export default function HomePage() {
                 </Link>
               </Flex>
             }
-            clusters={peekClusters}
+            clusters={clusters}
             spores={allSpores}
             isLoading={isClusterLoading || isAllSporesLoading}
           />
