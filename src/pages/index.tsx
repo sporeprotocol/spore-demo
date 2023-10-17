@@ -128,7 +128,7 @@ export default function HomePage() {
 
   const spores = useMemo(
     () =>
-      uniqBy(data?.pages.map(({ items }) => items).flat() as Spore[], 'id') ??
+      uniqBy(data?.pages.map(({ items }) => items).flat(), 'id') ??
       [],
     [data],
   );
@@ -232,7 +232,7 @@ export default function HomePage() {
         <SporeGrid
           title="Explore All Spores"
           spores={filteredSpores}
-          cluster={(id) => clusters.find((c) => c.id === id) ?? undefined}
+          cluster={(id) => filteredSpores.find((s) => s.clusterId === id)?.cluster ?? undefined}
           filter={
             <Group mt="16px">
               {[

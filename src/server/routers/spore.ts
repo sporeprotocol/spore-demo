@@ -1,3 +1,4 @@
+import ClusterService from '@/cluster';
 import { publicProcedure, router } from '@/server/trpc';
 import SporeService from '@/spore';
 import { config, helpers } from '@ckb-lumos/lumos';
@@ -78,8 +79,21 @@ export const sporeRouter = router({
       };
 
       const { items: spores, collected } = await getSpores();
+
+      const items = await Promise.all(spores.map(async (spore) => {
+        if (!spore.clusterId) {
+          return spore;
+        }
+
+        const cluster = await ClusterService.shared.get(spore.clusterId);
+        return {
+          ...spore,
+          cluster,
+        };
+      }))
+
       return {
-        items: spores,
+        items,
         nextCursor: spores.length === 0 ? undefined : cursor + collected,
       };
     }),

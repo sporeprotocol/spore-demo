@@ -5,8 +5,9 @@ import {
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
 import pick from 'lodash-es/pick';
-import { SUPPORTED_MIME_TYPE, isSupportedMIMEType } from './utils/mime';
+import { isSupportedMIMEType } from './utils/mime';
 import { uniqBy } from 'lodash-es';
+import { Cluster } from './cluster';
 
 export interface Spore {
   id: string;
@@ -14,6 +15,7 @@ export interface Spore {
   content?: string;
   contentType: string;
   cell: Pick<Cell, 'outPoint' | 'cellOutput'>;
+  cluster?: Cluster,
 }
 
 export interface QueryOptions {
