@@ -95,6 +95,7 @@ export default function AccountPage() {
     trpc.cluster.list.useQuery({
       owner: address as string,
       withPublic: true,
+      withSpores: true,
     });
 
   const isLoading = isSporesLoading || isClusterLoading;
@@ -205,7 +206,6 @@ export default function AccountPage() {
           <ClusterGrid
             title={isLoading ? '' : `${clusters.length} Clusters`}
             clusters={clusters}
-            spores={spores}
             isLoading={isLoading}
           />
         )}

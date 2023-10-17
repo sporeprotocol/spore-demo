@@ -1,13 +1,11 @@
-import { LiveCell, OutPoint } from '@ckb-lumos/base';
-import { BI, Cell, Indexer, RPC, Script } from '@ckb-lumos/lumos';
+import { Cell, Indexer, RPC, Script } from '@ckb-lumos/lumos';
 import {
   ClusterData,
   SporeConfig,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
-import { flatten, uniqBy } from 'lodash-es';
 import pick from 'lodash-es/pick';
-import SporeService from './spore';
+import SporeService, { Spore } from './spore';
 
 const hex2String = (hex: string) => {
   return Buffer.from(hex, 'hex').toString('utf-8');
@@ -18,9 +16,12 @@ export interface Cluster {
   name: string;
   description: string;
   cell: Pick<Cell, 'outPoint' | 'cellOutput'>;
+  spores?: Spore[];
 }
 
 export interface QueryOptions {
+  skip?: number;
+  limit?: number;
   includeContent?: boolean;
 }
 
@@ -74,45 +75,72 @@ export default class ClusterService {
     return undefined;
   }
 
-  public async list(): Promise<Cluster[]> {
+  public async list(options?: QueryOptions) {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
       order: 'desc',
+      skip: options?.skip,
     });
 
     const clusters: Cluster[] = [];
+    let collected = 0;
     for await (const cell of collector.collect()) {
+      collected += 1;
       const cluster = ClusterService.getClusterFromCell(cell);
       clusters.push(cluster);
+      if (options?.limit && clusters.length === options.limit) {
+        break;
+      }
     }
 
-    return clusters;
+    return {
+      items: clusters,
+      collected,
+    };
   }
 
-  public async listByLock(lock: Script): Promise<Cluster[]> {
+  public async listByLock(lock: Script, options?: QueryOptions) {
     const collector = this.indexer.collector({
-      order: 'desc',
-      type: { ...this.script, args: '0x' },
       lock,
+      type: { ...this.script, args: '0x' },
+      order: 'desc',
+      skip: options?.skip,
     });
 
     const clusters: Cluster[] = [];
+    let collected = 0;
     for await (const cell of collector.collect()) {
+      collected += 1;
       const cluster = ClusterService.getClusterFromCell(cell);
       clusters.push(cluster);
+
+      if (options?.limit && clusters.length === options.limit) {
+        break;
+      }
     }
 
-    return clusters;
+    return {
+      items: clusters,
+      collected,
+    };
   }
 
   public async recent(limit: number) {
     const recentSpores = await SporeService.shared.recent(limit, true);
     const clusterIds = recentSpores.map((spore) => spore.clusterId);
 
-    const clusters = await Promise.all(clusterIds.map(async (id) => {
-      const cluster = await this.get(id!);
-      return cluster!;
-    }));
+    const clusters = await Promise.all(
+      clusterIds.map(async (id) => {
+        const cluster = await this.get(id!);
+        const { items: spores } = await SporeService.shared.list(id!, {
+          limit: 4,
+        });
+        return {
+          ...cluster!,
+          spores,
+        };
+      }),
+    );
 
     return clusters;
   }

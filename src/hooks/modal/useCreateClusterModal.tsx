@@ -6,7 +6,6 @@ import CreateClusterModal from '@/components/CreateClusterModal';
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
-import { trpc } from '@/server';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
@@ -18,10 +17,6 @@ export default function useCreateClusterModal() {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const modalId = useId();
-
-  const { refetch } = trpc.cluster.list.useQuery(undefined, {
-    enabled: false,
-  });
 
   const addCluster = useCallback(
     async (...args: Parameters<typeof createCluster>) => {
@@ -35,11 +30,7 @@ export default function useCreateClusterModal() {
     [signTransaction],
   );
 
-  const addClusterMutation = useMutation(addCluster, {
-    onSuccess: () => {
-      refetch();
-    },
-  });
+  const addClusterMutation = useMutation(addCluster);
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(

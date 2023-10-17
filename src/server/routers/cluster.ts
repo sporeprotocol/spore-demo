@@ -1,5 +1,6 @@
 import ClusterService from '@/cluster';
 import { publicProcedure, router } from '@/server/trpc';
+import SporeService from '@/spore';
 import {
   getOmnilockAnyoneCanPayModeLock,
   isAnyoneCanPay,
@@ -28,13 +29,15 @@ export const clusterRouter = router({
         .object({
           owner: z.string().optional(),
           withPublic: z.boolean().optional(),
+          withSpores: z.boolean().optional(),
         })
         .optional(),
     )
     .query(async ({ input }) => {
-      const { owner, withPublic = false } = input ?? {};
+      const { owner, withPublic = false, withSpores = false } = input ?? {};
       if (!owner) {
-        return ClusterService.shared.list();
+        const { items: clusters } = await ClusterService.shared.list();
+        return clusters;
       }
       const lock = helpers.parseAddress(owner, {
         config: config.predefined.AGGRON4,
@@ -44,13 +47,67 @@ export const clusterRouter = router({
         const acpModeLock = getOmnilockAnyoneCanPayModeLock(lock);
         querys.push(ClusterService.shared.listByLock(acpModeLock));
       }
-      const [clusters = [], acpClusters = []] = await Promise.all(querys);
-      return [...clusters, ...acpClusters];
+      const [{ items: ownedClusters = [] }, { items: acpClusters = [] }] =
+        await Promise.all(querys);
+      const clusters = await Promise.all(
+        [...ownedClusters, ...acpClusters].map(async (cluster) => {
+          if (!withSpores) {
+            return cluster;
+          }
+          const { items: spores } = await SporeService.shared.list(cluster.id, {
+            limit: 4,
+          });
+          return {
+            ...cluster,
+            spores,
+          };
+        }),
+      );
+
+      return clusters;
+    }),
+  infiniteList: publicProcedure
+    .input(
+      z
+        .object({
+          cursor: z.number().optional(),
+          limit: z.number().optional(),
+          owner: z.string().optional(),
+        })
+        .optional(),
+    )
+    .query(async ({ input }) => {
+      const { cursor = 0, limit = 10 } = input ?? {};
+      const options = { skip: cursor, limit };
+
+      const { items: clusters, collected } = await ClusterService.shared.list(
+        options,
+      );
+
+      console.log(clusters);
+      const items = await Promise.all(
+        clusters.map(async (cluster) => {
+          const { items: spores } = await SporeService.shared.list(cluster.id, {
+            limit: 4,
+          });
+          return {
+            ...cluster,
+            spores,
+          };
+        }),
+      );
+
+      return {
+        items,
+        nextCursor: clusters.length === 0 ? undefined : cursor + collected,
+      };
     }),
   recent: publicProcedure
-    .input(z.object({
-      limit: z.number(),
-    }))
+    .input(
+      z.object({
+        limit: z.number(),
+      }),
+    )
     .query(async ({ input }) => {
       const clusters = await ClusterService.shared.recent(input.limit);
       return clusters;

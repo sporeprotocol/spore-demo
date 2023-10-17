@@ -96,8 +96,8 @@ export default function HomePage() {
 
   // const { data: clusters = [], isLoading: isClusterLoading } =
   //   trpc.cluster.list.useQuery();
-  const { data: allSpores = [], isLoading: isAllSporesLoading } =
-    trpc.spore.list.useQuery();
+  // const { data: allSpores = [], isLoading: isAllSporesLoading } =
+  //   trpc.spore.list.useQuery();
 
   const contentTypes = useMemo(() => {
     if (contentType === SporeContentType.Image) {
@@ -223,8 +223,7 @@ export default function HomePage() {
               </Flex>
             }
             clusters={clusters}
-            spores={allSpores}
-            isLoading={isClusterLoading || isAllSporesLoading}
+            isLoading={isClusterLoading}
           />
         </Container>
       </Box>

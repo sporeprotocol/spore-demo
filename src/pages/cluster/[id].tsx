@@ -43,7 +43,7 @@ export async function getStaticProps(
   };
 }
 export const getStaticPaths: GetStaticPaths = async () => {
-  const clusters = await ClusterService.shared.list();
+  const { items: clusters } = await ClusterService.shared.list();
   return {
     paths: clusters.map((cluster) => ({
       params: {
@@ -122,7 +122,9 @@ export default function ClusterPage() {
 
   const owner = useMemo(() => {
     if (!cluster) return '';
-    const address = helpers.encodeToAddress(cluster.cell.cellOutput.lock);
+    const address = helpers.encodeToAddress(cluster.cell.cellOutput.lock, {
+      config: config.predefined.AGGRON4,
+    });
     return address;
   }, [cluster]);
 

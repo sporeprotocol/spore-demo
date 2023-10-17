@@ -96,13 +96,12 @@ export default function MySpacePage() {
 
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ owner: address });
-  const { data: clusters = [] } = trpc.cluster.list.useQuery({
-    withPublic: true,
-  });
+  const { data: clusters = [] } = trpc.cluster.list.useQuery();
   const { data: ownedClusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery({
       owner: address,
       withPublic: true,
+      withSpores: true,
     });
 
   const isLoading = isSporesLoading || isClusterLoading;
@@ -237,7 +236,6 @@ export default function MySpacePage() {
           <ClusterGrid
             title={isLoading ? '' : `${ownedClusters.length} Clusters`}
             clusters={ownedClusters}
-            spores={spores}
             isLoading={isLoading}
           />
         )}

@@ -1,5 +1,4 @@
 import { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
 import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import ClusterCard, { ClusterSkeletonCard } from './ClusterCard';
 import EmptyPlaceholder from './EmptyPlaceholder';
@@ -11,12 +10,11 @@ import { useMediaQuery } from '@mantine/hooks';
 export interface ClusterGridProps {
   title: string | JSX.Element;
   clusters: Cluster[];
-  spores: Spore[];
   isLoading: boolean;
 }
 
 export default function ClusterGrid(props: ClusterGridProps) {
-  const { title, clusters, spores, isLoading } = props;
+  const { title, clusters, isLoading } = props;
   const router = useRouter();
   const theme = useMantineTheme();
   const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
@@ -89,16 +87,7 @@ export default function ClusterGrid(props: ClusterGridProps) {
           mt="24px"
         >
           {clusters.map((cluster) => {
-            const clusterSpores = spores.filter(
-              (spore) => spore.clusterId === cluster.id,
-            );
-            return (
-              <ClusterCard
-                key={cluster.id}
-                cluster={cluster}
-                spores={clusterSpores}
-              />
-            );
+            return <ClusterCard key={cluster.id} cluster={cluster} />;
           })}
         </SimpleGrid>
       )}

@@ -1,5 +1,4 @@
 import { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
 import {
   Text,
   Image,
@@ -22,12 +21,10 @@ import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
-import { ImageSporeCoverRender } from './renders/image';
 import SporeCoverRender from './SporeCoverRender';
 
 export interface ClusterCardProps {
   cluster: Cluster;
-  spores: Spore[];
 }
 
 const useStyles = createStyles((theme) => ({
@@ -112,8 +109,9 @@ export function ClusterSkeletonCard() {
   );
 }
 
-export default function ClusterCard({ cluster, spores }: ClusterCardProps) {
+export default function ClusterCard({ cluster }: ClusterCardProps) {
   const { classes } = useStyles();
+  const spores = cluster.spores ?? [];
   const theme = useMantineTheme();
   const cols = spores.length >= 4 ? 2 : 1;
   const { lock } = useConnect();

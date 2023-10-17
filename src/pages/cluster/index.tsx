@@ -162,8 +162,15 @@ export default function ClustersPage() {
                 />
               </Flex>
             }
-            clusters={displayClusters}
-            spores={spores}
+            clusters={displayClusters.map((cluster) => {
+              const clusterSpores = spores.filter(
+                (spore) => spore.clusterId === cluster.id,
+              );
+              return {
+                ...cluster,
+                spores: clusterSpores,
+              };
+            })}
             isLoading={isLoading}
           />
         </Box>
