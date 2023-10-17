@@ -1,8 +1,7 @@
-import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { ImageSporeCoverRender } from './renders/image';
 import { Spore } from '@/spore';
-import { TEXT_MIME_TYPE } from '@/utils/mime';
 import { TextSporeCoverRender } from './renders/text';
+import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
 
 export interface SporeRenderProps {
   spore: Spore;
@@ -11,11 +10,11 @@ export interface SporeRenderProps {
 }
 
 export default function SporeCoverRender({ spore, ratio, size }: SporeRenderProps) {
-  if (IMAGE_MIME_TYPE.includes(spore.contentType as any)) {
+  if (isImageMIMEType(spore.contentType)) {
     return <ImageSporeCoverRender spore={spore} ratio={ratio} />;
   }
 
-  if (TEXT_MIME_TYPE.includes(spore.contentType as any)) {
+  if (isTextMIMEType(spore.contentType)) {
     return <TextSporeCoverRender spore={spore} ratio={ratio} size={size} />;
   }
 

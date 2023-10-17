@@ -5,7 +5,7 @@ import {
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
 import pick from 'lodash-es/pick';
-import { SUPPORTED_MIME_TYPE } from './utils/mime';
+import { SUPPORTED_MIME_TYPE, isSupportedMIMEType } from './utils/mime';
 import { uniqBy } from 'lodash-es';
 
 export interface Spore {
@@ -101,7 +101,7 @@ export default class SporeService {
         cell,
         options?.includeContent,
       );
-      if (SUPPORTED_MIME_TYPE.includes(spore.contentType as any)) {
+      if (isSupportedMIMEType(spore.contentType)) {
         if (
           options?.contentTypes &&
           !options.contentTypes.includes(spore.contentType)
@@ -146,7 +146,7 @@ export default class SporeService {
         cell,
         options?.includeContent,
       );
-      if (SUPPORTED_MIME_TYPE.includes(spore.contentType as any)) {
+      if (isSupportedMIMEType(spore.contentType)) {
         if (
           options?.contentTypes &&
           !options.contentTypes.includes(spore.contentType)

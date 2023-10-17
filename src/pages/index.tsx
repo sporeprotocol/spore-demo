@@ -21,7 +21,7 @@ import SporeGrid from '@/components/SporeGrid';
 import ClusterGrid from '@/components/ClusterGrid';
 import { useMediaQuery } from '@mantine/hooks';
 import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { TEXT_MIME_TYPE } from '@/utils/mime';
+import { TEXT_MIME_TYPE, isImageMIMEType, isTextMIMEType } from '@/utils/mime';
 import { Spore } from '@/spore';
 import { uniqBy } from 'lodash-es';
 
@@ -139,12 +139,12 @@ export default function HomePage() {
     }
     if (contentType === SporeContentType.Image) {
       return spores.filter((spore) =>
-        IMAGE_MIME_TYPE.includes(spore.contentType as any),
+        isImageMIMEType(spore.contentType as any),
       );
     }
     if (contentType === SporeContentType.Text) {
       return spores.filter((spore) =>
-        TEXT_MIME_TYPE.includes(spore.contentType as any),
+        isTextMIMEType(spore.contentType as any),
       );
     }
     return spores;
