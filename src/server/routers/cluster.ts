@@ -54,7 +54,7 @@ export const clusterRouter = router({
           if (!withSpores) {
             return cluster;
           }
-          const { items: spores } = await SporeService.shared.list(cluster.id, {
+          const { items: spores } = await SporeService.shared.list([cluster.id], {
             limit: 4,
           });
           return {
@@ -86,7 +86,7 @@ export const clusterRouter = router({
 
       const items = await Promise.all(
         clusters.map(async (cluster) => {
-          const { items: spores } = await SporeService.shared.list(cluster.id, {
+          const { items: spores } = await SporeService.shared.list([cluster.id], {
             limit: 4,
           });
           return {

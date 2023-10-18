@@ -15,7 +15,7 @@ export interface Spore {
   content?: string;
   contentType: string;
   cell: Pick<Cell, 'outPoint' | 'cellOutput'>;
-  cluster?: Cluster,
+  cluster?: Cluster;
 }
 
 export interface QueryOptions {
@@ -88,7 +88,7 @@ export default class SporeService {
     return undefined;
   }
 
-  public async list(clusterId?: string, options?: QueryOptions) {
+  public async list(clusterIds: string[] = [], options?: QueryOptions) {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
       order: 'desc',
@@ -111,7 +111,11 @@ export default class SporeService {
           continue;
         }
 
-        if (clusterId && spore.clusterId !== clusterId) {
+        if (
+          clusterIds.length > 0 &&
+          spore.clusterId &&
+          !clusterIds.includes(spore.clusterId!)
+        ) {
           continue;
         }
 

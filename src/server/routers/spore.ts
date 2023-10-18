@@ -40,7 +40,7 @@ export const sporeRouter = router({
           });
           return await SporeService.shared.listByLock(lock, clusterId, options);
         }
-        return await SporeService.shared.list(clusterId, options);
+        return await SporeService.shared.list([clusterId!], options);
       };
 
       const { items: spores } = await getSpores();
@@ -75,7 +75,7 @@ export const sporeRouter = router({
           });
           return await SporeService.shared.listByLock(lock, clusterId, options);
         }
-        return await SporeService.shared.list(clusterId, options);
+        return await SporeService.shared.list([clusterId!], options);
       };
 
       const { items: spores, collected } = await getSpores();
