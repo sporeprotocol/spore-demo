@@ -217,6 +217,7 @@ export default function HomePage() {
             }
             clusters={clusters}
             isLoading={isClusterLoading}
+            disablePlaceholder
           />
         </Container>
       </Box>
@@ -248,6 +249,7 @@ export default function HomePage() {
             </Group>
           }
           isLoading={isSporesLoading}
+          disablePlaceholder
         />
         <Group position="center" mt="48px">
           {hasNextPage &&

@@ -23,10 +23,11 @@ export interface SporeGridProps {
     | undefined;
   isLoading: boolean;
   filter?: React.ReactNode;
+  disablePlaceholder?: boolean;
 }
 
 export default function SporeGrid(props: SporeGridProps) {
-  const { title, spores, isLoading } = props;
+  const { title, spores, isLoading, disablePlaceholder } = props;
   const router = useRouter();
   const theme = useMantineTheme();
   const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
@@ -39,7 +40,7 @@ export default function SporeGrid(props: SporeGridProps) {
 
   const mintSporeModal = useMintSporeModal();
 
-  if (!isLoading && spores.length === 0) {
+  if (!disablePlaceholder && !isLoading && spores.length === 0) {
     if (router.pathname === '/my') {
       return (
         <EmptyPlaceholder

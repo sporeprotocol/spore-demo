@@ -11,10 +11,11 @@ export interface ClusterGridProps {
   title: string | JSX.Element;
   clusters: Cluster[];
   isLoading: boolean;
+  disablePlaceholder?: boolean;
 }
 
 export default function ClusterGrid(props: ClusterGridProps) {
-  const { title, clusters, isLoading } = props;
+  const { title, clusters, isLoading, disablePlaceholder } = props;
   const router = useRouter();
   const theme = useMantineTheme();
   const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
@@ -27,7 +28,7 @@ export default function ClusterGrid(props: ClusterGridProps) {
 
   const createClusterModal = useCreateClusterModal();
 
-  if (!isLoading && clusters.length === 0) {
+  if (!disablePlaceholder && !isLoading && clusters.length === 0) {
     if (router.pathname === '/my') {
       return (
         <EmptyPlaceholder
