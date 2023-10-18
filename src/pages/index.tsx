@@ -14,7 +14,6 @@ import {
   Button,
   Loader,
 } from '@mantine/core';
-import groupBy from 'lodash-es/groupBy';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import SporeGrid from '@/components/SporeGrid';
@@ -22,7 +21,6 @@ import ClusterGrid from '@/components/ClusterGrid';
 import { useMediaQuery } from '@mantine/hooks';
 import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { TEXT_MIME_TYPE, isImageMIMEType, isTextMIMEType } from '@/utils/mime';
-import { Spore } from '@/spore';
 import { uniqBy } from 'lodash-es';
 
 enum SporeContentType {
@@ -93,11 +91,6 @@ export default function HomePage() {
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.recent.useQuery({ limit: 4 });
-
-  // const { data: clusters = [], isLoading: isClusterLoading } =
-  //   trpc.cluster.list.useQuery();
-  // const { data: allSpores = [], isLoading: isAllSporesLoading } =
-  //   trpc.spore.list.useQuery();
 
   const contentTypes = useMemo(() => {
     if (contentType === SporeContentType.Image) {

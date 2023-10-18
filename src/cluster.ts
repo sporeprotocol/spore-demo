@@ -131,10 +131,12 @@ export default class ClusterService {
 
     const clusters = await Promise.all(
       clusterIds.map(async (id) => {
-        const cluster = await this.get(id!);
-        const { items: spores } = await SporeService.shared.list(id!, {
-          limit: 4,
-        });
+        const [cluster, { items: spores }] = await Promise.all([
+          this.get(id!),
+          SporeService.shared.list(id!, {
+            limit: 4,
+          }),
+        ]);
         return {
           ...cluster!,
           spores,
