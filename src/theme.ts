@@ -91,6 +91,17 @@ const components: MantineThemeOverride['components'] = {
       },
     }),
   },
+  Checkbox: {
+    defaultProps: (theme) => ({
+      styles: {
+        input: {
+          '&:checked': {
+            backgroundColor: theme.colors.brand[1],
+          },
+        },
+      },
+    }),
+  },
 };
 
 const theme = {

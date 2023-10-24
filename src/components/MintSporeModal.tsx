@@ -25,6 +25,7 @@ import {
   MediaQuery,
   Stack,
   Tooltip,
+  Checkbox,
 } from '@mantine/core';
 import { Dropzone, DropzoneProps, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useClipboard, useMediaQuery } from '@mantine/hooks';
@@ -52,6 +53,7 @@ export interface MintSporeModalProps {
   onSubmit: (
     content: Blob | null,
     clusterId: string | undefined,
+    useCapacityMargin?: boolean,
   ) => Promise<void>;
 }
 
@@ -189,9 +191,10 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     defaultClusterId,
   );
   const [content, setContent] = useState<Blob | null>(null);
-  const onChainSize = useEstimatedOnChainSize(clusterId, content);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [useCapacityMargin, setUseCapacityMargin] = useState(true);
+  const onChainSize = useEstimatedOnChainSize(clusterId, content, useCapacityMargin);
   const { classes } = useStyles();
 
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
@@ -232,13 +235,13 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     try {
       setLoading(true);
       setError(null);
-      await onSubmit(content, clusterId);
+      await onSubmit(content, clusterId, useCapacityMargin);
       setLoading(false);
     } catch (err) {
       setError(err as Error);
       setLoading(false);
     }
-  }, [onSubmit, clusterId, content]);
+  }, [onSubmit, clusterId, content, useCapacityMargin]);
 
   const selectableClusters = useMemo(() => {
     const ownerClusters = clusters.filter((cluster) => {
@@ -461,7 +464,22 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         </Text>
       )}
       {!isMobile ? (
-        <Group position="right" mt="32px">
+        <Group position="apart" mt="32px">
+          <Group spacing="xs">
+            <Checkbox
+              checked={useCapacityMargin}
+              onChange={(e) => setUseCapacityMargin(e.target.checked)}
+            />
+            <Text>Enable Zero-Fee Transfers</Text>
+            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+              <Image
+                src="/svg/icon-info.svg"
+                alt="info"
+                width="20"
+                height="20"
+              />
+            </Popover>
+          </Group>
           <Button
             className={classes.submit}
             disabled={!content || !!error}

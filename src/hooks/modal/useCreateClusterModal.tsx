@@ -34,7 +34,10 @@ export default function useCreateClusterModal() {
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
-    async (values: { name: string; description: string; public: string }) => {
+    async (
+      values: { name: string; description: string; public: string },
+      useCapacityMargin?: boolean,
+    ) => {
       if (!address || !lock) {
         return;
       }
@@ -48,6 +51,8 @@ export default function useCreateClusterModal() {
         fromInfos: [address],
         toLock,
         config: predefinedSporeConfigs.Aggron4,
+        // @ts-ignore
+        capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });
 
       showSuccess('Cluster Created!', () => {

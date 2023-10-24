@@ -12,6 +12,7 @@ import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
+import { BI } from '@ckb-lumos/lumos';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -42,6 +43,7 @@ export default function useMintSporeModal(id?: string) {
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
+      console.log(...args);
       let { txSkeleton, outputIndex } = await createSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
       await sendTransaction(signedTx);
@@ -59,7 +61,11 @@ export default function useMintSporeModal(id?: string) {
   });
 
   const handleSubmit = useCallback(
-    async (content: Blob | null, clusterId: string | undefined) => {
+    async (
+      content: Blob | null,
+      clusterId: string | undefined,
+      useCapacityMargin?: boolean,
+    ) => {
       if (!content || !address || !lock) {
         return;
       }
@@ -75,6 +81,8 @@ export default function useMintSporeModal(id?: string) {
         fromInfos: [address],
         toLock: lock,
         config: predefinedSporeConfigs.Aggron4,
+        // @ts-ignore
+        capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });
       showSuccess('Spore minted!', () => {
         router.push(`/spore/${spore?.cellOutput.type?.args}`);
