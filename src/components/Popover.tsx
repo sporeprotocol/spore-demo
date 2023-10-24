@@ -5,9 +5,10 @@ import {
   createStyles,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useRef } from 'react';
 
 type PopoverProps = React.PropsWithChildren<{
-  label: string;
+  label: string | React.ReactNode;
 }> &
   React.ComponentProps<typeof MantinePopover>;
 
@@ -27,6 +28,22 @@ export default function Popover({
 }: PopoverProps) {
   const { classes } = useStyles();
   const [opened, { close, open }] = useDisclosure(false);
+  const overPopover = useRef(false);
+
+  const handleOpenPopover = () => {
+    setTimeout(() => {
+      open();
+    }, 100);
+  };
+
+  const handleClosePopover = () => {
+    setTimeout(() => {
+      if (overPopover.current) {
+        return;
+      }
+      close();
+    }, 100);
+  };
 
   return (
     <MantinePopover
@@ -40,13 +57,21 @@ export default function Popover({
       <MantinePopover.Target>
         <Box
           sx={{ cursor: 'pointer' }}
-          onMouseEnter={open}
-          onMouseLeave={close}
+          onMouseEnter={handleOpenPopover}
+          onMouseLeave={handleClosePopover}
         >
           {children}
         </Box>
       </MantinePopover.Target>
-      <MantinePopover.Dropdown sx={{ pointerEvents: 'none' }}>
+      <MantinePopover.Dropdown
+        onMouseEnter={() => {
+          overPopover.current = true;
+        }}
+        onMouseLeave={() => {
+          overPopover.current = false;
+          handleClosePopover();
+        }}
+      >
         <Text color="text.0" size="14px">
           {label}
         </Text>

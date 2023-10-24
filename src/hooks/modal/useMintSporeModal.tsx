@@ -43,7 +43,6 @@ export default function useMintSporeModal(id?: string) {
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
-      console.log(...args);
       let { txSkeleton, outputIndex } = await createSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
       await sendTransaction(signedTx);

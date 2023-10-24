@@ -1,5 +1,5 @@
-import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { getCellCapacityMargin, predefinedSporeConfigs } from '@spore-sdk/core';
+import { BI, config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -19,6 +19,11 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
   const { refetch } = trpc.spore.get.useQuery(
     { id: spore?.id },
     { enabled: false },
+  );
+
+  const { data: capacityMargin } = trpc.spore.getCapacityMargin.useQuery(
+    { id: spore?.id },
+    { enabled: !!spore },
   );
 
   const transferSpore = useCallback(
@@ -49,6 +54,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
           config: config.predefined.AGGRON4,
         }),
         config: predefinedSporeConfigs.Aggron4,
+        useCapacityMarginAsFee: true,
       });
       showSuccess('Spore Transferred!');
       modals.close(modalId);
@@ -65,12 +71,19 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         closeOnEscape: !transferSporeMutation.isLoading,
         withCloseButton: !transferSporeMutation.isLoading,
         closeOnClickOutside: !transferSporeMutation.isLoading,
-        children: <TransferModal type="spore" onSubmit={handleSubmit} />,
+        children: <TransferModal type="spore" capacityMargin={capacityMargin} onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);
     }
-  }, [transferSporeMutation.isLoading, handleSubmit, opened, close, modalId]);
+  }, [
+    transferSporeMutation.isLoading,
+    handleSubmit,
+    opened,
+    close,
+    modalId,
+    capacityMargin,
+  ]);
 
   return {
     open,

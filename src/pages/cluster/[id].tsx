@@ -108,7 +108,7 @@ export default function ClusterPage() {
   const router = useRouter();
   const { id } = router.query;
   const theme = useMantineTheme();
-  const { address } = useConnect();
+  const { address, getAnyoneCanPayLock } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
@@ -134,6 +134,18 @@ export default function ClusterPage() {
     }
     return isAnyoneCanPay(cluster?.cell.cellOutput.lock);
   }, [cluster]);
+
+  const isOwned = useMemo(() => {
+    if (owner === address) {
+      return true;
+    }
+    const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
+      config: config.predefined.AGGRON4,
+    });
+    if (acpAddress === owner) {
+      return true;
+    }
+  }, [address, owner, getAnyoneCanPayLock]);
 
   const isSporesLoading = !spores;
   const isLoading = !cluster;
@@ -261,7 +273,7 @@ export default function ClusterPage() {
               <Flex mb="24px">
                 <Flex align="center">
                   <Text component="span">
-                    {address === owner ? (
+                    {isOwned ? (
                       <>
                         <Text size="lg" component="span">
                           Me (
@@ -306,7 +318,7 @@ export default function ClusterPage() {
                 </Flex>
               </Flex>
               <Flex direction={{ base: 'column', sm: 'row' }} gap="md">
-                {(isPublic || owner === address) && (
+                {(isPublic || isOwned) && (
                   <Button
                     className={classes.button}
                     onClick={mintSporeModal.open}
@@ -314,7 +326,7 @@ export default function ClusterPage() {
                     Mint Spore
                   </Button>
                 )}
-                {owner === address && (
+                {isOwned && (
                   <Button
                     className={classes.button}
                     onClick={transferClusterModal.open}

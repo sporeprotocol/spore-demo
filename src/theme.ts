@@ -102,6 +102,17 @@ const components: MantineThemeOverride['components'] = {
       },
     }),
   },
+  Radio: {
+    defaultProps: (theme) => ({
+      styles: {
+        radio: {
+          '&:checked': {
+            backgroundColor: theme.colors.brand[1],
+          },
+        },
+      },
+    }),
+  },
 };
 
 const theme = {

@@ -2,6 +2,7 @@ import { BI, Cell, Indexer, OutPoint, RPC, Script } from '@ckb-lumos/lumos';
 import {
   SporeConfig,
   SporeData,
+  getCellCapacityMargin,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
 import pick from 'lodash-es/pick';
@@ -88,6 +89,16 @@ export default class SporeService {
     return undefined;
   }
 
+  public async getCapacityMargin(id: string) {
+    const collector = this.indexer.collector({
+      type: { ...this.script, args: id },
+    });
+    for await (const cell of collector.collect()) {
+      return getCellCapacityMargin(cell);
+    }
+    return BI.from(0);
+  }
+
   public async list(clusterIds: string[] = [], options?: QueryOptions) {
     const collector = this.indexer.collector({
       type: { ...this.script, args: '0x' },
@@ -111,11 +122,7 @@ export default class SporeService {
           continue;
         }
 
-        if (
-          clusterIds.length > 0 &&
-          spore.clusterId &&
-          !clusterIds.includes(spore.clusterId!)
-        ) {
+        if (!clusterIds.includes(spore.clusterId ?? '')) {
           continue;
         }
 

@@ -1,5 +1,6 @@
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { isValidAddress } from '@/utils/helpers';
+import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
   Button,
@@ -8,13 +9,16 @@ import {
   TextInput,
   createStyles,
   useMantineTheme,
+  Radio,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
+import Popover from './Popover';
 
 export interface TransferModalProps {
   type: 'cluster' | 'spore';
+  capacityMargin: string | undefined;
   onSubmit: (values: { to: string }) => Promise<void>;
 }
 
@@ -59,6 +63,7 @@ const useStyles = createStyles((theme) => ({
 
 export default function TransferModal(props: TransferModalProps) {
   const { type, onSubmit } = props;
+  const capacityMargin = BI.from(props.capacityMargin || '0x0');
   const { classes } = useStyles();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
@@ -69,6 +74,7 @@ export default function TransferModal(props: TransferModalProps) {
   const form = useForm({
     initialValues: {
       to: '',
+      useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
     },
   });
 
@@ -115,6 +121,35 @@ export default function TransferModal(props: TransferModalProps) {
           data-autofocus
           {...form.getInputProps('to')}
         />
+        <Radio.Group
+          label="Select your preferred way"
+          classNames={{
+            label: classes.label,
+          }}
+          {...form.getInputProps('useCapacityMarginAsFee')}
+        >
+          <Stack spacing="8px" mt="4px">
+            {capacityMargin.toNumber() === 0 ? (
+              <Popover
+                label={
+                  <Text>
+                    {`This ${type} has exhausted its Zero-Fee Transfer capacity or hasn't enabled this feature.`}
+                  </Text>
+                }
+              >
+                <Radio value="1" label="Zero-Fee Transfer" disabled />
+              </Popover>
+            ) : (
+              <Radio
+                value="1"
+                label="Zero-Fee Transfer"
+                disabled={BI.from(capacityMargin).toNumber() === 0}
+              />
+            )}
+
+            <Radio value="0" label="Pay from my wallet" />
+          </Stack>
+        </Radio.Group>
         {error && (
           <Text size="sm" color="functional.0">
             {getFriendlyErrorMessage(error.message)}

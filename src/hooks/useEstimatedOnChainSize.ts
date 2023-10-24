@@ -56,7 +56,7 @@ export default function useEstimatedOnChainSize(
     estimate().then((size) => {
       setOnChainSize(size);
     });
-  }, [content, address, lock, clusterId]);
+  }, [content, address, lock, clusterId, useCapacityMargin]);
 
   return onChainSize;
 }
