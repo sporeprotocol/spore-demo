@@ -10,6 +10,7 @@ import {
   createStyles,
   useMantineTheme,
   Radio,
+  Box,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
@@ -18,8 +19,9 @@ import Popover from './Popover';
 
 export interface TransferModalProps {
   type: 'cluster' | 'spore';
-  capacityMargin: string | undefined;
   onSubmit: (values: { to: string }) => Promise<void>;
+  capacityMargin?: string | undefined;
+  onSponsor?: () => void;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -62,7 +64,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export default function TransferModal(props: TransferModalProps) {
-  const { type, onSubmit } = props;
+  const { type, onSubmit, onSponsor } = props;
   const capacityMargin = BI.from(props.capacityMargin || '0x0');
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -133,7 +135,17 @@ export default function TransferModal(props: TransferModalProps) {
               <Popover
                 label={
                   <Text>
-                    {`This ${type} has exhausted its Zero-Fee Transfer capacity or hasn't enabled this feature.`}
+                    <Text
+                      inline
+                    >{`This ${type} has exhausted its Zero-Fee Transfer capacity or hasn't enabled this feature.`}</Text>
+                    <Text
+                      inline
+                      color="brand.1"
+                      sx={{ cursor: 'pointer', pointerEvents: 'all' }}
+                      onClick={onSponsor}
+                    >
+                      Sponsor future transfers
+                    </Text>
                   </Text>
                 }
               >

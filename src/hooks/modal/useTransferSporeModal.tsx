@@ -1,5 +1,5 @@
-import { getCellCapacityMargin, predefinedSporeConfigs } from '@spore-sdk/core';
-import { BI, config, helpers } from '@ckb-lumos/lumos';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
+import { config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -11,9 +11,13 @@ import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
+import useSponsorSporeModal from './useSponsorSporeModal';
+import { useSetAtom } from 'jotai';
+import { modalStackAtom } from '@/state/modal';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();
+  const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const { refetch } = trpc.spore.get.useQuery(
@@ -21,10 +25,13 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
     { enabled: false },
   );
 
-  const { data: capacityMargin } = trpc.spore.getCapacityMargin.useQuery(
-    { id: spore?.id },
-    { enabled: !!spore },
-  );
+  const { data: capacityMargin, refetch: refetchCapacityMargin } =
+    trpc.spore.getCapacityMargin.useQuery(
+      { id: spore?.id },
+      { enabled: !!spore },
+    );
+
+  const sponsorSporeModal = useSponsorSporeModal(spore);
 
   const transferSpore = useCallback(
     async (...args: Parameters<typeof _transferSpore>) => {
@@ -64,6 +71,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
 
   useEffect(() => {
     if (opened) {
+      refetchCapacityMargin();
       modals.open({
         modalId,
         title: 'Transfer spore?',
@@ -71,7 +79,18 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         closeOnEscape: !transferSporeMutation.isLoading,
         withCloseButton: !transferSporeMutation.isLoading,
         closeOnClickOutside: !transferSporeMutation.isLoading,
-        children: <TransferModal type="spore" capacityMargin={capacityMargin} onSubmit={handleSubmit} />,
+        children: (
+          <TransferModal
+            type="spore"
+            capacityMargin={capacityMargin}
+            onSubmit={handleSubmit}
+            onSponsor={() => {
+              close();
+              setModalStack((stack) => [...stack, { open, close }]);
+              sponsorSporeModal.open();
+            }}
+          />
+        ),
       });
     } else {
       modals.close(modalId);
@@ -83,6 +102,10 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
     close,
     modalId,
     capacityMargin,
+    sponsorSporeModal,
+    setModalStack,
+    open,
+    refetchCapacityMargin,
   ]);
 
   return {

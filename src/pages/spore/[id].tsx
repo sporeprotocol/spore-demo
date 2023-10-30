@@ -30,6 +30,7 @@ import SporeService from '@/spore';
 import { showSuccess } from '@/utils/notifications';
 import SporeContentRender from '@/components/SporeContentRender';
 import Popover from '@/components/Popover';
+import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -104,6 +105,7 @@ export default function SporePage() {
 
   const transferSpore = useTransferSporeModal(spore);
   const destroySpore = useDestroySporeModal(spore);
+  const sponsorSpore = useSponsorSporeModal(spore);
 
   const amount = spore
     ? Math.ceil(BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8)
@@ -265,6 +267,20 @@ export default function SporePage() {
                           <Image
                             src="/svg/icon-repeat.svg"
                             alt="Transfer"
+                            width="24px"
+                            height="24px"
+                          />
+                        </Box>
+                      </Tooltip>
+                      <Tooltip label={'Sponsor Spore'} withArrow>
+                        <Box
+                          sx={{ cursor: 'pointer' }}
+                          onClick={sponsorSpore.open}
+                        >
+                          <Image
+                            src="/svg/icon-add-capacity.svg"
+                            fit="contain"
+                            alt="sponsor"
                             width="24px"
                             height="24px"
                           />

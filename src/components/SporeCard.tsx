@@ -24,6 +24,7 @@ import { useConnect } from '@/hooks/useConnect';
 import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
 import SporeCoverRender from './SporeCoverRender';
+import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 
 export interface SporeCardProps {
   cluster: Cluster | undefined;
@@ -113,6 +114,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
 
   const transferSporeModal = useTransferSporeModal(spore);
   const destroySporeModal = useDestroySporeModal(spore);
+  const sponsorSporeModal = useSponsorSporeModal(spore);
 
   return (
     <Box
@@ -170,6 +172,27 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
                   onClick: (e) => {
                     e.preventDefault();
                     transferSporeModal.open();
+                  },
+                },
+                {
+                  type: 'item',
+                  key: 'sponsor-spore',
+                  title: (
+                    <Flex align="center">
+                      <Image
+                        src="/svg/icon-add-capacity.svg"
+                        fit="contain"
+                        width="18"
+                        height="18"
+                        alt="transfer"
+                        mr="8px"
+                      />
+                      <Text>Sponsor</Text>
+                    </Flex>
+                  ),
+                  onClick: (e) => {
+                    e.preventDefault();
+                    sponsorSporeModal.open();
                   },
                 },
                 {
