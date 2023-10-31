@@ -122,7 +122,10 @@ export default class SporeService {
           continue;
         }
 
-        if (!clusterIds.includes(spore.clusterId ?? '')) {
+        if (
+          clusterIds.length > 0 &&
+          !clusterIds.includes(spore.clusterId ?? '')
+        ) {
           continue;
         }
 
