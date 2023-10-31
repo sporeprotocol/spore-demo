@@ -28,7 +28,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
   const { data: capacityMargin, refetch: refetchCapacityMargin } =
     trpc.spore.getCapacityMargin.useQuery(
       { id: spore?.id },
-      { enabled: !!spore },
+      { enabled: !!spore && opened },
     );
 
   const sponsorSporeModal = useSponsorSporeModal(spore);

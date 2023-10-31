@@ -29,7 +29,7 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
 
   const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
     { id: cluster?.id },
-    { enabled: !!cluster },
+    { enabled: !!cluster && opened },
   );
 
   const sponsorCluster = useCallback(

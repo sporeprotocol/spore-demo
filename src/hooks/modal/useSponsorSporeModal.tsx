@@ -30,7 +30,7 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
 
   const { data: capacityMargin } = trpc.spore.getCapacityMargin.useQuery(
     { id: spore?.id },
-    { enabled: !!spore },
+    { enabled: !!spore && opened },
   );
 
   const sponsorSpore = useCallback(

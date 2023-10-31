@@ -28,7 +28,7 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const { data: capacityMargin, refetch: refetchCapacityMargin } =
     trpc.cluster.getCapacityMargin.useQuery(
       { id: cluster?.id },
-      { enabled: !!cluster },
+      { enabled: !!cluster && opened },
     );
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);
