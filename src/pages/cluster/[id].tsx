@@ -131,7 +131,7 @@ export default function ClusterPage() {
   const router = useRouter();
   const { id } = router.query;
   const theme = useMantineTheme();
-  const { address, getAnyoneCanPayLock } = useConnect();
+  const { address, getAnyoneCanPayLock, connected } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
@@ -160,6 +160,9 @@ export default function ClusterPage() {
   }, [cluster]);
 
   const isOwned = useMemo(() => {
+    if (!connected) {
+      return false;
+    }
     if (owner === address) {
       return true;
     }
@@ -169,7 +172,7 @@ export default function ClusterPage() {
     if (acpAddress === owner) {
       return true;
     }
-  }, [address, owner, getAnyoneCanPayLock]);
+  }, [address, owner, getAnyoneCanPayLock, connected]);
 
   const isSporesLoading = !spores;
   const isLoading = !cluster;

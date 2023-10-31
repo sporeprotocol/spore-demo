@@ -107,11 +107,11 @@ export const useConnect = () => {
   const isOwned = useCallback(
     (lock: Script) => {
       if (!connector) {
-        throw new Error(`Connector ${connectorType} not found`);
+        return false;
       }
       return connector.isOwned(lock);
     },
-    [connector, connectorType],
+    [connector],
   );
 
   const getAnyoneCanPayLock = useCallback(() => {

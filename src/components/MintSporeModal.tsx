@@ -252,6 +252,10 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   const selectableClusters = useMemo(() => {
     const ownerClusters = clusters.filter((cluster) => {
+      if (!address) {
+        return false;
+      }
+
       const clusterAddress = helpers.encodeToAddress(
         cluster.cell.cellOutput.lock,
         {
