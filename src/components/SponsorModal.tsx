@@ -122,6 +122,7 @@ export default function SponsorModal(props: TransferModalProps) {
       <form onSubmit={form.onSubmit(handleSubmit)} ref={focusTrapRef}>
         <Group w="100%" align="center" mb="8px">
           <NumberInput
+            type="number"
             classNames={{
               root: classes.root,
               label: classes.label,
@@ -133,6 +134,7 @@ export default function SponsorModal(props: TransferModalProps) {
             withAsterisk
             data-autofocus
             disabled={loading}
+            precision={0}
             rightSection={
               <Group spacing="0px" w="40px" h="100%">
                 <Stack
@@ -175,7 +177,7 @@ export default function SponsorModal(props: TransferModalProps) {
         </Group>
         {form.values.amount > 0 && (
           <Text size="12px" color="text.1">
-            Can support approximately {form.values.amount}00,000 future
+            Can support approximately {form.values.amount * 100000} future
             transfers
           </Text>
         )}
@@ -210,6 +212,7 @@ export default function SponsorModal(props: TransferModalProps) {
             type="submit"
             loading={loading}
             fullWidth={isMobile}
+            disabled={!form.values.amount}
           >
             Sponsor
           </Button>
