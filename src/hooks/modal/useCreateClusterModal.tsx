@@ -9,6 +9,7 @@ import { useMutation } from 'react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
+import { BI } from '@ckb-lumos/lumos';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);

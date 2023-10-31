@@ -145,6 +145,9 @@ const useStyles = createStyles((theme) => ({
       width: '100%',
     },
   },
+  mobileActions: {
+    borderTop: `1px solid ${theme.colors.border[0]}`,
+  },
   submit: {
     backgroundColor: theme.colors.brand[1],
     '&:hover': {
@@ -194,7 +197,11 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [useCapacityMargin, setUseCapacityMargin] = useState(true);
-  const onChainSize = useEstimatedOnChainSize(clusterId, content, useCapacityMargin);
+  const onChainSize = useEstimatedOnChainSize(
+    clusterId,
+    content,
+    useCapacityMargin,
+  );
   const { classes } = useStyles();
 
   const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
@@ -361,14 +368,16 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                 </Text>
               </Stack>
             </Group>
-            <Text
-              color="brand.1"
-              weight="bold"
-              sx={{ cursor: 'pointer' }}
-              onClick={() => dropzoneOpenRef.current?.()}
-            >
-              Change File
-            </Text>
+            {!isMobile && (
+              <Text
+                color="brand.1"
+                weight="bold"
+                sx={{ cursor: 'pointer' }}
+                onClick={() => dropzoneOpenRef.current?.()}
+              >
+                Change File
+              </Text>
+            )}
           </Group>
         </Stack>
       ) : (
@@ -490,7 +499,22 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           </Button>
         </Group>
       ) : (
-        <Stack mt="32px">
+        <Stack mt="16px" pt="16px" className={classes.mobileActions}>
+          <Group spacing="xs">
+            <Checkbox
+              checked={useCapacityMargin}
+              onChange={(e) => setUseCapacityMargin(e.target.checked)}
+            />
+            <Text>Enable Zero-Fee Transfers</Text>
+            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+              <Image
+                src="/svg/icon-info.svg"
+                alt="info"
+                width="20"
+                height="20"
+              />
+            </Popover>
+          </Group>
           {content && (
             <Button
               className={classes.change}

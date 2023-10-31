@@ -91,7 +91,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
         setLoading(false);
       }
     },
-    [onSubmit],
+    [onSubmit, useCapacityMargin],
   );
 
   return (

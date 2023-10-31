@@ -109,7 +109,7 @@ export default function SponsorModal(props: TransferModalProps) {
       return 0;
     }
     const capacity = BI.from(data.cell.cellOutput.capacity).toNumber();
-    return capacity / 100_000_000;
+    return Math.floor(capacity / 100_000_000);
   }, [data]);
 
   return (
@@ -117,7 +117,7 @@ export default function SponsorModal(props: TransferModalProps) {
       <Text color="text.1">
         {type === 'spore'
           ? `Sponsoring additional CKB for this Spore enables Zero-Fee Transfers and enhances your Spore's value as it grows with on-chain usage.`
-          : ``}
+          : `Enable Zero-Fee Transfers by adding CKB to this Cluster to sponsor future transfers.`}
       </Text>
       <form onSubmit={form.onSubmit(handleSubmit)} ref={focusTrapRef}>
         <Group w="100%" align="center" mb="8px">
@@ -132,6 +132,7 @@ export default function SponsorModal(props: TransferModalProps) {
             autoFocus
             withAsterisk
             data-autofocus
+            disabled={loading}
             rightSection={
               <Group spacing="0px" w="40px" h="100%">
                 <Stack
@@ -186,7 +187,9 @@ export default function SponsorModal(props: TransferModalProps) {
         {form.values.amount > 0 && (
           <Stack spacing="0px" mt="24px">
             <Text color="text.0" weight="bold">
-              {"Spore's on-chain size"}
+              {type === 'spore'
+                ? "Spore's on-chain size"
+                : "Cluster's on-chain size"}
             </Text>
             <Group spacing="4px" align="center">
               <Text color="text.0">{size} CKB</Text>

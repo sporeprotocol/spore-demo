@@ -14,7 +14,7 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Popover from './Popover';
 
 export interface TransferModalProps {
@@ -79,6 +79,13 @@ export default function TransferModal(props: TransferModalProps) {
       useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
     },
   });
+
+  useEffect(() => {
+    form.setValues({
+      ...form.values,
+      useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
+    });
+  }, [capacityMargin]);
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {

@@ -1,41 +1,40 @@
-import { predefinedSporeConfigs } from '@spore-sdk/core';
+import {
+  predefinedSporeConfigs,
+  transferCluster as _transferCluster,
+} from '@spore-sdk/core';
+import { BI } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
-import { Spore } from '@/spore';
+import { Cluster } from '@/cluster';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import { showSuccess } from '@/utils/notifications';
+import { modalStackAtom } from '@/state/modal';
+import { useAtomValue } from 'jotai';
 import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
-import { BI } from '@ckb-lumos/lumos';
-import { useAtomValue } from 'jotai';
-import { modalStackAtom } from '@/state/modal';
 
-export default function useSponsorSporeModal(spore: Spore | undefined) {
+export default function useSponsorClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
-  const modalStack = useAtomValue(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
-  const { address, lock, signTransaction } = useConnect();
+  const { address, signTransaction, lock } = useConnect();
+  const modalStack = useAtomValue(modalStackAtom);
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
-  const { refetch } = trpc.spore.get.useQuery(
-    { id: spore?.id },
-    { enabled: false },
+  const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+
+  const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
+    { id: cluster?.id },
+    { enabled: !!cluster },
   );
 
-  const { data: capacityMargin } = trpc.spore.getCapacityMargin.useQuery(
-    { id: spore?.id },
-    { enabled: !!spore },
-  );
-
-  const sponsorSpore = useCallback(
-    async (...args: Parameters<typeof _transferSpore>) => {
-      const { txSkeleton } = await _transferSpore(...args);
+  const sponsorCluster = useCallback(
+    async (...args: Parameters<typeof _transferCluster>) => {
+      const { txSkeleton } = await _transferCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
       const hash = await sendTransaction(signedTx);
       return hash;
@@ -43,41 +42,40 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
     [signTransaction],
   );
 
-  const sponsorSporeMutation = useMutation(sponsorSpore, {
+  const sponsorClusterMutation = useMutation(sponsorCluster, {
     onSuccess: () => refetch(),
   });
   const loading =
-    sponsorSporeMutation.isLoading && !sponsorSporeMutation.isError;
+    sponsorClusterMutation.isLoading && !sponsorClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { amount: number }) => {
-      if (!address || !values.amount || !spore) {
+      if (!address || !values.amount || !cluster) {
         return;
       }
       const { amount } = values;
       const newCapacity = BI.from(capacityMargin).add(
         BI.from(amount).mul(100_000_000),
       );
-
-      await sponsorSporeMutation.mutateAsync({
-        outPoint: spore.cell.outPoint!,
+      await sponsorClusterMutation.mutateAsync({
+        outPoint: cluster.cell.outPoint!,
         fromInfos: [address],
         toLock: lock!,
         config: predefinedSporeConfigs.Aggron4,
         capacityMargin: newCapacity.toHexString(),
         useCapacityMarginAsFee: false,
       });
-      showSuccess(`${amount} CKB sponsored to Spore!`);
+      showSuccess('Cluster Transferred!');
       modals.close(modalId);
     },
-    [address, spore, sponsorSporeMutation, modalId, lock, capacityMargin],
+    [address, cluster, sponsorClusterMutation, modalId, capacityMargin, lock],
   );
 
   useEffect(() => {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Sponsor Spore',
+        title: `Sponsor Cluster`,
         onClose: () => {
           close();
           const nextModal = modalStack.pop();
@@ -90,25 +88,29 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
             minWidth: isMobile ? 'auto' : '560px',
           },
         },
-        closeOnEscape: !sponsorSporeMutation.isLoading,
-        withCloseButton: !sponsorSporeMutation.isLoading,
-        closeOnClickOutside: !sponsorSporeMutation.isLoading,
+        closeOnEscape: !sponsorClusterMutation.isLoading,
+        withCloseButton: !sponsorClusterMutation.isLoading,
+        closeOnClickOutside: !sponsorClusterMutation.isLoading,
         children: (
-          <SponsorModal type="spore" data={spore!} onSubmit={handleSubmit} />
+          <SponsorModal
+            type="cluster"
+            data={cluster!}
+            onSubmit={handleSubmit}
+          />
         ),
       });
     } else {
       modals.close(modalId);
     }
   }, [
-    isMobile,
-    sponsorSporeMutation.isLoading,
+    cluster,
+    sponsorClusterMutation.isLoading,
     handleSubmit,
     opened,
     close,
     modalId,
-    spore,
     modalStack,
+    isMobile,
   ]);
 
   return {
