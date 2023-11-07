@@ -91,6 +91,7 @@ export default function AccountPage() {
 
   const { data: spores = [], isLoading: isSporesLoading } =
     trpc.spore.list.useQuery({ owner: address as string });
+  const { data: allClusters = [] } = trpc.cluster.list.useQuery();
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.list.useQuery({
       owner: address as string,
@@ -199,7 +200,7 @@ export default function AccountPage() {
           <SporeGrid
             title={isSporesLoading ? '' : `${spores.length} Spores`}
             spores={spores}
-            cluster={(id) => clusters.find((c) => c.id === id)}
+            cluster={(id) => allClusters.find((c) => c.id === id)}
             isLoading={isSporesLoading}
           />
         ) : (
