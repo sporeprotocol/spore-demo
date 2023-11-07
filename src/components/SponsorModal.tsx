@@ -159,11 +159,12 @@ export default function SponsorModal(props: TransferModalProps) {
                   h="100%"
                   justify="center"
                   sx={{ cursor: 'pointer' }}
-                  onClick={() =>
+                  onClick={() => {
+                    setError(null);
                     form.setValues({
                       amount: Math.max(form.values.amount - 1, 0),
-                    })
-                  }
+                    });
+                  }}
                 >
                   <Image
                     src="/svg/icon-left.svg"
@@ -176,9 +177,10 @@ export default function SponsorModal(props: TransferModalProps) {
                   h="100%"
                   justify="center"
                   sx={{ cursor: 'pointer' }}
-                  onClick={() =>
-                    form.setValues({ amount: form.values.amount + 1 })
-                  }
+                  onClick={() => {
+                    setError(null);
+                    form.setValues({ amount: form.values.amount + 1 });
+                  }}
                 >
                   <Image
                     src="/svg/icon-right.svg"
