@@ -1,5 +1,6 @@
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { isValidAddress } from '@/utils/helpers';
+import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
   Button,
@@ -8,14 +9,19 @@ import {
   TextInput,
   createStyles,
   useMantineTheme,
+  Radio,
+  Box,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import Popover from './Popover';
 
 export interface TransferModalProps {
   type: 'cluster' | 'spore';
   onSubmit: (values: { to: string }) => Promise<void>;
+  capacityMargin?: string | undefined;
+  onSponsor?: () => void;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -55,10 +61,15 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: '#7F6BD1',
     },
   },
+  radio: {
+    fontSize: '16px',
+    color: theme.colors.text[0],
+  },
 }));
 
 export default function TransferModal(props: TransferModalProps) {
-  const { type, onSubmit } = props;
+  const { type, onSubmit, onSponsor } = props;
+  const capacityMargin = BI.from(props.capacityMargin || '0x0');
   const { classes } = useStyles();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
@@ -69,6 +80,7 @@ export default function TransferModal(props: TransferModalProps) {
   const form = useForm({
     initialValues: {
       to: '',
+      useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
     },
   });
 
@@ -115,6 +127,51 @@ export default function TransferModal(props: TransferModalProps) {
           data-autofocus
           {...form.getInputProps('to')}
         />
+        <Radio.Group
+          label="Select your preferred way"
+          classNames={{
+            label: classes.label,
+          }}
+          {...form.getInputProps('useCapacityMarginAsFee')}
+        >
+          <Stack spacing="8px" mt="4px">
+            {capacityMargin.toNumber() === 0 ? (
+              <Popover
+                label={
+                  <Text>
+                    <Text
+                      inline
+                      sx={{ lineHeight: 1.4 }}
+                    >{`This ${type} has exhausted its Zero-Fee Transfer capacity or hasn't enabled this feature.`}</Text>
+                    <Text
+                      inline
+                      color="brand.1"
+                      sx={{ cursor: 'pointer', pointerEvents: 'all', lineHeight: 1.4 }}
+                      onClick={onSponsor}
+                    >
+                      Sponsor future transfers
+                    </Text>
+                  </Text>
+                }
+              >
+                <Radio value="1" label="Zero-Fee Transfer" disabled />
+              </Popover>
+            ) : (
+              <Radio
+                value="1"
+                classNames={{ label: classes.radio }}
+                label="Zero-Fee Transfer"
+                disabled={BI.from(capacityMargin).toNumber() === 0}
+              />
+            )}
+
+            <Radio
+              value="0"
+              classNames={{ label: classes.radio }}
+              label="Pay from my wallet"
+            />
+          </Stack>
+        </Radio.Group>
         {error && (
           <Text size="sm" color="functional.0">
             {getFriendlyErrorMessage(error.message)}

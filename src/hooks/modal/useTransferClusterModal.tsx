@@ -13,13 +13,25 @@ import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
+import useSponsorClusterModal from './useSponsorClusterModal';
+import { modalStackAtom } from '@/state/modal';
+import { useSetAtom } from 'jotai';
 
 export default function useTransferClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
+  const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
 
   const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+
+  const { data: capacityMargin, refetch: refetchCapacityMargin } =
+    trpc.cluster.getCapacityMargin.useQuery(
+      { id: cluster?.id },
+      { enabled: !!cluster && opened },
+    );
+
+  const sponsorClusterModal = useSponsorClusterModal(cluster);
 
   const transferCluster = useCallback(
     async (...args: Parameters<typeof _transferCluster>) => {
@@ -59,6 +71,7 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
 
   useEffect(() => {
     if (opened) {
+      refetchCapacityMargin();
       modals.open({
         modalId,
         title: `Transfer "${cluster!.name}"?`,
@@ -66,7 +79,18 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         closeOnEscape: !transferClusterMutation.isLoading,
         withCloseButton: !transferClusterMutation.isLoading,
         closeOnClickOutside: !transferClusterMutation.isLoading,
-        children: <TransferModal type="cluster" onSubmit={handleSubmit} />,
+        children: (
+          <TransferModal
+            type="cluster"
+            capacityMargin={capacityMargin}
+            onSubmit={handleSubmit}
+            onSponsor={() => {
+              close();
+              setModalStack((stack) => [...stack, { open, close }]);
+              sponsorClusterModal.open();
+            }}
+          />
+        ),
       });
     } else {
       modals.close(modalId);
@@ -78,6 +102,11 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
     opened,
     close,
     modalId,
+    capacityMargin,
+    refetchCapacityMargin,
+    open,
+    setModalStack,
+    sponsorClusterModal,
   ]);
 
   return {

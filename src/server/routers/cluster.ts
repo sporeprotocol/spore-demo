@@ -6,7 +6,7 @@ import {
   isAnyoneCanPay,
   isOmnilockScript,
 } from '@/utils/script';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { BI, config, helpers } from '@ckb-lumos/lumos';
 import z from 'zod';
 
 export const clusterRouter = router({
@@ -110,5 +110,20 @@ export const clusterRouter = router({
     .query(async ({ input }) => {
       const clusters = await ClusterService.shared.recent(input.limit);
       return clusters;
+    }),
+  getCapacityMargin: publicProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { id } = input;
+      if (!id) {
+        return BI.from(0).toHexString();
+      }
+
+      const margin = await ClusterService.shared.getCapacityMargin(id);
+      return margin.toHexString();
     }),
 });

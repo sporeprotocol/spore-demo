@@ -8,17 +8,23 @@ import {
   createStyles,
   Radio,
   useMantineTheme,
+  Checkbox,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import Image from 'next/image';
+import Popover from './Popover';
 
 export interface CreateClusterModalProps {
-  onSubmit: (values: {
-    name: string;
-    description: string;
-    public: string;
-  }) => Promise<void>;
+  onSubmit: (
+    values: {
+      name: string;
+      description: string;
+      public: string;
+    },
+    useCapacityMargin?: boolean,
+  ) => Promise<void>;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -62,6 +68,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [useCapacityMargin, setUseCapacityMargin] = useState(true);
   const focusTrapRef = useFocusTrap();
 
   const form = useForm({
@@ -77,14 +84,14 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
       try {
         setLoading(true);
         setError(null);
-        await onSubmit(values);
+        await onSubmit(values, useCapacityMargin);
         setLoading(false);
       } catch (err) {
         setError(err as Error);
         setLoading(false);
       }
     },
-    [onSubmit],
+    [onSubmit, useCapacityMargin],
   );
 
   return (
@@ -149,7 +156,22 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
             {getFriendlyErrorMessage(error.message)}
           </Text>
         )}
-        <Group position="right" mt={error ? '24px' : '48px'}>
+        <Group position="apart" mt={error ? '24px' : '48px'}>
+          <Group spacing="xs">
+            <Checkbox
+              checked={useCapacityMargin}
+              onChange={(e) => setUseCapacityMargin(e.target.checked)}
+            />
+            <Text>Enable Zero-Fee Transfers</Text>
+            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+              <Image
+                src="/svg/icon-info.svg"
+                alt="info"
+                width="20"
+                height="20"
+              />
+            </Popover>
+          </Group>
           <Button
             type="submit"
             className={classes.submit}

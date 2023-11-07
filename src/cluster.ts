@@ -1,7 +1,8 @@
-import { Cell, Indexer, RPC, Script } from '@ckb-lumos/lumos';
+import { BI, Cell, Indexer, RPC, Script } from '@ckb-lumos/lumos';
 import {
   ClusterData,
   SporeConfig,
+  getCellCapacityMargin,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
 import pick from 'lodash-es/pick';
@@ -73,6 +74,16 @@ export default class ClusterService {
     }
 
     return undefined;
+  }
+
+  public async getCapacityMargin(id: string) {
+    const collector = this.indexer.collector({
+      type: { ...this.script, args: id },
+    });
+    for await (const cell of collector.collect()) {
+      return getCellCapacityMargin(cell);
+    }
+    return BI.from(0);
   }
 
   public async list(options?: QueryOptions) {

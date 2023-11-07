@@ -7,6 +7,7 @@ import { isSameScript } from '@/utils/script';
 export default function useEstimatedOnChainSize(
   clusterId: string | undefined,
   content: Blob | null,
+  useCapacityMargin = false,
 ) {
   const { address, lock } = useConnect();
   const [onChainSize, setOnChainSize] = useState(0);
@@ -29,6 +30,8 @@ export default function useEstimatedOnChainSize(
           fromInfos: [address],
           toLock: lock,
           config: predefinedSporeConfigs.Aggron4,
+          // @ts-ignore
+          capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
         });
 
         const outputs = txSkeleton.get('outputs');
@@ -53,7 +56,7 @@ export default function useEstimatedOnChainSize(
     estimate().then((size) => {
       setOnChainSize(size);
     });
-  }, [content, address, lock, clusterId]);
+  }, [content, address, lock, clusterId, useCapacityMargin]);
 
   return onChainSize;
 }

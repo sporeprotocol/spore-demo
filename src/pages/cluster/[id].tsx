@@ -20,7 +20,7 @@ import {
   Title,
 } from '@mantine/core';
 import { useClipboard, useMediaQuery } from '@mantine/hooks';
-import { IconCopy } from '@tabler/icons-react';
+import { IconCopy, IconDots } from '@tabler/icons-react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -31,6 +31,8 @@ import { ClusterOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import ClusterService from '@/cluster';
 import { showSuccess } from '@/utils/notifications';
+import DropMenu from '@/components/DropMenu';
+import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -84,7 +86,7 @@ const useStyles = createStyles((theme) => ({
   },
   description: {
     textOverflow: 'ellipsis',
-    maxWidth: '690px ',
+    maxWidth: '953px ',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
   },
@@ -96,9 +98,30 @@ const useStyles = createStyles((theme) => ({
     borderStyle: 'solid',
     boxShadow: 'none !important',
 
+    [theme.fn.smallerThan('sm')]: {
+      flexGrow: 1,
+    },
+
     '&:hover': {
       backgroundColor: theme.colors.text[0],
       color: theme.white,
+    },
+  },
+  more: {
+    color: theme.colors.text[0],
+    backgroundColor: theme.colors.brand[0],
+    borderWidth: '2px',
+    borderColor: theme.colors.text[0],
+    borderStyle: 'solid',
+    boxShadow: 'none !important',
+    minWidth: '48px !important',
+    width: '48px',
+    padding: '0px !important',
+
+    '&:hover': {
+      backgroundColor: theme.colors.text[0],
+      color: theme.white,
+      fill: theme.white,
     },
   },
 }));
@@ -108,7 +131,7 @@ export default function ClusterPage() {
   const router = useRouter();
   const { id } = router.query;
   const theme = useMantineTheme();
-  const { address } = useConnect();
+  const { address, getAnyoneCanPayLock, connected } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
@@ -119,6 +142,7 @@ export default function ClusterPage() {
 
   const mintSporeModal = useMintSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);
+  const sponsorClusterModal = useSponsorClusterModal(cluster);
 
   const owner = useMemo(() => {
     if (!cluster) return '';
@@ -134,6 +158,21 @@ export default function ClusterPage() {
     }
     return isAnyoneCanPay(cluster?.cell.cellOutput.lock);
   }, [cluster]);
+
+  const isOwned = useMemo(() => {
+    if (!connected) {
+      return false;
+    }
+    if (owner === address) {
+      return true;
+    }
+    const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
+      config: config.predefined.AGGRON4,
+    });
+    if (acpAddress === owner) {
+      return true;
+    }
+  }, [address, owner, getAnyoneCanPayLock, connected]);
 
   const isSporesLoading = !spores;
   const isLoading = !cluster;
@@ -172,9 +211,7 @@ export default function ClusterPage() {
                 borderRadius="16px"
               />
             </Flex>
-          </Grid.Col>
-          <Grid.Col span={isMobile ? 12 : 4}>
-            <Flex direction="column">
+            <Flex direction="column" mt="24px">
               <Title mb="8px" order={5}>
                 Owned by
               </Title>
@@ -251,62 +288,68 @@ export default function ClusterPage() {
               <Text size="20px" color="text.1" className={classes.description}>
                 {cluster?.description}
               </Text>
+              <Flex direction="column" mt="24px">
+                <Title mb="8px" order={5}>
+                  Owned by
+                </Title>
+                <Flex mb="24px">
+                  <Flex align="center">
+                    <Text component="span">
+                      {isOwned ? (
+                        <>
+                          <Text size="lg" component="span">
+                            Me (
+                          </Text>
+                          <Link href={`/my`} style={{ textDecoration: 'none' }}>
+                            <Text size="lg" color="brand.1" component="span">
+                              {owner.slice(0, 10)}...{owner.slice(-10)}
+                            </Text>
+                          </Link>
+                          <Text size="lg" component="span">
+                            )
+                          </Text>
+                        </>
+                      ) : (
+                        <Link
+                          href={`/${owner}`}
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <Text size="lg" color="brand.1">
+                            {owner.slice(0, 10)}...{owner.slice(-10)}
+                          </Text>
+                        </Link>
+                      )}
+                    </Text>
+                    <Text
+                      component="span"
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => {
+                        clipboard.copy(owner);
+                        showSuccess('Copied!');
+                      }}
+                      h="22px"
+                      ml="5px"
+                    >
+                      <Tooltip
+                        label={clipboard.copied ? 'Copied' : 'Copy'}
+                        withArrow
+                      >
+                        <IconCopy size="22px" color={theme.colors.text[0]} />
+                      </Tooltip>
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Flex>
             </Flex>
           </Grid.Col>
           <Grid.Col span={isMobile ? 12 : 4}>
             <Flex direction="column">
-              <Title mb="8px" order={5}>
-                Owned by
-              </Title>
-              <Flex mb="24px">
-                <Flex align="center">
-                  <Text component="span">
-                    {address === owner ? (
-                      <>
-                        <Text size="lg" component="span">
-                          Me (
-                        </Text>
-                        <Link href={`/my`} style={{ textDecoration: 'none' }}>
-                          <Text size="lg" color="brand.1" component="span">
-                            {owner.slice(0, 10)}...{owner.slice(-10)}
-                          </Text>
-                        </Link>
-                        <Text size="lg" component="span">
-                          )
-                        </Text>
-                      </>
-                    ) : (
-                      <Link
-                        href={`/${owner}`}
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <Text size="lg" color="brand.1">
-                          {owner.slice(0, 10)}...{owner.slice(-10)}
-                        </Text>
-                      </Link>
-                    )}
-                  </Text>
-                  <Text
-                    component="span"
-                    sx={{ cursor: 'pointer' }}
-                    onClick={() => {
-                      clipboard.copy(owner);
-                      showSuccess('Copied!');
-                    }}
-                    h="22px"
-                    ml="5px"
-                  >
-                    <Tooltip
-                      label={clipboard.copied ? 'Copied' : 'Copy'}
-                      withArrow
-                    >
-                      <IconCopy size="22px" color={theme.colors.text[0]} />
-                    </Tooltip>
-                  </Text>
-                </Flex>
-              </Flex>
-              <Flex direction={{ base: 'column', sm: 'row' }} gap="md">
-                {(isPublic || owner === address) && (
+              <Flex
+                direction="row"
+                justify="end"
+                gap="md"
+              >
+                {(isPublic || isOwned) && (
                   <Button
                     className={classes.button}
                     onClick={mintSporeModal.open}
@@ -314,13 +357,52 @@ export default function ClusterPage() {
                     Mint Spore
                   </Button>
                 )}
-                {owner === address && (
-                  <Button
-                    className={classes.button}
-                    onClick={transferClusterModal.open}
+                {isOwned && (
+                  <DropMenu
+                    position="bottom-end"
+                    menu={[
+                      {
+                        type: 'item',
+                        key: 'sponsor-spore',
+                        title: (
+                          <Flex align="center">
+                            <Image
+                              src="/svg/icon-add-capacity.svg"
+                              width="18"
+                              height="18"
+                              alt="sponsor"
+                            />
+                            <Text ml="8px">Sponsor</Text>
+                          </Flex>
+                        ),
+                        onClick: () => {
+                          sponsorClusterModal.open();
+                        },
+                      },
+                      {
+                        type: 'item',
+                        key: 'transfer-spore',
+                        title: (
+                          <Flex align="center">
+                            <Image
+                              src="/svg/icon-repeat.svg"
+                              width="18"
+                              height="18"
+                              alt="transfer"
+                            />
+                            <Text ml="8px">Transfer</Text>
+                          </Flex>
+                        ),
+                        onClick: () => {
+                          transferClusterModal.open();
+                        },
+                      },
+                    ]}
                   >
-                    Transfer Cluster
-                  </Button>
+                    <Button className={classes.more}>
+                      <IconDots size="24" />
+                    </Button>
+                  </DropMenu>
                 )}
               </Flex>
             </Flex>

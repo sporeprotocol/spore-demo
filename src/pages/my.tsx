@@ -194,7 +194,7 @@ export default function MySpacePage() {
                 Balance:
               </Text>
               <Text size="xl" weight="bold" color="text.0" mr="5px">
-                {balance} CKB
+                {balance.toLocaleString('en-US')} CKB
               </Text>
             </Flex>
           </Flex>

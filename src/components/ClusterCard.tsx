@@ -22,6 +22,7 @@ import { isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import SporeCoverRender from './SporeCoverRender';
+import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
 
 export interface ClusterCardProps {
   cluster: Cluster;
@@ -123,6 +124,7 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
   );
 
   const transferClusterModal = useTransferClusterModal(cluster);
+  const sponsorClusterModal = useSponsorClusterModal(cluster);
 
   return (
     <Box
@@ -200,6 +202,24 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
           <Flex align="center" justify="flex-end">
             <DropMenu
               menu={[
+                {
+                  type: 'item',
+                  key: 'sponsor-spore',
+                  title: (
+                    <Flex align="center">
+                      <Image
+                        src="/svg/icon-add-capacity.svg"
+                        width="18"
+                        height="18"
+                        alt="sponsor"
+                      />
+                      <Text ml="8px">Sponsor</Text>
+                    </Flex>
+                  ),
+                  onClick: () => {
+                    sponsorClusterModal.open();
+                  },
+                },
                 {
                   type: 'item',
                   key: 'transfer-spore',

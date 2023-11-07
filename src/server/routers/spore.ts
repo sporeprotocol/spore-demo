@@ -1,7 +1,7 @@
 import ClusterService from '@/cluster';
 import { publicProcedure, router } from '@/server/trpc';
 import SporeService from '@/spore';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { BI, config, helpers } from '@ckb-lumos/lumos';
 import z from 'zod';
 
 export const sporeRouter = router({
@@ -40,7 +40,10 @@ export const sporeRouter = router({
           });
           return await SporeService.shared.listByLock(lock, clusterId, options);
         }
-        return await SporeService.shared.list([clusterId!], options);
+        return await SporeService.shared.list(
+          clusterId ? [clusterId] : [],
+          options,
+        );
       };
 
       const { items: spores } = await getSpores();
@@ -75,26 +78,46 @@ export const sporeRouter = router({
           });
           return await SporeService.shared.listByLock(lock, clusterId, options);
         }
-        return await SporeService.shared.list(clusterId ? [clusterId] : [], options);
+        return await SporeService.shared.list(
+          clusterId ? [clusterId] : [],
+          options,
+        );
       };
 
       const { items: spores, collected } = await getSpores();
 
-      const items = await Promise.all(spores.map(async (spore) => {
-        if (!spore.clusterId) {
-          return spore;
-        }
+      const items = await Promise.all(
+        spores.map(async (spore) => {
+          if (!spore.clusterId) {
+            return spore;
+          }
 
-        const cluster = await ClusterService.shared.get(spore.clusterId);
-        return {
-          ...spore,
-          cluster,
-        };
-      }))
+          const cluster = await ClusterService.shared.get(spore.clusterId);
+          return {
+            ...spore,
+            cluster,
+          };
+        }),
+      );
 
       return {
         items,
         nextCursor: spores.length === 0 ? undefined : cursor + collected,
       };
+    }),
+  getCapacityMargin: publicProcedure
+    .input(
+      z.object({
+        id: z.string().optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { id } = input;
+      if (!id) {
+        return BI.from(0).toHexString();
+      }
+
+      const margin = await SporeService.shared.getCapacityMargin(id);
+      return margin.toHexString();
     }),
 });

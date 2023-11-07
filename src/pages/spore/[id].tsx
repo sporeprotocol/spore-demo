@@ -23,13 +23,14 @@ import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
 import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
 import { useMemo } from 'react';
 import Head from 'next/head';
-import { useClipboard } from '@mantine/hooks';
+import { useClipboard, useMediaQuery } from '@mantine/hooks';
 import { SporeOpenGraph } from '@/components/OpenGraph';
 import { GetStaticPaths, GetStaticPropsContext } from 'next';
 import SporeService from '@/spore';
 import { showSuccess } from '@/utils/notifications';
 import SporeContentRender from '@/components/SporeContentRender';
 import Popover from '@/components/Popover';
+import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 
 export async function getStaticProps(
   context: GetStaticPropsContext<{ id: string }>,
@@ -85,13 +86,12 @@ export default function SporePage() {
   const theme = useMantineTheme();
   const { connected, address, getAnyoneCanPayLock } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const { data: spore, isLoading } = trpc.spore.get.useQuery({
     id: id as string,
   });
   const { classes } = useStyles();
-  // const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  // const isTablet = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
 
   const { data: cluster } = trpc.cluster.get.useQuery(
     { id: spore?.clusterId ?? undefined },
@@ -104,6 +104,7 @@ export default function SporePage() {
 
   const transferSpore = useTransferSporeModal(spore);
   const destroySpore = useDestroySporeModal(spore);
+  const sponsorSpore = useSponsorSporeModal(spore);
 
   const amount = spore
     ? Math.ceil(BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8)
@@ -270,6 +271,20 @@ export default function SporePage() {
                           />
                         </Box>
                       </Tooltip>
+                      <Tooltip label={'Sponsor Spore'} withArrow>
+                        <Box
+                          sx={{ cursor: 'pointer' }}
+                          onClick={sponsorSpore.open}
+                        >
+                          <Image
+                            src="/svg/icon-add-capacity.svg"
+                            fit="contain"
+                            alt="sponsor"
+                            width="24px"
+                            height="24px"
+                          />
+                        </Box>
+                      </Tooltip>
                       <Tooltip label={'Destroy'} withArrow>
                         <Box
                           sx={{ cursor: 'pointer' }}
@@ -298,7 +313,7 @@ export default function SporePage() {
                 />
               ) : (
                 <Popover
-                  label={`The amount of CKB held in on-chain storage, redeemable upon destruction`}
+                  label={`The amount of CKB locked up on-chain, redeemable upon destruction`}
                   width={320}
                   position="bottom-start"
                 >
@@ -310,12 +325,12 @@ export default function SporePage() {
                       display: 'inline',
                     }}
                   >
-                    {amount} CKB
+                    {amount.toLocaleString('en-US')} CKB
                   </Title>
                 </Popover>
               )}
             </Group>
-            <Group spacing="48px">
+            <Group spacing={isMobile ? '24px' : '48px'}>
               <Stack spacing="4px">
                 <Text size="lg" color="text.0" weight="bold">
                   Content Type

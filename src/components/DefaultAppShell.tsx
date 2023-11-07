@@ -86,7 +86,7 @@ const useStyles = createStyles((theme) => ({
     width: '26px',
     height: '26px',
     borderRadius: '22px',
-    border: `2px solid ${theme.white}`
+    border: `2px solid ${theme.white}`,
   },
 }));
 
@@ -201,6 +201,8 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     ] as DropMenuProps['menu'];
   }, [router, disconnect, address, connected, connector, clipboard]);
 
+  const balance = Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
+
   return (
     <AppShell
       padding="none"
@@ -267,14 +269,12 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                                 height="24"
                               />
                             </Box>
-                            <Text>
-                              {Math.floor(
-                                BI.from(capacity).toNumber() / 10 ** 8,
-                              )}{' '}
-                              CKB
-                            </Text>
+                            <Text>{balance.toLocaleString('en-US')} CKB</Text>
                             <Divider mx="md" size="sm" orientation="vertical" />
-                            <Box className={classes.avatar} id="wallet-avatar" />
+                            <Box
+                              className={classes.avatar}
+                              id="wallet-avatar"
+                            />
                           </Button>
                         </DropMenu>
                       )}
