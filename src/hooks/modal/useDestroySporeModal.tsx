@@ -21,7 +21,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
   const router = useRouter();
 
   const { refetch } = trpc.spore.list.useQuery(
-    { clusterId: spore?.clusterId ?? undefined },
+    { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
     { enabled: false },
   );
 
