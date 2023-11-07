@@ -136,9 +136,7 @@ export default function ClusterPage() {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
-  const { data: spores } = trpc.spore.list.useQuery({ clusterId: id } as {
-    clusterId: string;
-  });
+  const { data: spores } = trpc.spore.list.useQuery({ clusterIds: [id as string] });
 
   const mintSporeModal = useMintSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);

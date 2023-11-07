@@ -121,7 +121,7 @@ export default class SporeService {
         ) {
           continue;
         }
-        
+
         if (clusterIds.length > 0 && !clusterIds.includes(spore.clusterId!)) {
           continue;
         }
@@ -141,7 +141,7 @@ export default class SporeService {
 
   public async listByLock(
     lock: Script,
-    clusterId?: string,
+    clusterIds: string[] = [],
     options?: QueryOptions,
   ) {
     const collector = this.indexer.collector({
@@ -167,7 +167,7 @@ export default class SporeService {
           continue;
         }
 
-        if (clusterId && spore.clusterId !== clusterId) {
+        if (clusterIds.length > 0 && !clusterIds.includes(spore.clusterId!)) {
           continue;
         }
 

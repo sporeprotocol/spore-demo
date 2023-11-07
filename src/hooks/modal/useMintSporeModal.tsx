@@ -25,7 +25,7 @@ export default function useMintSporeModal(id?: string) {
   const { data: clusters = [] } = trpc.cluster.list.useQuery();
   const { refetch } = trpc.spore.list.useQuery(
     {
-      clusterId: id,
+      clusterIds: id ? [id] : undefined,
     },
     {
       enabled: false,

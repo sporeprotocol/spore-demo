@@ -22,7 +22,7 @@ export const sporeRouter = router({
     .input(
       z
         .object({
-          clusterId: z.string().optional(),
+          clusterIds: z.array(z.string()).optional(),
           owner: z.string().optional(),
           skip: z.number().optional(),
           limit: z.number().optional(),
@@ -30,7 +30,7 @@ export const sporeRouter = router({
         .optional(),
     )
     .query(async ({ input }) => {
-      const { clusterId, owner, skip, limit } = input ?? {};
+      const { clusterIds, owner, skip, limit } = input ?? {};
       const options = { skip, limit };
 
       const getSpores = async () => {
@@ -38,12 +38,13 @@ export const sporeRouter = router({
           const lock = helpers.parseAddress(owner, {
             config: config.predefined.AGGRON4,
           });
-          return await SporeService.shared.listByLock(lock, clusterId, options);
+          return await SporeService.shared.listByLock(
+            lock,
+            clusterIds,
+            options,
+          );
         }
-        return await SporeService.shared.list(
-          clusterId ? [clusterId] : [],
-          options,
-        );
+        return await SporeService.shared.list(clusterIds, options);
       };
 
       const { items: spores } = await getSpores();
@@ -53,7 +54,6 @@ export const sporeRouter = router({
     .input(
       z
         .object({
-          clusterId: z.string().optional(),
           cursor: z.number().optional(),
           limit: z.number().optional(),
           owner: z.string().optional(),
@@ -62,13 +62,7 @@ export const sporeRouter = router({
         .optional(),
     )
     .query(async ({ input }) => {
-      const {
-        clusterId,
-        owner,
-        cursor = 0,
-        limit = 10,
-        contentTypes,
-      } = input ?? {};
+      const { owner, cursor = 0, limit = 10, contentTypes } = input ?? {};
       const options = { skip: cursor, limit, contentTypes };
 
       const getSpores = async () => {
@@ -76,12 +70,9 @@ export const sporeRouter = router({
           const lock = helpers.parseAddress(owner, {
             config: config.predefined.AGGRON4,
           });
-          return await SporeService.shared.listByLock(lock, clusterId, options);
+          return await SporeService.shared.listByLock(lock, undefined, options);
         }
-        return await SporeService.shared.list(
-          clusterId ? [clusterId] : [],
-          options,
-        );
+        return await SporeService.shared.list(undefined, options);
       };
 
       const { items: spores, collected } = await getSpores();

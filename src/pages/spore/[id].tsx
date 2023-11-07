@@ -98,7 +98,7 @@ export default function SporePage() {
     { enabled: !!spore?.clusterId },
   );
   const { data: spores } = trpc.spore.list.useQuery(
-    { clusterId: spore?.clusterId ?? undefined },
+    { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
     { enabled: !!spore?.clusterId },
   );
 

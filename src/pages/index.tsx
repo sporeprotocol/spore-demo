@@ -91,6 +91,15 @@ export default function HomePage() {
 
   const { data: clusters = [], isLoading: isClusterLoading } =
     trpc.cluster.recent.useQuery({ limit: 4 });
+  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
+    trpc.spore.list.useQuery(
+      {
+        clusterIds: clusters.map((c) => c.id),
+      },
+      {
+        enabled: !isClusterLoading,
+      },
+    );
 
   const contentTypes = useMemo(() => {
     if (contentType === SporeContentType.Image) {
@@ -120,9 +129,7 @@ export default function HomePage() {
   );
 
   const spores = useMemo(
-    () =>
-      uniqBy(data?.pages.map(({ items }) => items).flat(), 'id') ??
-      [],
+    () => uniqBy(data?.pages.map(({ items }) => items).flat(), 'id') ?? [],
     [data],
   );
 
@@ -136,9 +143,7 @@ export default function HomePage() {
       );
     }
     if (contentType === SporeContentType.Text) {
-      return spores.filter((spore) =>
-        isTextMIMEType(spore.contentType as any),
-      );
+      return spores.filter((spore) => isTextMIMEType(spore.contentType as any));
     }
     return spores;
   }, [spores, contentType]);
@@ -215,8 +220,13 @@ export default function HomePage() {
                 </Link>
               </Flex>
             }
-            clusters={clusters}
-            isLoading={isClusterLoading}
+            clusters={clusters.map((cluster) => ({
+              ...cluster,
+              spores: clusterSpores.filter(
+                (spore) => spore.clusterId === cluster.id,
+              ),
+            }))}
+            isLoading={isClusterLoading || isClusterSporesLoading}
             disablePlaceholder
           />
         </Container>
@@ -225,7 +235,9 @@ export default function HomePage() {
         <SporeGrid
           title="Explore All Spores"
           spores={filteredSpores}
-          cluster={(id) => filteredSpores.find((s) => s.clusterId === id)?.cluster ?? undefined}
+          cluster={(id) =>
+            filteredSpores.find((s) => s.clusterId === id)?.cluster ?? undefined
+          }
           filter={
             <Group mt="16px">
               {[

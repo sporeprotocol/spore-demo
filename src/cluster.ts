@@ -140,23 +140,13 @@ export default class ClusterService {
     const recentSpores = await SporeService.shared.recent(limit, true);
     const clusterIds = recentSpores.map((spore) => spore.clusterId) as string[];
 
-    const getClusters = Promise.all(
+    const clusters = await Promise.all(
       clusterIds.map(async (id) => {
         const cluster = this.get(id!);
         return cluster;
       }),
     );
-    const getSpores = SporeService.shared.list(clusterIds);
-    const [clusters, spores] = await Promise.all([getClusters, getSpores]);
 
-    return clusters.map((cluster) => {
-      const clusterSpores = spores.items.filter(
-        (spore) => spore.clusterId === cluster!.id,
-      );
-      return {
-        ...cluster,
-        spores: clusterSpores,
-      } as Cluster;
-    });
+    return clusters as Cluster[];
   }
 }
