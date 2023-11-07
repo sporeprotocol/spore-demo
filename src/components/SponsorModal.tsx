@@ -135,11 +135,22 @@ export default function SponsorModal(props: TransferModalProps) {
             data-autofocus
             disabled={loading}
             precision={0}
+            formatter={(val) => {
+              const num = parseInt(val);
+              if (isNaN(num)) {
+                return '0';
+              }
+              return num.toString();
+            }}
+            parser={(val) => {
+              return Math.max(parseInt(val), 0).toString();
+            }}
             rightSection={
               <Group spacing="0px" w="40px" h="100%">
                 <Stack
                   h="100%"
                   justify="center"
+                  sx={{ cursor: 'pointer' }}
                   onClick={() =>
                     form.setValues({
                       amount: Math.max(form.values.amount - 1, 0),
@@ -156,6 +167,7 @@ export default function SponsorModal(props: TransferModalProps) {
                 <Stack
                   h="100%"
                   justify="center"
+                  sx={{ cursor: 'pointer' }}
                   onClick={() =>
                     form.setValues({ amount: form.values.amount + 1 })
                   }
@@ -186,25 +198,29 @@ export default function SponsorModal(props: TransferModalProps) {
             {getFriendlyErrorMessage(error.message)}
           </Text>
         )}
-        {form.values.amount > 0 && (
-          <Stack spacing="0px" mt="24px">
-            <Text color="text.0" weight="bold">
-              {type === 'spore'
-                ? "Spore's on-chain size"
-                : "Cluster's on-chain size"}
-            </Text>
-            <Group spacing="4px" align="center">
-              <Text color="text.0">{size} CKB</Text>
-              <Image
-                src="/svg/icon-arrow-right.svg"
-                alt="arrow-right"
-                width="18"
-                height="18"
-              />
-              <Text color="brand.1">{size + form.values.amount} CKB</Text>
-            </Group>
-          </Stack>
-        )}
+        <Stack spacing="0px" mt="24px">
+          <Text color="text.0" weight="bold">
+            {type === 'spore'
+              ? "Spore's on-chain size"
+              : "Cluster's on-chain size"}
+          </Text>
+          <Group spacing="4px" align="center">
+            <Text color="text.0">{size.toLocaleString('en-US')} CKB</Text>
+            {form.values.amount > 0 && (
+              <>
+                <Image
+                  src="/svg/icon-arrow-right.svg"
+                  alt="arrow-right"
+                  width="18"
+                  height="18"
+                />
+                <Text color="brand.1" weight="bold">
+                  {(size + form.values.amount).toLocaleString('en-US')} CKB
+                </Text>
+              </>
+            )}
+          </Group>
+        </Stack>
 
         <Group position="right" mt={'32px'}>
           <Button

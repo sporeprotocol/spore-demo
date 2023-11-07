@@ -25,7 +25,10 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
-  const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+  const { refetch } = trpc.cluster.get.useQuery(
+    { id: cluster?.id },
+    { enabled: false },
+  );
 
   const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
     { id: cluster?.id },
@@ -65,7 +68,9 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
         capacityMargin: newCapacity.toHexString(),
         useCapacityMarginAsFee: false,
       });
-      showSuccess('Cluster Transferred!');
+      showSuccess(
+        `${amount.toLocaleString('en-US')} CKB sponsored to Cluster!`,
+      );
       modals.close(modalId);
     },
     [address, cluster, sponsorClusterMutation, modalId, capacityMargin, lock],

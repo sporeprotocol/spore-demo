@@ -61,6 +61,10 @@ const useStyles = createStyles((theme) => ({
       backgroundColor: '#7F6BD1',
     },
   },
+  radio: {
+    fontSize: '16px',
+    color: theme.colors.text[0],
+  },
 }));
 
 export default function TransferModal(props: TransferModalProps) {
@@ -79,13 +83,6 @@ export default function TransferModal(props: TransferModalProps) {
       useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
     },
   });
-
-  useEffect(() => {
-    form.setValues({
-      ...form.values,
-      useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
-    });
-  }, [capacityMargin]);
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
@@ -141,7 +138,7 @@ export default function TransferModal(props: TransferModalProps) {
             {capacityMargin.toNumber() === 0 ? (
               <Popover
                 label={
-                  <Text>
+                  <Text sx={{ lineHeight: 1.4 }}>
                     <Text
                       inline
                     >{`This ${type} has exhausted its Zero-Fee Transfer capacity or hasn't enabled this feature.`}</Text>
@@ -161,12 +158,17 @@ export default function TransferModal(props: TransferModalProps) {
             ) : (
               <Radio
                 value="1"
+                classNames={{ label: classes.radio }}
                 label="Zero-Fee Transfer"
                 disabled={BI.from(capacityMargin).toNumber() === 0}
               />
             )}
 
-            <Radio value="0" label="Pay from my wallet" />
+            <Radio
+              value="0"
+              classNames={{ label: classes.radio }}
+              label="Pay from my wallet"
+            />
           </Stack>
         </Radio.Group>
         {error && (

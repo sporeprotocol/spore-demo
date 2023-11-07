@@ -325,7 +325,7 @@ export default function SporePage() {
                       display: 'inline',
                     }}
                   >
-                    {amount} CKB
+                    {amount.toLocaleString('en-US')} CKB
                   </Title>
                 </Popover>
               )}

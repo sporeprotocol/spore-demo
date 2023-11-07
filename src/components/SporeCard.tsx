@@ -116,6 +116,8 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
   const destroySporeModal = useDestroySporeModal(spore);
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
+  const amount = BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8;
+
   return (
     <Box
       sx={{ overflow: 'visible', position: 'relative' }}
@@ -141,8 +143,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
               </Title>
               <Flex>
                 <Text size="md" color="white">
-                  {BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8}{' '}
-                  CKB
+                  {amount.toLocaleString('en-US')} CKB
                 </Text>
               </Flex>
             </Flex>

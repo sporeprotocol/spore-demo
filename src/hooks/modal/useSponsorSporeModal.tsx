@@ -67,7 +67,7 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
         capacityMargin: newCapacity.toHexString(),
         useCapacityMarginAsFee: false,
       });
-      showSuccess(`${amount} CKB sponsored to Spore!`);
+      showSuccess(`${amount.toLocaleString('en-US')} CKB sponsored to Spore!`);
       modals.close(modalId);
     },
     [address, spore, sponsorSporeMutation, modalId, lock, capacityMargin],

@@ -318,7 +318,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
             Balance:
           </Text>
           <Text color="text.0" weight="700">
-            {balance} CKB
+            {balance.toLocaleString('en-US')} CKB
           </Text>
         </Flex>
       </Flex>
@@ -368,7 +368,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                   {content.name}
                 </Text>
                 <Text size="sm" color="text.1">
-                  {content.size} CKB
+                  {content.size.toLocaleString('en-US')} CKB
                 </Text>
               </Stack>
             </Group>
@@ -445,7 +445,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                 Estimated On-chain Size:
               </Text>
               <Text weight="bold" color="text.0" mr="5px">
-                ≈ {onChainSize} CKB
+                ≈ {onChainSize.toLocaleString('en-US')} CKB
               </Text>
               <Popover label="By creating a spore, you are reserving this amount of CKB for on-chain storage. You can always destroy spores to redeem your reserved CKB.">
                 <Image
@@ -464,7 +464,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                   Remaining Balance:
                 </Text>
                 <Text weight="bold" color="text.0" mr="5px">
-                  ≈ {balance - onChainSize} CKB
+                  ≈ {(balance - onChainSize).toLocaleString('en-US')} CKB
                 </Text>
               </Flex>
             </Flex>
@@ -480,10 +480,14 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         <Group position="apart" mt="32px">
           <Group spacing="xs">
             <Checkbox
+              id="zero-fee"
+              sx={{ cursor: 'pointer' }}
               checked={useCapacityMargin}
               onChange={(e) => setUseCapacityMargin(e.target.checked)}
             />
-            <Text>Enable Zero-Fee Transfers</Text>
+            <label style={{ cursor: 'pointer' }} htmlFor="zero-fee">
+              Enable Zero-Fee Transfers
+            </label>
             <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
               <Image
                 src="/svg/icon-info.svg"
