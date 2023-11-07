@@ -143,7 +143,15 @@ export default function SponsorModal(props: TransferModalProps) {
               return num.toString();
             }}
             parser={(val) => {
-              return Math.max(parseInt(val), 0).toString();
+              const num = parseInt(val);
+              setError(null);
+              if (isNaN(num)) {
+                return '0';
+              }
+              if (num < 0) {
+                setError(new Error('Please enter a positive number'));
+              }
+              return Math.max(num, 0).toString();
             }}
             rightSection={
               <Group spacing="0px" w="40px" h="100%">
