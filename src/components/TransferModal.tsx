@@ -138,14 +138,15 @@ export default function TransferModal(props: TransferModalProps) {
             {capacityMargin.toNumber() === 0 ? (
               <Popover
                 label={
-                  <Text sx={{ lineHeight: 1.4 }}>
+                  <Text>
                     <Text
                       inline
+                      sx={{ lineHeight: 1.4 }}
                     >{`This ${type} has exhausted its Zero-Fee Transfer capacity or hasn't enabled this feature.`}</Text>
                     <Text
                       inline
                       color="brand.1"
-                      sx={{ cursor: 'pointer', pointerEvents: 'all' }}
+                      sx={{ cursor: 'pointer', pointerEvents: 'all', lineHeight: 1.4 }}
                       onClick={onSponsor}
                     >
                       Sponsor future transfers
