@@ -20,7 +20,7 @@ import { IconCopy } from '@tabler/icons-react';
 import { useConnect } from '@/hooks/useConnect';
 import Skeleton from 'react-loading-skeleton';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
-import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
+import useMeltSporeModal from '@/hooks/modal/useMeltSporeModal';
 import { useMemo } from 'react';
 import Head from 'next/head';
 import { useClipboard, useMediaQuery } from '@mantine/hooks';
@@ -103,7 +103,7 @@ export default function SporePage() {
   );
 
   const transferSpore = useTransferSporeModal(spore);
-  const destroySpore = useDestroySporeModal(spore);
+  const meltSpore = useMeltSporeModal(spore);
   const sponsorSpore = useSponsorSporeModal(spore);
 
   const amount = spore
@@ -285,14 +285,14 @@ export default function SporePage() {
                           />
                         </Box>
                       </Tooltip>
-                      <Tooltip label={'Destroy'} withArrow>
+                      <Tooltip label={'Melt'} withArrow>
                         <Box
                           sx={{ cursor: 'pointer' }}
-                          onClick={destroySpore.open}
+                          onClick={meltSpore.open}
                         >
                           <Image
                             src="/svg/icon-trash-2.svg"
-                            alt="Destroy"
+                            alt="Melt"
                             width="24px"
                             height="24px"
                           />

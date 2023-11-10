@@ -19,7 +19,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import DropMenu from './DropMenu';
 import useTransferSporeModal from '@/hooks/modal/useTransferSporeModal';
-import useDestroySporeModal from '@/hooks/modal/useDestroySporeModal';
+import useMeltSporeModal from '@/hooks/modal/useMeltSporeModal';
 import { useConnect } from '@/hooks/useConnect';
 import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
@@ -113,7 +113,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
   );
 
   const transferSporeModal = useTransferSporeModal(spore);
-  const destroySporeModal = useDestroySporeModal(spore);
+  const meltSporeModal = useMeltSporeModal(spore);
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
   const amount = BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8;
@@ -198,7 +198,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
                 },
                 {
                   type: 'item',
-                  key: 'destroy-spore',
+                  key: 'melt-spore',
                   title: (
                     <Flex align="center">
                       <Image
@@ -208,12 +208,12 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
                         alt="transfer"
                         mr="8px"
                       />
-                      <Text>Destroy</Text>
+                      <Text>Melt</Text>
                     </Flex>
                   ),
                   onClick: (e) => {
                     e.preventDefault();
-                    destroySporeModal.open();
+                    meltSporeModal.open();
                   },
                 },
               ]}

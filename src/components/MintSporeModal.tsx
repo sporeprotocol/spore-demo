@@ -447,7 +447,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               <Text weight="bold" color="text.0" mr="5px">
                 ≈ {onChainSize.toLocaleString('en-US')} CKB
               </Text>
-              <Popover label="By creating a spore, you are reserving this amount of CKB for on-chain storage. You can always destroy spores to redeem your reserved CKB.">
+              <Popover label="By creating a spore, you are reserving this amount of CKB for on-chain storage. You can always melt spores to redeem your reserved CKB.">
                 <Image
                   src="/svg/icon-info.svg"
                   alt="info"

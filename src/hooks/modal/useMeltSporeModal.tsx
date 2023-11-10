@@ -1,6 +1,6 @@
 import {
   predefinedSporeConfigs,
-  destroySpore as _destroySpore,
+  meltSpore as _meltSpore,
 } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
@@ -8,13 +8,13 @@ import { modals } from '@mantine/modals';
 import { useRouter } from 'next/router';
 import { useConnect } from '../useConnect';
 import { Spore } from '@/spore';
-import DestroySporeModal from '@/components/DestroySporeModal';
+import MeltSporeModal from '@/components/MeltSporeModal';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from 'react-query';
 import { trpc } from '@/server';
 import { showSuccess } from '@/utils/notifications';
 
-export default function useDestroySporeModal(spore: Spore | undefined) {
+export default function useMeltSporeModal(spore: Spore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
@@ -25,9 +25,9 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
     { enabled: false },
   );
 
-  const destroySpore = useCallback(
-    async (...args: Parameters<typeof _destroySpore>) => {
-      const { txSkeleton } = await _destroySpore(...args);
+  const meltSpore = useCallback(
+    async (...args: Parameters<typeof _meltSpore>) => {
+      const { txSkeleton } = await _meltSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
       const hash = await sendTransaction(signedTx);
       return hash;
@@ -35,7 +35,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
     [signTransaction],
   );
 
-  const destroySporeMutation = useMutation(destroySpore, {
+  const meltSporeMutation = useMutation(meltSpore, {
     onSuccess: () => {
       refetch();
     },
@@ -45,29 +45,29 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
     if (!address || !spore) {
       return;
     }
-    await destroySporeMutation.mutateAsync({
+    await meltSporeMutation.mutateAsync({
       outPoint: spore.cell.outPoint!,
       fromInfos: [address],
       config: predefinedSporeConfigs.Aggron4,
     });
-    showSuccess('Spore destroyed!')
+    showSuccess('Spore melted!')
     modals.close(modalId);
     if (router.pathname.startsWith('/spore')) {
       router.back();
     }
-  }, [address, spore, destroySporeMutation, router, modalId]);
+  }, [address, spore, meltSporeMutation, router, modalId]);
 
   useEffect(() => {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Destroy spore?',
+        title: 'Melt spore?',
         onClose: close,
-        closeOnEscape: !destroySporeMutation.isLoading,
-        withCloseButton: !destroySporeMutation.isLoading,
-        closeOnClickOutside: !destroySporeMutation.isLoading,
+        closeOnEscape: !meltSporeMutation.isLoading,
+        withCloseButton: !meltSporeMutation.isLoading,
+        closeOnClickOutside: !meltSporeMutation.isLoading,
         children: (
-          <DestroySporeModal
+          <MeltSporeModal
             spore={spore}
             onSubmit={handleSubmit}
             onClose={() => modals.close(modalId)}
@@ -79,7 +79,7 @@ export default function useDestroySporeModal(spore: Spore | undefined) {
     }
   }, [
     modalId,
-    destroySporeMutation.isLoading,
+    meltSporeMutation.isLoading,
     handleSubmit,
     opened,
     close,
