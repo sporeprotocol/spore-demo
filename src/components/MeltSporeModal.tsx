@@ -14,7 +14,7 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
 
-export interface DestroySporeModalProps {
+export interface MeltSporeModalProps {
   spore: Spore | undefined;
   onSubmit: () => Promise<void>;
   onClose: () => void;
@@ -31,7 +31,7 @@ const useStyles = createStyles((theme) => ({
     color: `${theme.colors.brand[1]} !important`,
   },
 
-  destroy: {
+  melt: {
     backgroundColor: theme.colors.functional[0],
     '&:hover': {
       backgroundColor: theme.fn.lighten(theme.colors.functional[0], 0.1),
@@ -39,7 +39,7 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export default function DestroySporeModal(props: DestroySporeModalProps) {
+export default function MeltSporeModal(props: MeltSporeModalProps) {
   const { spore, onSubmit, onClose } = props;
   const { classes } = useStyles();
   const theme = useMantineTheme();
@@ -66,7 +66,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
   return (
     <Box>
       <Text color="text.0" mb="32px">
-        After destroying this spore, you will be able to get ~{amount} CKB back
+        After melt this spore, you will be able to get ~{amount} CKB back
         in your wallet. This action cannot be undone.
       </Text>
 
@@ -87,7 +87,7 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
               Cancel
             </Button>
             <Button
-              className={classes.destroy}
+              className={classes.melt}
               onClick={handleSubmit}
               loading={loading}
             >
@@ -97,12 +97,12 @@ export default function DestroySporeModal(props: DestroySporeModalProps) {
         ) : (
           <Stack w="100%">
             <Button
-              className={classes.destroy}
+              className={classes.melt}
               onClick={handleSubmit}
               loading={loading}
               fullWidth
             >
-              Destroy
+              Melt
             </Button>
             <Button
               classNames={{ root: classes.cancel, label: classes.label }}

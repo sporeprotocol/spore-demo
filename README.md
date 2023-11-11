@@ -3,7 +3,7 @@
 ![](https://github.com/ahonn/spore-demo/assets/9718515/b478387b-3dfa-49e5-89db-509467962744)
 
 A Spore Protocol Demo based on Next.js + React + [Spore SDK](https://github.com/sporeprotocol/spore-sdk), which implements basic functionalities such as
-the creation and transfer of clusters, as well as minting, transferring, and destroying of spores.
+the creation and transfer of clusters, as well as minting, transferring, and melting of spores.
 
 ## Technology Stack
 

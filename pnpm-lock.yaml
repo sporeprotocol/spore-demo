@@ -60,8 +60,8 @@ dependencies:
     specifier: ^6.0.21
     version: 6.0.21(@mantine/core@6.0.21)(@mantine/hooks@6.0.21)(react-dom@18.2.0)(react@18.2.0)
   '@spore-sdk/core':
-    specifier: 0.1.0-beta.12
-    version: 0.1.0-beta.12
+    specifier: 0.1.0-beta.14
+    version: 0.1.0-beta.14
   '@tabler/icons-react':
     specifier: ^2.40.0
     version: 2.40.0(react@18.2.0)
@@ -1252,8 +1252,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@spore-sdk/core@0.1.0-beta.12:
-    resolution: {integrity: sha512-Sn/arRIzPgaxSCjfa6tmKZr0K08q5dEqr2okeJCtZgHEwQtyE9ItgNQv1k+C/dpKNuaU3hTQkN5hVMRIgC8/gw==}
+  /@spore-sdk/core@0.1.0-beta.14:
+    resolution: {integrity: sha512-pwD20Ft134aTUzJ3xZDEGtSNqJfuO5CoUGKqIbd/o+oQp1a7UpwdNKiqYxUKUBWEBF/JyBPPD2qvoBID/PycRw==}
     dependencies:
       '@ckb-lumos/base': 0.21.0-next.1
       '@ckb-lumos/bi': 0.21.0-next.1
