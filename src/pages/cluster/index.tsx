@@ -17,6 +17,8 @@ import { useMemo, useState } from 'react';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '@/hooks/useConnect';
 import groupBy from 'lodash-es/groupBy';
+import { createServerSideHelpers } from '@trpc/react-query/server';
+import { appRouter } from '@/server/routers';
 
 const useStyles = createStyles(
   (theme, params: { showMintableOnly: boolean }) => ({
@@ -59,6 +61,24 @@ const useStyles = createStyles(
     },
   }),
 );
+
+export async function getStaticProps() {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {},
+  });
+  await Promise.all([
+    helpers.cluster.list.prefetch(),
+    helpers.spore.list.prefetch(),
+  ]);
+
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+    },
+    revalidate: 1,
+  };
+}
 
 export default function ClustersPage() {
   const { lock } = useConnect();
