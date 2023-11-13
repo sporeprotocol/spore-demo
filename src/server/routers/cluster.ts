@@ -29,12 +29,11 @@ export const clusterRouter = router({
         .object({
           owner: z.string().optional(),
           withPublic: z.boolean().optional(),
-          withSpores: z.boolean().optional(),
         })
         .optional(),
     )
     .query(async ({ input }) => {
-      const { owner, withPublic = false, withSpores = false } = input ?? {};
+      const { owner, withPublic = false } = input ?? {};
       if (!owner) {
         const { items: clusters } = await ClusterService.shared.list();
         return clusters;
@@ -49,22 +48,7 @@ export const clusterRouter = router({
       }
       const [{ items: ownedClusters = [] }, { items: acpClusters = [] }] =
         await Promise.all(querys);
-      const clusters = await Promise.all(
-        [...ownedClusters, ...acpClusters].map(async (cluster) => {
-          if (!withSpores) {
-            return cluster;
-          }
-          const { items: spores } = await SporeService.shared.list(cluster.id ? [cluster.id] : [], {
-            limit: 4,
-          });
-          return {
-            ...cluster,
-            spores,
-          };
-        }),
-      );
-
-      return clusters;
+      return [...ownedClusters, ...acpClusters];
     }),
   infiniteList: publicProcedure
     .input(
