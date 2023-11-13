@@ -101,10 +101,16 @@ export default function MySpacePage() {
     trpc.cluster.list.useQuery({
       owner: address,
       withPublic: true,
-      withSpores: true,
     });
-
-  const isLoading = isSporesLoading || isClusterLoading;
+  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
+    trpc.spore.list.useQuery(
+      {
+        clusterIds: ownedClusters.map((c) => c.id),
+      },
+      {
+        enabled: !isClusterLoading,
+      },
+    );
 
   const balance = useMemo(() => {
     if (!capacity) return 0;
@@ -234,9 +240,18 @@ export default function MySpacePage() {
           />
         ) : (
           <ClusterGrid
-            title={isLoading ? '' : `${ownedClusters.length} Clusters`}
-            clusters={ownedClusters}
-            isLoading={isLoading}
+            title={
+              isClusterLoading || isClusterSporesLoading
+                ? ''
+                : `${ownedClusters.length} Clusters`
+            }
+            clusters={ownedClusters.map((cluster) => ({
+              ...cluster,
+              spores: clusterSpores.filter(
+                (spore) => spore.clusterId === cluster.id,
+              ),
+            }))}
+            isLoading={isClusterLoading || isClusterSporesLoading}
           />
         )}
       </Container>

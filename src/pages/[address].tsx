@@ -96,10 +96,17 @@ export default function AccountPage() {
     trpc.cluster.list.useQuery({
       owner: address as string,
       withPublic: true,
-      withSpores: true,
     });
 
-  const isLoading = isSporesLoading || isClusterLoading;
+  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
+    trpc.spore.list.useQuery(
+      {
+        clusterIds: clusters.map((c) => c.id),
+      },
+      {
+        enabled: !isClusterLoading,
+      },
+    );
 
   if (!address) {
     return null;
@@ -205,9 +212,18 @@ export default function AccountPage() {
           />
         ) : (
           <ClusterGrid
-            title={isLoading ? '' : `${clusters.length} Clusters`}
-            clusters={clusters}
-            isLoading={isLoading}
+            title={
+              isClusterLoading || isClusterSporesLoading
+                ? ''
+                : `${clusters.length} Clusters`
+            }
+            clusters={clusters.map((cluster) => ({
+              ...cluster,
+              spores: clusterSpores.filter(
+                (spore) => spore.clusterId === cluster.id,
+              ),
+            }))}
+            isLoading={isClusterLoading || isClusterSporesLoading}
           />
         )}
       </Container>
