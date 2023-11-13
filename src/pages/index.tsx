@@ -89,7 +89,12 @@ export async function getStaticProps() {
     router: appRouter,
     ctx: {},
   });
-  await helpers.cluster.recent.prefetch({ limit: 4 });
+  await Promise.all([
+    helpers.cluster.recent.prefetch({ limit: 4 }),
+    helpers.spore.infiniteList.prefetch({
+      limit: 12,
+    }),
+  ]);
 
   return {
     props: {
