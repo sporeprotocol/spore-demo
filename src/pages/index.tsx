@@ -1,4 +1,5 @@
 import Layout from '@/components/Layout';
+import { createServerSideHelpers } from '@trpc/react-query/server';
 import { trpc } from '@/server';
 import {
   Text,
@@ -22,6 +23,7 @@ import { useMediaQuery } from '@mantine/hooks';
 import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { TEXT_MIME_TYPE, isImageMIMEType, isTextMIMEType } from '@/utils/mime';
 import { uniqBy } from 'lodash-es';
+import { appRouter } from '@/server/routers';
 
 enum SporeContentType {
   All = 'All',
@@ -81,6 +83,21 @@ const useStyles = createStyles((theme) => ({
     },
   },
 }));
+
+export async function getStaticProps() {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {},
+  });
+  await helpers.cluster.recent.prefetch({ limit: 4 });
+
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+    },
+    revalidate: 1,
+  };
+}
 
 export default function HomePage() {
   const { classes, cx } = useStyles();
