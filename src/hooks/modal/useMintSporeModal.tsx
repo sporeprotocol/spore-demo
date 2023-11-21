@@ -4,10 +4,9 @@ import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '../useConnect';
-import { trpc } from '@/server';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
@@ -22,15 +21,17 @@ export default function useMintSporeModal(id?: string) {
   const router = useRouter();
   const modalId = useId();
 
-  const { data: clusters = [] } = trpc.cluster.list.useQuery();
-  const { refetch } = trpc.spore.list.useQuery(
-    {
-      clusterIds: id ? [id] : undefined,
-    },
-    {
-      enabled: false,
-    },
-  );
+  // FIXME
+  const clusters = [];
+  // const { data: clusters = [] } = trpc.cluster.list.useQuery();
+  // const { refetch } = trpc.spore.list.useQuery(
+  //   {
+  //     clusterIds: id ? [id] : undefined,
+  //   },
+  //   {
+  //     enabled: false,
+  //   },
+  // );
 
   const selectableClusters = useMemo(() => {
     return clusters.filter(({ cell }) => {
@@ -53,9 +54,11 @@ export default function useMintSporeModal(id?: string) {
     [signTransaction],
   );
 
-  const addSporeMutation = useMutation(addSpore, {
+  const addSporeMutation = useMutation({
+    mutationFn: addSpore, 
     onSuccess: () => {
-      refetch();
+      // FIXME
+      // refetch();
     },
   });
 

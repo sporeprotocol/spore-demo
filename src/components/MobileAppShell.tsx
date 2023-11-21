@@ -26,7 +26,6 @@ import { MOBILE_NAVS } from '@/constants';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useClipboard, useDisclosure } from '@mantine/hooks';
-import { trpc } from '@/server';
 import { BI } from '@ckb-lumos/lumos';
 import Image from 'next/image';
 import { showSuccess } from '@/utils/notifications';
@@ -149,10 +148,8 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
   const [drawerOpened, drawer] = useDisclosure(false);
   const { connect, connected, address, connector, disconnect } = useConnect();
 
-  const { data: capacity = 0 } = trpc.accout.balance.useQuery(
-    { address },
-    { enabled: !!address },
-  );
+  // FIXME
+  const capacity = 0;
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 

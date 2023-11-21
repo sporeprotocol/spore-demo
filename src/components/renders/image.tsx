@@ -37,7 +37,7 @@ export function ImageSporeCoverRender(props: ImageSporeRenderProps) {
     <AspectRatio ratio={ratio} bg="#F4F5F9">
       <Image
         alt={spore.id}
-        src={`/api/v1/media/${spore.id}`}
+        src={`/api/media/${spore.id}`}
         classNames={{
           image: classes.image,
           figure: classes.figure,

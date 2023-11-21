@@ -1,5 +1,4 @@
 import { Cluster } from '@/cluster';
-import { trpc } from '@/server';
 import { Spore } from '@/spore';
 import { IMAGE_MIME_TYPE } from '@/utils/mime';
 import { useMantineTheme } from '@mantine/core';
@@ -41,6 +40,10 @@ export function GlobalOpenGraph() {
 export function ClusterOpenGraph(props: { id: string }) {
   const { id } = props;
 
+  if (!id) {
+    return null;
+  }
+
   return (
     <NextSeo
       title={`Cluster: ${id.slice(0, 10)}...${id.slice(-10)} | Spore Demo`}
@@ -51,27 +54,29 @@ export function ClusterOpenGraph(props: { id: string }) {
 
 export function SporeOpenGraph(props: { id: string }) {
   const { id } = props;
-  const { data: spore } = trpc.spore.get.useQuery({ id });
+  // FIXME
+  return null;
+  // const { data: spore } = trpc.spore.get.useQuery({ id });
 
-  return (
-    <NextSeo
-      title={`Spore: ${id.slice(0, 10)}...${id.slice(-10)} | Spore Demo`}
-      description={id}
-      openGraph={{
-        images: [
-          ...(IMAGE_MIME_TYPE.includes(spore?.contentType ?? '' as any)
-            ? [
-                {
-                  url: `/api/v1/media/${id}`,
-                  width: 400,
-                  height: 400,
-                  alt: id,
-                  type: spore?.contentType,
-                },
-              ]
-            : []),
-        ],
-      }}
-    />
-  );
+  // return (
+  //   <NextSeo
+  //     title={`Spore: ${id.slice(0, 10)}...${id.slice(-10)} | Spore Demo`}
+  //     description={id}
+  //     openGraph={{
+  //       images: [
+  //         ...(IMAGE_MIME_TYPE.includes(spore?.contentType ?? ('' as any))
+  //           ? [
+  //               {
+  //                 url: `/api/media/${id}`,
+  //                 width: 400,
+  //                 height: 400,
+  //                 alt: id,
+  //                 type: spore?.contentType,
+  //               },
+  //             ]
+  //           : []),
+  //       ],
+  //     }}
+  //   />
+  // );
 }

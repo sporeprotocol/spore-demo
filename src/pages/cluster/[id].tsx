@@ -4,7 +4,6 @@ import SporeGrid from '@/components/SporeGrid';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
-import { trpc } from '@/server';
 import { isAnyoneCanPay } from '@/utils/script';
 import { config, helpers } from '@ckb-lumos/lumos';
 import {
@@ -28,103 +27,12 @@ import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { ClusterOpenGraph } from '@/components/OpenGraph';
-import { GetStaticPaths, GetStaticPropsContext } from 'next';
-import ClusterService from '@/cluster';
 import { showSuccess } from '@/utils/notifications';
 import DropMenu from '@/components/DropMenu';
 import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
-
-export async function getStaticProps(
-  context: GetStaticPropsContext<{ id: string }>,
-) {
-  const id = context.params?.id as string;
-  return {
-    props: {
-      id,
-    },
-  };
-}
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { items: clusters } = await ClusterService.shared.list();
-  return {
-    paths: clusters.map((cluster) => ({
-      params: {
-        id: cluster.id,
-      },
-    })),
-    fallback: 'blocking',
-  };
-};
-
-const useStyles = createStyles((theme) => ({
-  header: {
-    height: '280px',
-    overflow: 'hidden',
-    borderBottomWidth: '2px',
-    borderBottomColor: theme.colors.text[0],
-    borderBottomStyle: 'solid',
-    backgroundImage: 'url(/images/noise-on-yellow.png)',
-
-    [theme.fn.largerThan('sm')]: {
-      paddingLeft: '40px',
-      paddingRight: '40px',
-    },
-
-    [theme.fn.smallerThan('sm')]: {
-      minHeight: '452px',
-    },
-  },
-  name: {
-    textOverflow: 'ellipsis',
-    maxWidth: '574px',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-
-    [theme.fn.smallerThan('sm')]: {
-      maxWidth: '99vw',
-    },
-  },
-  description: {
-    textOverflow: 'ellipsis',
-    maxWidth: '953px ',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-  },
-  button: {
-    color: theme.colors.text[0],
-    backgroundColor: theme.colors.brand[0],
-    borderWidth: '2px',
-    borderColor: theme.colors.text[0],
-    borderStyle: 'solid',
-    boxShadow: 'none !important',
-
-    [theme.fn.smallerThan('sm')]: {
-      flexGrow: 1,
-    },
-
-    '&:hover': {
-      backgroundColor: theme.colors.text[0],
-      color: theme.white,
-    },
-  },
-  more: {
-    color: theme.colors.text[0],
-    backgroundColor: theme.colors.brand[0],
-    borderWidth: '2px',
-    borderColor: theme.colors.text[0],
-    borderStyle: 'solid',
-    boxShadow: 'none !important',
-    minWidth: '48px !important',
-    width: '48px',
-    padding: '0px !important',
-
-    '&:hover': {
-      backgroundColor: theme.colors.text[0],
-      color: theme.white,
-      fill: theme.white,
-    },
-  },
-}));
+import { useStyles } from './[id].style';
+import { useClusterQuery } from '@/hooks/query/useClusterQuery';
+import { Cluster, Spore } from 'spore-graphql';
 
 export default function ClusterPage() {
   const { classes } = useStyles();
@@ -135,15 +43,25 @@ export default function ClusterPage() {
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
-  const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
-  const { data: spores } = trpc.spore.list.useQuery({ clusterIds: [id as string] });
+  const { data: clusterData, isLoading } = useClusterQuery(id as string);
+  const cluster = useMemo(
+    () => (clusterData?.cluster as Cluster) || undefined,
+    [clusterData],
+  );
+  const spores = useMemo(() => {
+    // @ts-ignore
+    const spores = cluster?.spores?.filter<Spore>((s) => s !== null) || [];
+    return spores;
+  }, [cluster]);
 
   const mintSporeModal = useMintSporeModal(id as string);
-  const transferClusterModal = useTransferClusterModal(cluster);
-  const sponsorClusterModal = useSponsorClusterModal(cluster);
+  const transferClusterModal = useTransferClusterModal(cluster as Cluster);
+  const sponsorClusterModal = useSponsorClusterModal(cluster as Cluster);
 
   const owner = useMemo(() => {
-    if (!cluster) return '';
+    if (!cluster || !cluster.cell) {
+      return '';
+    }
     const address = helpers.encodeToAddress(cluster.cell.cellOutput.lock, {
       config: config.predefined.AGGRON4,
     });
@@ -151,10 +69,10 @@ export default function ClusterPage() {
   }, [cluster]);
 
   const isPublic = useMemo(() => {
-    if (!cluster) {
+    if (!cluster || !cluster.cell) {
       return false;
     }
-    return isAnyoneCanPay(cluster?.cell.cellOutput.lock);
+    return isAnyoneCanPay(cluster.cell.cellOutput.lock);
   }, [cluster]);
 
   const isOwned = useMemo(() => {
@@ -171,9 +89,6 @@ export default function ClusterPage() {
       return true;
     }
   }, [address, owner, getAnyoneCanPayLock, connected]);
-
-  const isSporesLoading = !spores;
-  const isLoading = !cluster;
 
   const header = isLoading ? (
     <Flex align="center" className={classes.header}>
@@ -342,11 +257,7 @@ export default function ClusterPage() {
           </Grid.Col>
           <Grid.Col span={isMobile ? 12 : 4}>
             <Flex direction="column">
-              <Flex
-                direction="row"
-                justify="end"
-                gap="md"
-              >
+              <Flex direction="row" justify="end" gap="md">
                 {(isPublic || isOwned) && (
                   <Button
                     className={classes.button}
@@ -418,10 +329,9 @@ export default function ClusterPage() {
       <ClusterOpenGraph id={id as string} />
       <Container py="48px" size="xl">
         <SporeGrid
-          title={isSporesLoading ? '' : `${spores.length} Spores`}
-          spores={spores ?? []}
-          cluster={cluster}
-          isLoading={isSporesLoading}
+          title={isLoading ? '' : `${spores.length ?? '0'} Spores`}
+          spores={spores.map((spore) => ({ ...spore, cluster }))}
+          isLoading={isLoading}
         />
       </Container>
     </Layout>

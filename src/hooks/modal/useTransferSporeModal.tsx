@@ -5,31 +5,34 @@ import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
-import { Spore } from '@/spore';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
+import { useMutation } from '@tanstack/react-query';
+// import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
 import useSponsorSporeModal from './useSponsorSporeModal';
 import { useSetAtom } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
+import { Spore } from 'spore-graphql';
 
 export default function useTransferSporeModal(spore: Spore | undefined) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-  const { refetch } = trpc.spore.get.useQuery(
-    { id: spore?.id },
-    { enabled: false },
-  );
 
-  const { data: capacityMargin, refetch: refetchCapacityMargin } =
-    trpc.spore.getCapacityMargin.useQuery(
-      { id: spore?.id },
-      { enabled: !!spore && opened },
-    );
+  // FIXME
+  const capacityMargin = 0;
+  // const { refetch } = trpc.spore.get.useQuery(
+  //   { id: spore?.id },
+  //   { enabled: false },
+  // );
+
+  // const { data: capacityMargin, refetch: refetchCapacityMargin } =
+  //   trpc.spore.getCapacityMargin.useQuery(
+  //     { id: spore?.id },
+  //     { enabled: !!spore && opened },
+  //   );
 
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
@@ -43,11 +46,13 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
     [signTransaction],
   );
 
-  const transferSporeMutation = useMutation(transferSpore, {
-    onSuccess: () => refetch(),
+  const transferSporeMutation = useMutation({
+    mutationFn: transferSpore,
+    // FIXME
+    // onSuccess: () => refetch(),
   });
   const loading =
-    transferSporeMutation.isLoading && !transferSporeMutation.isError;
+    transferSporeMutation.isPending && !transferSporeMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
@@ -71,7 +76,8 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
 
   useEffect(() => {
     if (opened) {
-      refetchCapacityMargin();
+      // FIXME
+      // refetchCapacityMargin();
       modals.open({
         modalId,
         title: 'Transfer spore?',
@@ -105,7 +111,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
     sponsorSporeModal,
     setModalStack,
     open,
-    refetchCapacityMargin,
+    // refetchCapacityMargin,
   ]);
 
   return {

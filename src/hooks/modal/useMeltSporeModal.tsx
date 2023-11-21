@@ -7,12 +7,11 @@ import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useRouter } from 'next/router';
 import { useConnect } from '../useConnect';
-import { Spore } from '@/spore';
 import MeltSporeModal from '@/components/MeltSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
+import { Spore } from 'spore-graphql';
 
 export default function useMeltSporeModal(spore: Spore | undefined) {
   const modalId = useId();
@@ -20,10 +19,11 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
   const { address, signTransaction } = useConnect();
   const router = useRouter();
 
-  const { refetch } = trpc.spore.list.useQuery(
-    { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
-    { enabled: false },
-  );
+  // FIXME
+  // const { refetch } = trpc.spore.list.useQuery(
+  //   { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
+  //   { enabled: false },
+  // );
 
   const meltSpore = useCallback(
     async (...args: Parameters<typeof _meltSpore>) => {
@@ -35,9 +35,10 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
     [signTransaction],
   );
 
-  const meltSporeMutation = useMutation(meltSpore, {
+  const meltSporeMutation = useMutation({
+    mutationFn: meltSpore,
     onSuccess: () => {
-      refetch();
+      // refetch();
     },
   });
 
@@ -50,7 +51,7 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
       fromInfos: [address],
       config: predefinedSporeConfigs.Aggron4,
     });
-    showSuccess('Spore melted!')
+    showSuccess('Spore melted!');
     modals.close(modalId);
     if (router.pathname.startsWith('/spore')) {
       router.back();

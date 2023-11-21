@@ -1,5 +1,3 @@
-import { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -25,9 +23,9 @@ import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
 import SporeCoverRender from './SporeCoverRender';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
+import { Spore } from 'spore-graphql';
 
 export interface SporeCardProps {
-  cluster: Cluster | undefined;
   spore: Spore;
 }
 
@@ -102,7 +100,7 @@ export function SporeSkeletonCard() {
   );
 }
 
-export default function SporeCard({ cluster, spore }: SporeCardProps) {
+export default function SporeCard({ spore }: SporeCardProps) {
   const { classes } = useStyles();
   const [hovered, { close, open }] = useDisclosure(false);
   const { lock } = useConnect();
@@ -136,7 +134,7 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
           <Box p="24px">
             <Flex direction="column">
               <Text color="rgba(255, 255, 255, 0.8)" size="sm" mb="8px">
-                {cluster?.name ?? '<No Cluster>'}
+                {spore.cluster?.name ?? '<No Cluster>'}
               </Text>
               <Title color="white" order={5} mb="8px">
                 {`${spore.id.slice(0, 10)}...${spore.id.slice(-10)}`}

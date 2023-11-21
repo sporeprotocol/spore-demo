@@ -1,4 +1,3 @@
-import { Cluster } from '@/cluster';
 import {
   Text,
   Image,
@@ -23,6 +22,7 @@ import { useConnect } from '@/hooks/useConnect';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import SporeCoverRender from './SporeCoverRender';
 import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
+import { Cluster } from 'spore-graphql';
 
 export interface ClusterCardProps {
   cluster: Cluster;

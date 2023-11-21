@@ -1,4 +1,3 @@
-import { Cluster } from '@/cluster';
 import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import ClusterCard, { ClusterSkeletonCard } from './ClusterCard';
 import EmptyPlaceholder from './EmptyPlaceholder';
@@ -6,6 +5,7 @@ import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
+import { Cluster } from 'spore-graphql';
 
 export interface ClusterGridProps {
   title: string | JSX.Element;

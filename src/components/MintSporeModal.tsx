@@ -7,7 +7,6 @@ import {
   TEXT_MIME_TYPE,
   getMIMETypeByName,
 } from '@/utils/mime';
-import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError, showSuccess } from '@/utils/notifications';
 import { BI, config, helpers } from '@ckb-lumos/lumos';
@@ -204,7 +203,8 @@ export default function MintSporeModal(props: MintSporeModalProps) {
   );
   const { classes } = useStyles();
 
-  const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
+  // FIXME
+  const capacity = '0';
   const balance = useMemo(() => {
     if (!capacity) return 0;
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);

@@ -1,34 +1,32 @@
-import Image from 'next/image';
-import { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { BI } from '@ckb-lumos/lumos';
 import {
-  Text,
   Button,
   Group,
+  NumberInput,
   Stack,
+  Text,
   createStyles,
   useMantineTheme,
-  NumberInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
+import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
+import { Cluster, Spore } from 'spore-graphql';
 
-export type TransferModalProps =
+export type TransferModalProps = {
+  onSubmit: (values: { amount: number }) => Promise<void>;
+} & (
   | {
-      onSubmit: (values: { amount: number }) => Promise<void>;
-    } & (
-      | {
-          type: 'spore';
-          data: Spore;
-        }
-      | {
-          type: 'cluster';
-          data: Cluster;
-        }
-    );
+      type: 'spore';
+      data: Spore;
+    }
+  | {
+      type: 'cluster';
+      data: Cluster;
+    }
+);
 
 const useStyles = createStyles((theme) => ({
   root: {

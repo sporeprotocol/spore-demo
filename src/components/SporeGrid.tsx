@@ -1,26 +1,15 @@
-import { Spore } from '@/spore';
-import {
-  Box,
-  Flex,
-  SimpleGrid,
-  Title,
-  useMantineTheme,
-} from '@mantine/core';
+import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import SporeCard, { SporeSkeletonCard } from './SporeCard';
-import { Cluster } from '@/cluster';
 import EmptyPlaceholder from './EmptyPlaceholder';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useRouter } from 'next/router';
 import { useMediaQuery } from '@mantine/hooks';
 import { useMemo } from 'react';
+import { Spore } from 'spore-graphql';
 
 export interface SporeGridProps {
   title: string;
   spores: Spore[];
-  cluster:
-    | ((clusterId: string | null) => Cluster | undefined)
-    | Cluster
-    | undefined;
   isLoading: boolean;
   filter?: React.ReactNode;
   disablePlaceholder?: boolean;
@@ -97,11 +86,7 @@ export default function SporeGrid(props: SporeGridProps) {
           mt="24px"
         >
           {spores.map((spore) => {
-            const cluster =
-              typeof props.cluster === 'function'
-                ? props.cluster(spore.clusterId)
-                : props.cluster;
-            return <SporeCard key={spore.id} spore={spore} cluster={cluster} />;
+            return <SporeCard key={spore.id} spore={spore} />;
           })}
         </SimpleGrid>
       )}

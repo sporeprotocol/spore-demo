@@ -7,15 +7,14 @@ import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
-import { Cluster } from '@/cluster';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { modalStackAtom } from '@/state/modal';
 import { useAtomValue } from 'jotai';
 import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
+import { Cluster } from 'spore-graphql';
 
 export default function useSponsorClusterModal(cluster: Cluster | undefined) {
   const modalId = useId();
@@ -25,15 +24,17 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
-  const { refetch } = trpc.cluster.get.useQuery(
-    { id: cluster?.id },
-    { enabled: false },
-  );
+  // FIXME
+  const capacityMargin = 0;
+  // const { refetch } = trpc.cluster.get.useQuery(
+  //   { id: cluster?.id },
+  //   { enabled: false },
+  // );
 
-  const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
-    { id: cluster?.id },
-    { enabled: !!cluster && opened },
-  );
+  // const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
+  //   { id: cluster?.id },
+  //   { enabled: !!cluster && opened },
+  // );
 
   const sponsorCluster = useCallback(
     async (...args: Parameters<typeof _transferCluster>) => {
@@ -45,11 +46,13 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
     [signTransaction],
   );
 
-  const sponsorClusterMutation = useMutation(sponsorCluster, {
-    onSuccess: () => refetch(),
+  const sponsorClusterMutation = useMutation({
+    mutationFn: sponsorCluster,
+    // FIXME
+    // onSuccess: () => refetch(),
   });
   const loading =
-    sponsorClusterMutation.isLoading && !sponsorClusterMutation.isError;
+    sponsorClusterMutation.isPending && !sponsorClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { amount: number }) => {
@@ -61,7 +64,7 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
         BI.from(amount).mul(100_000_000),
       );
       await sponsorClusterMutation.mutateAsync({
-        outPoint: cluster.cell.outPoint!,
+        outPoint: cluster.cell?.outPoint!,
         fromInfos: [address],
         toLock: lock!,
         config: predefinedSporeConfigs.Aggron4,
@@ -93,9 +96,9 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
             minWidth: isMobile ? 'auto' : '560px',
           },
         },
-        closeOnEscape: !sponsorClusterMutation.isLoading,
-        withCloseButton: !sponsorClusterMutation.isLoading,
-        closeOnClickOutside: !sponsorClusterMutation.isLoading,
+        closeOnEscape: !sponsorClusterMutation.isPending,
+        withCloseButton: !sponsorClusterMutation.isPending,
+        closeOnClickOutside: !sponsorClusterMutation.isPending,
         children: (
           <SponsorModal
             type="cluster"
@@ -109,7 +112,7 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
     }
   }, [
     cluster,
-    sponsorClusterMutation.isLoading,
+    sponsorClusterMutation.isPending,
     handleSubmit,
     opened,
     close,

@@ -5,7 +5,7 @@ import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
@@ -31,7 +31,7 @@ export default function useCreateClusterModal() {
     [signTransaction],
   );
 
-  const addClusterMutation = useMutation(addCluster);
+  const addClusterMutation = useMutation({ mutationFn: addCluster });
   const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(

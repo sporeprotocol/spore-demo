@@ -2,13 +2,12 @@ import type { AppProps } from 'next/app';
 import { Provider as JotaiProvider } from 'jotai';
 import { MantineProvider, createStyles } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ModalsProvider } from '@mantine/modals';
 import { useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
-import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
@@ -26,7 +25,7 @@ function StateProvider({
   return (
     <JotaiProvider store={store}>
       <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps.dehydratedState}>{children}</Hydrate>
+        {children}
       </QueryClientProvider>
     </JotaiProvider>
   );
@@ -123,4 +122,4 @@ function App({ Component, pageProps }: AppProps) {
   );
 }
 
-export default trpc.withTRPC(App);
+export default App;

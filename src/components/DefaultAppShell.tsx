@@ -23,7 +23,6 @@ import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import DropMenu, { DropMenuProps } from './DropMenu';
 import { IconCopy, IconPlus } from '@tabler/icons-react';
 import { NAVS } from '@/constants';
-import { trpc } from '@/server';
 import { BI } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
 import { showSuccess } from '@/utils/notifications';
@@ -110,10 +109,8 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     });
   }, [address]);
 
-  const { data: capacity = 0 } = trpc.accout.balance.useQuery(
-    { address },
-    { enabled: !!address },
-  );
+  // FIXME
+  const capacity = 0;
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 

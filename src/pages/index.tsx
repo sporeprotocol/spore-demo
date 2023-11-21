@@ -1,107 +1,32 @@
+import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import { trpc } from '@/server';
+import SporeGrid from '@/components/SporeGrid';
+import { useInfiniteSporesQuery } from '@/hooks/query/useInfiniteSporesQuery';
+import { useTopClustersQuery } from '@/hooks/query/useTopClustersQuery';
+import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
 import {
-  Text,
   Box,
+  Button,
   Container,
   Flex,
-  Title,
-  Image,
-  createStyles,
-  MediaQuery,
-  useMantineTheme,
   Group,
-  Button,
+  Image,
   Loader,
+  MediaQuery,
+  Text,
+  Title,
+  useMantineTheme,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import SporeGrid from '@/components/SporeGrid';
-import ClusterGrid from '@/components/ClusterGrid';
-import { useMediaQuery } from '@mantine/hooks';
-import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { TEXT_MIME_TYPE, isImageMIMEType, isTextMIMEType } from '@/utils/mime';
-import { uniqBy } from 'lodash-es';
-import { appRouter } from '@/server/routers';
+import { Cluster, Spore } from 'spore-graphql';
+import { useStyles } from './index.style';
 
 enum SporeContentType {
   All = 'All',
   Image = 'Image',
   Text = 'Text',
-}
-
-const useStyles = createStyles((theme) => ({
-  banner: {
-    minHeight: '280px',
-    overflowY: 'hidden',
-    borderBottomWidth: '2px',
-    borderBottomColor: theme.colors.text[0],
-    borderBottomStyle: 'solid',
-    backgroundImage: 'url(/images/noise-on-yellow.png)',
-
-    [theme.fn.smallerThan('sm')]: {
-      minHeight: '232px',
-    },
-  },
-  container: {
-    position: 'relative',
-  },
-  illus: {
-    position: 'absolute',
-    left: '-387px',
-    top: '-25px',
-  },
-  type: {
-    height: '32px',
-    border: '1px solid #CDCFD5',
-    backgroundColor: '#FFF',
-    borderRadius: '20px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    cursor: 'pointer',
-
-    '&:hover': {
-      backgroundColor: 'rgba(26, 32, 44, 0.08)',
-    },
-  },
-  active: {
-    backgroundColor: theme.colors.brand[1],
-    color: '#FFF',
-  },
-  more: {
-    color: theme.colors.brand[1],
-    backgroundColor: 'transparent',
-    borderWidth: '2px',
-    borderColor: theme.colors.brand[1],
-    borderStyle: 'solid',
-    boxShadow: 'none !important',
-
-    '&:hover': {
-      backgroundColor: theme.colors.brand[1],
-      color: theme.white,
-    },
-  },
-}));
-
-export async function getStaticProps() {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-  });
-  await Promise.all([
-    helpers.cluster.recent.prefetch({ limit: 4 }),
-    helpers.spore.infiniteList.prefetch({
-      limit: 12,
-    }),
-  ]);
-
-  return {
-    props: {
-      trpcState: helpers.dehydrate(),
-    },
-    revalidate: 1,
-  };
 }
 
 export default function HomePage() {
@@ -111,49 +36,47 @@ export default function HomePage() {
   const [contentType, setContentType] = useState(SporeContentType.All);
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { data: clusters = [], isLoading: isClusterLoading } =
-    trpc.cluster.recent.useQuery({ limit: 4 });
-  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
-    trpc.spore.list.useQuery(
-      {
-        clusterIds: clusters.map((c) => c.id),
-      },
-      {
-        enabled: !isClusterLoading,
-      },
-    );
-
-  const contentTypes = useMemo(() => {
-    if (contentType === SporeContentType.Image) {
-      return IMAGE_MIME_TYPE;
-    }
-    if (contentType === SporeContentType.Text) {
-      return TEXT_MIME_TYPE;
-    }
-    return undefined;
-  }, [contentType]);
-
+  const { data: topClustersData, isLoading: isTopClustersLoading } =
+    useTopClustersQuery();
   const {
-    data,
-    isLoading: isSporesLoading,
-    isFetchingNextPage,
+    data: sporesData,
     hasNextPage,
+    isFetchingNextPage,
+    isFetching,
     fetchNextPage,
-  } = trpc.spore.infiniteList.useInfiniteQuery(
-    {
-      limit: 12,
-      contentTypes,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      initialCursor: 0,
-    },
-  );
+  } = useInfiniteSporesQuery();
 
-  const spores = useMemo(
-    () => uniqBy(data?.pages.map(({ items }) => items).flat(), 'id') ?? [],
-    [data],
-  );
+  useEffect(() => {
+    if (isFetchingNextPage || !hasNextPage) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        fetchNextPage();
+      }
+    });
+    if (loadMoreButtonRef.current) {
+      observer.observe(loadMoreButtonRef.current);
+    }
+    return () => observer.disconnect();
+  }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
+
+  const topClusters = useMemo(() => {
+    if (!topClustersData) {
+      return [] as Cluster[];
+    }
+    const { topClusters } = topClustersData;
+    return (topClusters?.filter((c) => !!c) ?? []) as Cluster[];
+  }, [topClustersData]);
+
+  const spores = useMemo(() => {
+    if (!sporesData) {
+      return [] as Spore[];
+    }
+    const { pages } = sporesData;
+    const spores = pages?.flatMap(
+      (page) => page?.spores?.filter((s) => s !== null) ?? [],
+    );
+    return (spores ?? []) as Spore[];
+  }, [sporesData]);
 
   const filteredSpores = useMemo(() => {
     if (contentType === SporeContentType.All) {
@@ -169,19 +92,6 @@ export default function HomePage() {
     }
     return spores;
   }, [spores, contentType]);
-
-  useEffect(() => {
-    if (isFetchingNextPage || !hasNextPage) return;
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        fetchNextPage();
-      }
-    });
-    if (loadMoreButtonRef.current) {
-      observer.observe(loadMoreButtonRef.current);
-    }
-    return () => observer.disconnect();
-  }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -242,13 +152,8 @@ export default function HomePage() {
                 </Link>
               </Flex>
             }
-            clusters={clusters.map((cluster) => ({
-              ...cluster,
-              spores: clusterSpores.filter(
-                (spore) => spore.clusterId === cluster.id,
-              ),
-            }))}
-            isLoading={isClusterLoading || isClusterSporesLoading}
+            clusters={topClusters}
+            isLoading={isTopClustersLoading}
             disablePlaceholder
           />
         </Container>
@@ -257,9 +162,6 @@ export default function HomePage() {
         <SporeGrid
           title="Explore All Spores"
           spores={filteredSpores}
-          cluster={(id) =>
-            filteredSpores.find((s) => s.clusterId === id)?.cluster ?? undefined
-          }
           filter={
             <Group mt="16px">
               {[
@@ -282,7 +184,7 @@ export default function HomePage() {
               })}
             </Group>
           }
-          isLoading={isSporesLoading}
+          isLoading={isFetching}
           disablePlaceholder
         />
         <Group position="center" mt="48px">

@@ -40,7 +40,7 @@ export function TextSporeCoverRender(props: TextSporeRenderProps) {
   const { classes } = useStyles(props);
 
   useEffect(() => {
-    fetch(`/api/v1/media/${spore.id}`).then(async (res) => {
+    fetch(`/api/media/${spore.id}`).then(async (res) => {
       const text = await res.text();
       setText(text);
     });
@@ -66,7 +66,7 @@ export function TextSporeContentRender(props: TextSporeRenderProps) {
   const [reactContent, setMarkdownSource] = useRemark();
 
   useEffect(() => {
-    fetch(`/api/v1/media/${spore.id}`).then(async (res) => {
+    fetch(`/api/media/${spore.id}`).then(async (res) => {
       const text = await res.text();
       setMarkdownSource(text);
     });
