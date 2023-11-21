@@ -1,4 +1,4 @@
-import { Cluster } from '@/cluster';
+import { Cluster } from 'spore-graphql';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
@@ -252,7 +252,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   const selectableClusters = useMemo(() => {
     const ownerClusters = clusters.filter((cluster) => {
-      if (!address) {
+      if (!address || !cluster?.cell) {
         return false;
       }
 
@@ -271,7 +271,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     });
 
     const publicClusters = clusters.filter((cluster) => {
-      const lock = cluster.cell.cellOutput.lock;
+      const lock = cluster.cell?.cellOutput.lock;
       return (
         isAnyoneCanPay(lock) && !ownerClusters.some((c) => c.id === cluster.id)
       );
@@ -279,13 +279,13 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
     return [
       ...ownerClusters.map(({ id, name }) => ({
-        value: id,
-        label: name,
+        value: id!,
+        label: name!,
         group: 'My Clusters',
       })),
       ...publicClusters.map(({ id, name }) => ({
-        value: id,
-        label: name,
+        value: id!,
+        label: name!,
         group: 'All Public Clusters',
       })),
     ];

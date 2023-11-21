@@ -106,7 +106,7 @@ export default function SponsorModal(props: TransferModalProps) {
     if (!data) {
       return 0;
     }
-    const capacity = BI.from(data.cell.cellOutput.capacity).toNumber();
+    const capacity = BI.from(data?.cell?.cellOutput.capacity ?? 0).toNumber();
     return Math.floor(capacity / 100_000_000);
   }, [data]);
 

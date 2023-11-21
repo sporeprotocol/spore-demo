@@ -1,7 +1,7 @@
 import { ImageSporeCoverRender } from './renders/image';
-import { Spore } from '@/spore';
 import { TextSporeCoverRender } from './renders/text';
 import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
+import { Spore } from 'spore-graphql';
 
 export interface SporeRenderProps {
   spore: Spore;
@@ -9,7 +9,11 @@ export interface SporeRenderProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export default function SporeCoverRender({ spore, ratio, size }: SporeRenderProps) {
+export default function SporeCoverRender({
+  spore,
+  ratio,
+  size,
+}: SporeRenderProps) {
   if (isImageMIMEType(spore.contentType)) {
     return <ImageSporeCoverRender spore={spore} ratio={ratio} />;
   }

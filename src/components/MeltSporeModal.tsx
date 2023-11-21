@@ -1,4 +1,3 @@
-import { Spore } from '@/spore';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { BI } from '@ckb-lumos/lumos';
 import {
@@ -13,6 +12,7 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
+import { Spore } from 'spore-graphql';
 
 export interface MeltSporeModalProps {
   spore: Spore | undefined;
@@ -48,7 +48,7 @@ export default function MeltSporeModal(props: MeltSporeModalProps) {
   const [error, setError] = useState<Error | null>(null);
 
   const amount = Math.ceil(
-    BI.from(spore?.cell.cellOutput.capacity ?? 0).toNumber() / 10 ** 8,
+    BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8,
   );
 
   const handleSubmit = useCallback(async () => {
@@ -66,8 +66,8 @@ export default function MeltSporeModal(props: MeltSporeModalProps) {
   return (
     <Box>
       <Text color="text.0" mb="32px">
-        After melt this spore, you will be able to get ~{amount} CKB back
-        in your wallet. This action cannot be undone.
+        After melt this spore, you will be able to get ~{amount} CKB back in
+        your wallet. This action cannot be undone.
       </Text>
 
       {error && (

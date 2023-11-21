@@ -18,17 +18,26 @@ export function getMIMETypeByName(name: string) {
   return '';
 }
 
-export function isSupportedMIMEType(contentType: string) {
+export function isSupportedMIMEType(contentType: string | undefined | null) {
+  if (!contentType) {
+    return false;
+  }
   const { type, subtype } = decodeContentType(contentType);
   return SUPPORTED_MIME_TYPE.includes(`${type}/${subtype}`);
 }
 
-export function isImageMIMEType(contentType: string) {
+export function isImageMIMEType(contentType: string | undefined | null) {
+  if (!contentType) {
+    return false;
+  }
   const { type, subtype } = decodeContentType(contentType);
   return IMAGE_MIME_TYPE.includes(`${type}/${subtype}` as any);
 }
 
-export function isTextMIMEType(contentType: string) {
+export function isTextMIMEType(contentType: string | undefined | null) {
+  if (!contentType) {
+    return false;
+  }
   const { type, subtype } = decodeContentType(contentType);
   return TEXT_MIME_TYPE.includes(`${type}/${subtype}`);
 }

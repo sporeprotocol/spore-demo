@@ -22,7 +22,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
   const { address, signTransaction } = useConnect();
 
   // FIXME
-  const capacityMargin = 0;
+  const capacityMargin = '0';
   // const { refetch } = trpc.spore.get.useQuery(
   //   { id: spore?.id },
   //   { enabled: false },
@@ -56,7 +56,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
-      if (!address || !values.to || !spore) {
+      if (!address || !values.to || !spore?.cell) {
         return;
       }
       await transferSporeMutation.mutateAsync({
@@ -82,9 +82,9 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         modalId,
         title: 'Transfer spore?',
         onClose: close,
-        closeOnEscape: !transferSporeMutation.isLoading,
-        withCloseButton: !transferSporeMutation.isLoading,
-        closeOnClickOutside: !transferSporeMutation.isLoading,
+        closeOnEscape: !transferSporeMutation.isPending,
+        withCloseButton: !transferSporeMutation.isPending,
+        closeOnClickOutside: !transferSporeMutation.isPending,
         children: (
           <TransferModal
             type="spore"
@@ -102,7 +102,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       modals.close(modalId);
     }
   }, [
-    transferSporeMutation.isLoading,
+    transferSporeMutation.isPending,
     handleSubmit,
     opened,
     close,

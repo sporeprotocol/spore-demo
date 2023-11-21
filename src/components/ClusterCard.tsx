@@ -1,28 +1,29 @@
+import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
+import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
+import { useConnect } from '@/hooks/useConnect';
+import { isSameScript } from '@/utils/script';
 import {
-  Text,
-  Image,
-  Card,
   AspectRatio,
-  SimpleGrid,
-  Flex,
-  createStyles,
   Box,
-  useMantineTheme,
+  Card,
+  Flex,
+  Image,
+  SimpleGrid,
+  Text,
   Title,
+  createStyles,
+  useMantineTheme,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { IconDotsVertical } from '@tabler/icons-react';
 import Link from 'next/link';
+import { useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import DropMenu from './DropMenu';
-import { useDisclosure } from '@mantine/hooks';
-import { useMemo } from 'react';
-import { isSameScript } from '@/utils/script';
-import { useConnect } from '@/hooks/useConnect';
-import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
-import SporeCoverRender from './SporeCoverRender';
-import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
 import { Cluster } from 'spore-graphql';
+import DropMenu from './DropMenu';
+import SporeCoverRender from './SporeCoverRender';
+import { Spore } from 'spore-graphql';
 
 export interface ClusterCardProps {
   cluster: Cluster;
@@ -112,14 +113,14 @@ export function ClusterSkeletonCard() {
 
 export default function ClusterCard({ cluster }: ClusterCardProps) {
   const { classes } = useStyles();
-  const spores = cluster.spores ?? [];
+  const spores = (cluster.spores ?? []) as Spore[];
   const theme = useMantineTheme();
   const cols = spores.length >= 4 ? 2 : 1;
   const { lock } = useConnect();
   const [hovered, { close, open }] = useDisclosure(false);
 
   const isOwner = useMemo(
-    () => isSameScript(lock, cluster.cell.cellOutput.lock),
+    () => isSameScript(lock, cluster.cell?.cellOutput.lock),
     [cluster, lock],
   );
 

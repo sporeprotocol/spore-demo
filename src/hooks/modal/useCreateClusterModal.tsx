@@ -32,7 +32,7 @@ export default function useCreateClusterModal() {
   );
 
   const addClusterMutation = useMutation({ mutationFn: addCluster });
-  const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
+  const loading = addClusterMutation.isPending && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (
@@ -75,9 +75,9 @@ export default function useCreateClusterModal() {
             minWidth: isMobile ? 'auto' : '500px',
           },
         },
-        closeOnEscape: !addClusterMutation.isLoading,
-        closeOnClickOutside: !addClusterMutation.isLoading,
-        withCloseButton: !addClusterMutation.isLoading,
+        closeOnEscape: !addClusterMutation.isPending,
+        closeOnClickOutside: !addClusterMutation.isPending,
+        withCloseButton: !addClusterMutation.isPending,
         children: <CreateClusterModal onSubmit={handleSubmit} />,
       });
     } else {
@@ -85,7 +85,7 @@ export default function useCreateClusterModal() {
     }
   }, [
     modalId,
-    addClusterMutation.isLoading,
+    addClusterMutation.isPending,
     handleSubmit,
     opened,
     close,

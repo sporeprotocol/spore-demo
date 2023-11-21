@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
 import { BI } from '@ckb-lumos/lumos';
+import { Cluster } from 'spore-graphql';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -22,7 +23,7 @@ export default function useMintSporeModal(id?: string) {
   const modalId = useId();
 
   // FIXME
-  const clusters = [];
+  const clusters: Cluster[] = [];
   // const { data: clusters = [] } = trpc.cluster.list.useQuery();
   // const { refetch } = trpc.spore.list.useQuery(
   //   {
@@ -36,8 +37,8 @@ export default function useMintSporeModal(id?: string) {
   const selectableClusters = useMemo(() => {
     return clusters.filter(({ cell }) => {
       return (
-        isSameScript(cell.cellOutput.lock, lock) ||
-        isAnyoneCanPay(cell.cellOutput.lock)
+        isSameScript(cell?.cellOutput.lock, lock) ||
+        isAnyoneCanPay(cell?.cellOutput.lock)
       );
     });
   }, [clusters, lock]);
@@ -55,7 +56,7 @@ export default function useMintSporeModal(id?: string) {
   );
 
   const addSporeMutation = useMutation({
-    mutationFn: addSpore, 
+    mutationFn: addSpore,
     onSuccess: () => {
       // FIXME
       // refetch();
@@ -106,12 +107,12 @@ export default function useMintSporeModal(id?: string) {
             minHeight: isMobile ? 'auto' : '525px',
           },
         },
-        closeOnEscape: !addSporeMutation.isLoading,
-        withCloseButton: !addSporeMutation.isLoading,
-        closeOnClickOutside: !addSporeMutation.isLoading,
+        closeOnEscape: !addSporeMutation.isPending,
+        withCloseButton: !addSporeMutation.isPending,
+        closeOnClickOutside: !addSporeMutation.isPending,
         children: (
           <MintSporeModal
-            defaultClusterId={id}
+            defaultClusterId={id!}
             clusters={selectableClusters}
             onSubmit={handleSubmit}
           />
@@ -123,7 +124,7 @@ export default function useMintSporeModal(id?: string) {
   }, [
     isMobile,
     modalId,
-    addSporeMutation.isLoading,
+    addSporeMutation.isPending,
     selectableClusters,
     handleSubmit,
     opened,

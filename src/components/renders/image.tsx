@@ -1,4 +1,3 @@
-import { Spore } from '@/spore';
 import { BI } from '@ckb-lumos/lumos';
 import {
   AspectRatio,
@@ -9,6 +8,7 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useEffect, useMemo, useState } from 'react';
+import { Spore } from 'spore-graphql';
 
 export interface ImageSporeRenderProps {
   spore: Spore;
@@ -28,15 +28,19 @@ const useStyles = createStyles((_, params?: { pixelated: boolean }) => ({
 export function ImageSporeCoverRender(props: ImageSporeRenderProps) {
   const { spore, ratio = 1 } = props;
   const capacity = useMemo(
-    () => BI.from(spore.cell.cellOutput.capacity ?? 0).toNumber(),
+    () => BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber(),
     [spore],
   );
   const { classes } = useStyles({ pixelated: capacity < 10_000 * 10 ** 8 });
 
+  if (!spore) {
+    return null;
+  }
+
   return (
     <AspectRatio ratio={ratio} bg="#F4F5F9">
       <Image
-        alt={spore.id}
+        alt={spore.id!}
         src={`/api/media/${spore.id}`}
         classNames={{
           image: classes.image,

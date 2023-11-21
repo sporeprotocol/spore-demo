@@ -51,11 +51,11 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
     // onSuccess: () => refetch(),
   });
   const loading =
-    sponsorSporeMutation.isLoading && !sponsorSporeMutation.isError;
+    sponsorSporeMutation.isPending && !sponsorSporeMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { amount: number }) => {
-      if (!address || !values.amount || !spore) {
+      if (!address || !values.amount || !spore?.cell) {
         return;
       }
       const { amount } = values;
@@ -64,7 +64,7 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
       );
 
       await sponsorSporeMutation.mutateAsync({
-        outPoint: spore.cell.outPoint!,
+        outPoint: spore.cell!.outPoint!,
         fromInfos: [address],
         toLock: lock!,
         config: predefinedSporeConfigs.Aggron4,
@@ -94,9 +94,9 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
             minWidth: isMobile ? 'auto' : '560px',
           },
         },
-        closeOnEscape: !sponsorSporeMutation.isLoading,
-        withCloseButton: !sponsorSporeMutation.isLoading,
-        closeOnClickOutside: !sponsorSporeMutation.isLoading,
+        closeOnEscape: !sponsorSporeMutation.isPending,
+        withCloseButton: !sponsorSporeMutation.isPending,
+        closeOnClickOutside: !sponsorSporeMutation.isPending,
         children: (
           <SponsorModal type="spore" data={spore!} onSubmit={handleSubmit} />
         ),
@@ -106,7 +106,7 @@ export default function useSponsorSporeModal(spore: Spore | undefined) {
     }
   }, [
     isMobile,
-    sponsorSporeMutation.isLoading,
+    sponsorSporeMutation.isPending,
     handleSubmit,
     opened,
     close,

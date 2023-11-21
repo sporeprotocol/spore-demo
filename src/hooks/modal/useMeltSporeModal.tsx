@@ -47,7 +47,7 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
       return;
     }
     await meltSporeMutation.mutateAsync({
-      outPoint: spore.cell.outPoint!,
+      outPoint: spore!.cell!.outPoint!,
       fromInfos: [address],
       config: predefinedSporeConfigs.Aggron4,
     });
@@ -64,9 +64,9 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
         modalId,
         title: 'Melt spore?',
         onClose: close,
-        closeOnEscape: !meltSporeMutation.isLoading,
-        withCloseButton: !meltSporeMutation.isLoading,
-        closeOnClickOutside: !meltSporeMutation.isLoading,
+        closeOnEscape: !meltSporeMutation.isPending,
+        withCloseButton: !meltSporeMutation.isPending,
+        closeOnClickOutside: !meltSporeMutation.isPending,
         children: (
           <MeltSporeModal
             spore={spore}
@@ -80,7 +80,7 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
     }
   }, [
     modalId,
-    meltSporeMutation.isLoading,
+    meltSporeMutation.isPending,
     handleSubmit,
     opened,
     close,
