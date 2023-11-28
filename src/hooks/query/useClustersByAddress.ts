@@ -3,20 +3,16 @@ import request from 'graphql-request';
 import { useQuery } from '@tanstack/react-query';
 import { QueryCluster } from './type';
 
-const topClustersQueryDocument = graphql(`
-  query GetTopClustersQuery($first: Int) {
-    topClusters(first: $first) {
+const clustersByAddressQueryDocument = graphql(`
+  query GetClustersByAddress($address: String) {
+    clusters(filter: { address: $address }) {
       id
       name
       description
       spores {
         id
+        clusterId
         contentType
-        cell {
-          cellOutput {
-            capacity
-          }
-        }
       }
       cell {
         cellOutput {
@@ -27,18 +23,23 @@ const topClustersQueryDocument = graphql(`
             hashType
           }
         }
+        outPoint {
+          txHash
+          index
+        }
       }
     }
   }
 `);
 
-export function useTopClustersQuery(limit = 4) {
+export function useClustersByAddressQuery(address: string) {
   const { data, isLoading } = useQuery({
-    queryKey: ['topClusters', limit],
+    queryKey: ['clustersByAddress', address],
     queryFn: async () =>
-      request('/api/graphql', topClustersQueryDocument, { first: limit }),
+      request('/api/graphql', clustersByAddressQueryDocument, { address }),
+    enabled: !!address,
   });
-  const clusters = (data?.topClusters as QueryCluster[]) ?? [];
+  const clusters: QueryCluster[] = data?.clusters ?? [];
   return {
     data: clusters,
     isLoading,

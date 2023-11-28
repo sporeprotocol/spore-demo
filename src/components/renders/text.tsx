@@ -1,3 +1,4 @@
+import { QuerySpore } from '@/hooks/query/type';
 import {
   AspectRatio,
   Box,
@@ -8,10 +9,9 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import { useEffect, useState } from 'react';
 import { useRemark } from 'react-remark';
-import { Spore } from 'spore-graphql';
 
 export interface TextSporeRenderProps {
-  spore: Spore;
+  spore: QuerySpore;
   ratio?: number;
   size?: 'sm' | 'md' | 'lg';
 }

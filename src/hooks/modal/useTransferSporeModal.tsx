@@ -7,32 +7,26 @@ import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from '@tanstack/react-query';
-// import { trpc } from '@/server';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
 import useSponsorSporeModal from './useSponsorSporeModal';
 import { useSetAtom } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
-import { Spore } from 'spore-graphql';
+import { QuerySpore } from '../query/type';
+import { useSporeQuery } from '../query/useSporeQuery';
 
-export default function useTransferSporeModal(spore: Spore | undefined) {
+export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
+  const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
 
   // FIXME
-  const capacityMargin = '0';
   // const { refetch } = trpc.spore.get.useQuery(
   //   { id: spore?.id },
   //   { enabled: false },
   // );
-
-  // const { data: capacityMargin, refetch: refetchCapacityMargin } =
-  //   trpc.spore.getCapacityMargin.useQuery(
-  //     { id: spore?.id },
-  //     { enabled: !!spore && opened },
-  //   );
 
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
@@ -88,7 +82,7 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
         children: (
           <TransferModal
             type="spore"
-            capacityMargin={capacityMargin}
+            capacityMargin={capacityMargin || undefined}
             onSubmit={handleSubmit}
             onSponsor={() => {
               close();
@@ -107,11 +101,11 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
     opened,
     close,
     modalId,
-    capacityMargin,
     sponsorSporeModal,
     setModalStack,
     open,
-    // refetchCapacityMargin,
+    spore,
+    capacityMargin,
   ]);
 
   return {

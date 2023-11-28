@@ -5,11 +5,11 @@ import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useRouter } from 'next/router';
 import { useMediaQuery } from '@mantine/hooks';
 import { useMemo } from 'react';
-import { Spore } from 'spore-graphql';
+import { QuerySpore } from '@/hooks/query/type';
 
 export interface SporeGridProps {
   title: string;
-  spores: Spore[];
+  spores: QuerySpore[];
   isLoading: boolean;
   filter?: React.ReactNode;
   disablePlaceholder?: boolean;

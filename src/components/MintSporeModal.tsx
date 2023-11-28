@@ -1,4 +1,3 @@
-import { Cluster } from 'spore-graphql';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
@@ -40,6 +39,8 @@ import {
 import PreviewRender from './PreviewRender';
 import { isAnyoneCanPay } from '@/utils/script';
 import Popover from './Popover';
+import { QueryCluster } from '@/hooks/query/type';
+import { useCapacity } from '@/hooks/query/useCapacity';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -48,7 +49,7 @@ const MAX_SIZE_LIMIT = parseInt(
 
 export interface MintSporeModalProps {
   defaultClusterId?: string;
-  clusters: Cluster[];
+  clusters: QueryCluster[];
   onSubmit: (
     content: Blob | null,
     clusterId: string | undefined,
@@ -202,9 +203,8 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     useCapacityMargin,
   );
   const { classes } = useStyles();
+  const { data: capacity = '0x0' } = useCapacity(address);
 
-  // FIXME
-  const capacity = '0';
   const balance = useMemo(() => {
     if (!capacity) return 0;
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);

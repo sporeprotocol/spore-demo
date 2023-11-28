@@ -5,11 +5,11 @@ import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
-import { Cluster } from 'spore-graphql';
+import { QueryCluster } from '@/hooks/query/type';
 
 export interface ClusterGridProps {
   title: string | JSX.Element;
-  clusters: Cluster[];
+  clusters: QueryCluster[];
   isLoading: boolean;
   disablePlaceholder?: boolean;
 }

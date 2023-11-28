@@ -20,13 +20,12 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { Cluster } from 'spore-graphql';
 import DropMenu from './DropMenu';
 import SporeCoverRender from './SporeCoverRender';
-import { Spore } from 'spore-graphql';
+import { QueryCluster } from '@/hooks/query/type';
 
 export interface ClusterCardProps {
-  cluster: Cluster;
+  cluster: QueryCluster;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -113,7 +112,7 @@ export function ClusterSkeletonCard() {
 
 export default function ClusterCard({ cluster }: ClusterCardProps) {
   const { classes } = useStyles();
-  const spores = (cluster.spores ?? []) as Spore[];
+  const spores = cluster.spores ?? [];
   const theme = useMantineTheme();
   const cols = spores.length >= 4 ? 2 : 1;
   const { lock } = useConnect();

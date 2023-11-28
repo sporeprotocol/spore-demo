@@ -1,3 +1,4 @@
+import { QuerySpore } from '@/hooks/query/type';
 import { BI } from '@ckb-lumos/lumos';
 import {
   AspectRatio,
@@ -8,10 +9,9 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useEffect, useMemo, useState } from 'react';
-import { Spore } from 'spore-graphql';
 
 export interface ImageSporeRenderProps {
-  spore: Spore;
+  spore: QuerySpore;
   ratio?: number;
   size?: 'sm' | 'md' | 'lg';
 }

@@ -14,26 +14,24 @@ import { modalStackAtom } from '@/state/modal';
 import { useAtomValue } from 'jotai';
 import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
-import { Cluster } from 'spore-graphql';
+import { QueryCluster } from '../query/type';
+import { useClusterQuery } from '../query/useClusterQuery';
 
-export default function useSponsorClusterModal(cluster: Cluster | undefined) {
+export default function useSponsorClusterModal(
+  cluster: QueryCluster | undefined,
+) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction, lock } = useConnect();
   const modalStack = useAtomValue(modalStackAtom);
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
 
   // FIXME
-  const capacityMargin = 0;
   // const { refetch } = trpc.cluster.get.useQuery(
   //   { id: cluster?.id },
   //   { enabled: false },
-  // );
-
-  // const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
-  //   { id: cluster?.id },
-  //   { enabled: !!cluster && opened },
   // );
 
   const sponsorCluster = useCallback(

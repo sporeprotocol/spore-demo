@@ -1,6 +1,7 @@
 import { graphql } from '@/gql';
 import request from 'graphql-request';
 import { useQuery } from '@tanstack/react-query';
+import {QuerySpore} from './type';
 
 const clusterSporesQueryDocument = graphql(`
   query GetClusterSporesQuery($clusterId: String) {
@@ -39,8 +40,9 @@ export function useClusterSporesQuery(id: string | undefined) {
     },
     enabled: !!id,
   });
+  const spores = data?.spores as QuerySpore[] ?? [];
   return {
-    data,
+    data: spores,
     isLoading,
   };
 }

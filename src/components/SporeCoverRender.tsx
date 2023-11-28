@@ -1,10 +1,10 @@
+import { QuerySpore } from '@/hooks/query/type';
 import { ImageSporeCoverRender } from './renders/image';
 import { TextSporeCoverRender } from './renders/text';
 import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
-import { Spore } from 'spore-graphql';
 
 export interface SporeRenderProps {
-  spore: Spore;
+  spore: QuerySpore;
   ratio?: number;
   size?: 'sm' | 'md' | 'lg';
 }

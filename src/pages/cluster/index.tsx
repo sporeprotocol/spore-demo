@@ -19,7 +19,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 // import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 // import { useConnect } from '@/hooks/useConnect';
 import { useInfiniteClustersQuery } from '@/hooks/query/useInfiniteClustersQuery';
-import { Cluster } from 'spore-graphql';
+import { QueryCluster } from '@/hooks/query/type';
 
 export const useStyles = createStyles(
   (theme, params: { showMintableOnly: boolean }) => ({
@@ -100,13 +100,11 @@ export default function ClustersPage() {
 
   const clusters = useMemo(() => {
     if (!data) {
-      return [] as Cluster[];
+      return [] as QueryCluster[];
     }
     const { pages } = data;
-    const clusters = pages?.flatMap(
-      (page) => page?.clusters?.filter((s) => s !== null) ?? [],
-    );
-    return (clusters ?? []) as Cluster[];
+    const clusters = pages?.flatMap((page) => page?.clusters ?? []);
+    return clusters as QueryCluster[];
   }, [data]);
 
   // FIXME

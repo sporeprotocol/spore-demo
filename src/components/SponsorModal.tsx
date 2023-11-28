@@ -1,3 +1,4 @@
+import { QueryCluster, QuerySpore } from '@/hooks/query/type';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { BI } from '@ckb-lumos/lumos';
 import {
@@ -13,18 +14,17 @@ import { useForm } from '@mantine/form';
 import { useFocusTrap, useMediaQuery } from '@mantine/hooks';
 import Image from 'next/image';
 import { useCallback, useMemo, useState } from 'react';
-import { Cluster, Spore } from 'spore-graphql';
 
 export type TransferModalProps = {
   onSubmit: (values: { amount: number }) => Promise<void>;
 } & (
   | {
       type: 'spore';
-      data: Spore;
+      data: QuerySpore;
     }
   | {
       type: 'cluster';
-      data: Cluster;
+      data: QueryCluster;
     }
 );
 

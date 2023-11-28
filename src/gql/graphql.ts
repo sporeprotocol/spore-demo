@@ -16,6 +16,11 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export enum CacheControlScope {
+  Private = 'PRIVATE',
+  Public = 'PUBLIC'
+}
+
 export type Cell = {
   __typename?: 'Cell';
   blockHash?: Maybe<Scalars['String']['output']>;
@@ -35,11 +40,21 @@ export type CellOutput = {
 
 export type Cluster = {
   __typename?: 'Cluster';
+  capacityMargin?: Maybe<Scalars['String']['output']>;
   cell?: Maybe<Cell>;
-  description?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['String']['output']>;
-  name?: Maybe<Scalars['String']['output']>;
-  spores?: Maybe<Array<Maybe<Spore>>>;
+  description: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  spores?: Maybe<Array<Spore>>;
+};
+
+
+export type ClusterSporesArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ClusterFilterInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum HashType {
@@ -58,11 +73,11 @@ export type Query = {
   __typename?: 'Query';
   cluster?: Maybe<Cluster>;
   clusterCount: Scalars['Int']['output'];
-  clusters?: Maybe<Array<Maybe<Cluster>>>;
+  clusters?: Maybe<Array<Cluster>>;
   spore?: Maybe<Spore>;
   sporeCount: Scalars['Int']['output'];
-  spores?: Maybe<Array<Maybe<Spore>>>;
-  topClusters?: Maybe<Array<Maybe<Cluster>>>;
+  spores?: Maybe<Array<Spore>>;
+  topClusters?: Maybe<Array<Cluster>>;
 };
 
 
@@ -73,6 +88,7 @@ export type QueryClusterArgs = {
 
 export type QueryClustersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
+  filter?: InputMaybe<ClusterFilterInput>;
   first?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<QueryOrder>;
 };
@@ -84,13 +100,13 @@ export type QuerySporeArgs = {
 
 
 export type QuerySporeCountArgs = {
-  filter?: InputMaybe<SporesFilterInput>;
+  filter?: InputMaybe<SporeFilterInput>;
 };
 
 
 export type QuerySporesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
-  filter?: InputMaybe<SporesFilterInput>;
+  filter?: InputMaybe<SporeFilterInput>;
   first?: InputMaybe<Scalars['Int']['input']>;
   order?: InputMaybe<QueryOrder>;
 };
@@ -114,15 +130,17 @@ export type Script = {
 
 export type Spore = {
   __typename?: 'Spore';
+  capacityMargin?: Maybe<Scalars['String']['output']>;
   cell?: Maybe<Cell>;
   cluster?: Maybe<Cluster>;
   clusterId?: Maybe<Scalars['String']['output']>;
-  content?: Maybe<Scalars['String']['output']>;
-  contentType?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['String']['output']>;
+  content: Scalars['String']['output'];
+  contentType: Scalars['String']['output'];
+  id: Scalars['String']['output'];
 };
 
-export type SporesFilterInput = {
+export type SporeFilterInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['String']['input']>;
   contentType?: InputMaybe<Scalars['String']['input']>;
 };
@@ -132,14 +150,21 @@ export type GetClusterQueryQueryVariables = Exact<{
 }>;
 
 
-export type GetClusterQueryQuery = { __typename?: 'Query', cluster?: { __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null, spores?: Array<{ __typename?: 'Spore', id?: string | null, contentType?: string | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string } } | null } | null> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null };
+export type GetClusterQueryQuery = { __typename?: 'Query', cluster?: { __typename?: 'Cluster', id: string, name: string, description: string, capacityMargin?: string | null, spores?: Array<{ __typename?: 'Spore', id: string, contentType: string, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null }> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null };
 
 export type GetClusterSporesQueryQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetClusterSporesQueryQuery = { __typename?: 'Query', spores?: Array<{ __typename?: 'Spore', id?: string | null, contentType?: string | null, cluster?: { __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null> | null };
+export type GetClusterSporesQueryQuery = { __typename?: 'Query', spores?: Array<{ __typename?: 'Spore', id: string, contentType: string, cluster?: { __typename?: 'Cluster', id: string, name: string, description: string } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null }> | null };
+
+export type GetClustersByAddressQueryVariables = Exact<{
+  address?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetClustersByAddressQuery = { __typename?: 'Query', clusters?: Array<{ __typename?: 'Cluster', id: string, name: string, description: string, spores?: Array<{ __typename?: 'Spore', id: string, clusterId?: string | null, contentType: string }> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } }, outPoint?: { __typename?: 'OutPoint', txHash: string, index: string } | null } | null }> | null };
 
 export type GetInfiniteClustersQueryQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -147,7 +172,7 @@ export type GetInfiniteClustersQueryQueryVariables = Exact<{
 }>;
 
 
-export type GetInfiniteClustersQueryQuery = { __typename?: 'Query', clusters?: Array<{ __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null, spores?: Array<{ __typename?: 'Spore', id?: string | null, contentType?: string | null, cluster?: { __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string } } | null } | null> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null> | null };
+export type GetInfiniteClustersQueryQuery = { __typename?: 'Query', clusters?: Array<{ __typename?: 'Cluster', id: string, name: string, description: string, spores?: Array<{ __typename?: 'Spore', id: string, contentType: string, cluster?: { __typename?: 'Cluster', id: string, name: string, description: string } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string } } | null }> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null }> | null };
 
 export type GetInfiniteSporesQueryQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -155,26 +180,43 @@ export type GetInfiniteSporesQueryQueryVariables = Exact<{
 }>;
 
 
-export type GetInfiniteSporesQueryQuery = { __typename?: 'Query', spores?: Array<{ __typename?: 'Spore', id?: string | null, contentType?: string | null, cluster?: { __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null> | null };
+export type GetInfiniteSporesQueryQuery = { __typename?: 'Query', spores?: Array<{ __typename?: 'Spore', id: string, contentType: string, cluster?: { __typename?: 'Cluster', id: string, name: string, description: string } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null }> | null };
 
 export type GetSporeQueryQueryVariables = Exact<{
   id: Scalars['String']['input'];
 }>;
 
 
-export type GetSporeQueryQuery = { __typename?: 'Query', spore?: { __typename?: 'Spore', id?: string | null, contentType?: string | null, cluster?: { __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null };
+export type GetSporeQueryQuery = { __typename?: 'Query', spore?: { __typename?: 'Spore', id: string, contentType: string, capacityMargin?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, description: string } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null };
+
+export type GetSporesByAddressQueryVariables = Exact<{
+  address?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetSporesByAddressQuery = { __typename?: 'Query', spores?: Array<{ __typename?: 'Spore', id: string, clusterId?: string | null, contentType: string, cluster?: { __typename?: 'Cluster', id: string, name: string, description: string } | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } }, outPoint?: { __typename?: 'OutPoint', txHash: string, index: string } | null } | null }> | null };
 
 export type GetTopClustersQueryQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
-export type GetTopClustersQueryQuery = { __typename?: 'Query', topClusters?: Array<{ __typename?: 'Cluster', id?: string | null, name?: string | null, description?: string | null, spores?: Array<{ __typename?: 'Spore', id?: string | null, contentType?: string | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string } } | null } | null> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null } | null> | null };
+export type GetTopClustersQueryQuery = { __typename?: 'Query', topClusters?: Array<{ __typename?: 'Cluster', id: string, name: string, description: string, spores?: Array<{ __typename?: 'Spore', id: string, contentType: string, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string } } | null }> | null, cell?: { __typename?: 'Cell', cellOutput: { __typename?: 'CellOutput', capacity: string, lock: { __typename?: 'Script', args: string, codeHash: string, hashType: HashType } } } | null }> | null };
+
+export type GetSporeContentQueryQueryVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
 
 
-export const GetClusterQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetClusterQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cluster"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"spores"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetClusterQueryQuery, GetClusterQueryQueryVariables>;
+export type GetSporeContentQueryQuery = { __typename?: 'Query', spore?: { __typename?: 'Spore', id: string, content: string, contentType: string } | null };
+
+
+export const GetClusterQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetClusterQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cluster"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"capacityMargin"}},{"kind":"Field","name":{"kind":"Name","value":"spores"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetClusterQueryQuery, GetClusterQueryQueryVariables>;
 export const GetClusterSporesQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetClusterSporesQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clusterId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"spores"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"clusterId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clusterId"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cluster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetClusterSporesQueryQuery, GetClusterSporesQueryQueryVariables>;
+export const GetClustersByAddressDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetClustersByAddress"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clusters"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"spores"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"clusterId"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"outPoint"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"txHash"}},{"kind":"Field","name":{"kind":"Name","value":"index"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetClustersByAddressQuery, GetClustersByAddressQueryVariables>;
 export const GetInfiniteClustersQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetInfiniteClustersQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"after"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"clusters"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"after"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"spores"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cluster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetInfiniteClustersQueryQuery, GetInfiniteClustersQueryQueryVariables>;
 export const GetInfiniteSporesQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetInfiniteSporesQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"after"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"spores"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}},{"kind":"Argument","name":{"kind":"Name","value":"after"},"value":{"kind":"Variable","name":{"kind":"Name","value":"after"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cluster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetInfiniteSporesQueryQuery, GetInfiniteSporesQueryQueryVariables>;
-export const GetSporeQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSporeQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"spore"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cluster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSporeQueryQuery, GetSporeQueryQueryVariables>;
+export const GetSporeQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSporeQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"spore"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"capacityMargin"}},{"kind":"Field","name":{"kind":"Name","value":"cluster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSporeQueryQuery, GetSporeQueryQueryVariables>;
+export const GetSporesByAddressDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSporesByAddress"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"address"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"spores"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filter"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"address"},"value":{"kind":"Variable","name":{"kind":"Name","value":"address"}}}]}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"clusterId"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cluster"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"outPoint"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"txHash"}},{"kind":"Field","name":{"kind":"Name","value":"index"}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetSporesByAddressQuery, GetSporesByAddressQueryVariables>;
 export const GetTopClustersQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTopClustersQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"first"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"topClusters"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"first"},"value":{"kind":"Variable","name":{"kind":"Name","value":"first"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"spores"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"cell"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cellOutput"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capacity"}},{"kind":"Field","name":{"kind":"Name","value":"lock"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"args"}},{"kind":"Field","name":{"kind":"Name","value":"codeHash"}},{"kind":"Field","name":{"kind":"Name","value":"hashType"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<GetTopClustersQueryQuery, GetTopClustersQueryQueryVariables>;
+export const GetSporeContentQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetSporeContentQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"spore"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"content"}},{"kind":"Field","name":{"kind":"Name","value":"contentType"}}]}}]}}]} as unknown as DocumentNode<GetSporeContentQueryQuery, GetSporeContentQueryQueryVariables>;

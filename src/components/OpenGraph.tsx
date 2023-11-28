@@ -1,6 +1,5 @@
 import { useMantineTheme } from '@mantine/core';
 import { DefaultSeo, NextSeo } from 'next-seo';
-import { Spore, Cluster } from 'spore-graphql';
 
 export function GlobalOpenGraph() {
   const theme = useMantineTheme();

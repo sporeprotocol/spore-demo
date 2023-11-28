@@ -1,6 +1,7 @@
 import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
+import { QuerySpore } from '@/hooks/query/type';
 import { useInfiniteSporesQuery } from '@/hooks/query/useInfiniteSporesQuery';
 import { useTopClustersQuery } from '@/hooks/query/useTopClustersQuery';
 import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
@@ -21,7 +22,6 @@ import {
 import { useMediaQuery } from '@mantine/hooks';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Cluster, Spore } from 'spore-graphql';
 
 enum SporeContentType {
   All = 'All',
@@ -89,7 +89,7 @@ export default function HomePage() {
   const [contentType, setContentType] = useState(SporeContentType.All);
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { data: topClustersData, isLoading: isTopClustersLoading } =
+  const { data: topClusters, isLoading: isTopClustersLoading } =
     useTopClustersQuery();
   const {
     data: sporesData,
@@ -112,23 +112,13 @@ export default function HomePage() {
     return () => observer.disconnect();
   }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
 
-  const topClusters = useMemo(() => {
-    if (!topClustersData) {
-      return [] as Cluster[];
-    }
-    const { topClusters } = topClustersData;
-    return (topClusters?.filter((c) => !!c) ?? []) as Cluster[];
-  }, [topClustersData]);
-
   const spores = useMemo(() => {
     if (!sporesData) {
-      return [] as Spore[];
+      return [] as QuerySpore[];
     }
     const { pages } = sporesData;
-    const spores = pages?.flatMap(
-      (page) => page?.spores?.filter((s) => s !== null) ?? [],
-    );
-    return (spores ?? []) as Spore[];
+    const spores = pages?.flatMap((page) => page?.spores ?? []);
+    return spores as QuerySpore[];
   }, [sporesData]);
 
   const filteredSpores = useMemo(() => {

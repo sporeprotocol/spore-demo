@@ -1,3 +1,4 @@
+import { QuerySpore } from '@/hooks/query/type';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { BI } from '@ckb-lumos/lumos';
 import {
@@ -12,10 +13,9 @@ import {
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
-import { Spore } from 'spore-graphql';
 
 export interface MeltSporeModalProps {
-  spore: Spore | undefined;
+  spore: QuerySpore;
   onSubmit: () => Promise<void>;
   onClose: () => void;
 }
@@ -48,7 +48,7 @@ export default function MeltSporeModal(props: MeltSporeModalProps) {
   const [error, setError] = useState<Error | null>(null);
 
   const amount = Math.ceil(
-    BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8,
+    BI.from(spore.cell.cellOutput.capacity ?? 0).toNumber() / 10 ** 8,
   );
 
   const handleSubmit = useCallback(async () => {

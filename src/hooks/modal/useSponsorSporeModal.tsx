@@ -13,26 +13,22 @@ import { useMantineTheme } from '@mantine/core';
 import { BI } from '@ckb-lumos/lumos';
 import { useAtomValue } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
-import { Spore } from 'spore-graphql';
+import { QuerySpore } from '../query/type';
+import { useSporeQuery } from '../query/useSporeQuery';
 
-export default function useSponsorSporeModal(spore: Spore | undefined) {
+export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
   const modalStack = useAtomValue(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, lock, signTransaction } = useConnect();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
 
   // FIXME
-  const capacityMargin = '0';
   // const { refetch } = trpc.spore.get.useQuery(
   //   { id: spore?.id },
   //   { enabled: false },
-  // );
-
-  // const { data: capacityMargin } = trpc.spore.getCapacityMargin.useQuery(
-  //   { id: spore?.id },
-  //   { enabled: !!spore && opened },
   // );
 
   const sponsorSpore = useCallback(

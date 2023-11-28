@@ -12,7 +12,8 @@ import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
 import { BI } from '@ckb-lumos/lumos';
-import { Cluster } from 'spore-graphql';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -22,17 +23,8 @@ export default function useMintSporeModal(id?: string) {
   const router = useRouter();
   const modalId = useId();
 
-  // FIXME
-  const clusters: Cluster[] = [];
-  // const { data: clusters = [] } = trpc.cluster.list.useQuery();
-  // const { refetch } = trpc.spore.list.useQuery(
-  //   {
-  //     clusterIds: id ? [id] : undefined,
-  //   },
-  //   {
-  //     enabled: false,
-  //   },
-  // );
+  const { data: clusters = [] } = useClustersByAddressQuery(address);
+  const { refresh } = useSporesByAddressQuery(address);
 
   const selectableClusters = useMemo(() => {
     return clusters.filter(({ cell }) => {
@@ -58,8 +50,7 @@ export default function useMintSporeModal(id?: string) {
   const addSporeMutation = useMutation({
     mutationFn: addSpore,
     onSuccess: () => {
-      // FIXME
-      // refetch();
+      refresh();
     },
   });
 

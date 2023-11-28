@@ -31,7 +31,7 @@ import { showSuccess } from '@/utils/notifications';
 import DropMenu from '@/components/DropMenu';
 import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
 import { useClusterQuery } from '@/hooks/query/useClusterQuery';
-import { Cluster, Spore } from 'spore-graphql';
+import { QuerySpore } from '@/hooks/query/type';
 
 export const useStyles = createStyles((theme) => ({
   header: {
@@ -112,20 +112,15 @@ export default function ClusterPage() {
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
-  const { data: clusterData, isLoading } = useClusterQuery(id as string);
-  const cluster = useMemo(
-    () => (clusterData?.cluster as Cluster) || undefined,
-    [clusterData],
-  );
+  const { data: cluster, isLoading } = useClusterQuery(id as string);
   const spores = useMemo(() => {
-    // @ts-ignore
-    const spores = cluster?.spores?.filter<Spore>((s) => s !== null) || [];
-    return spores;
+    const spores = cluster?.spores || [];
+    return spores as QuerySpore[];
   }, [cluster]);
 
   const mintSporeModal = useMintSporeModal(id as string);
-  const transferClusterModal = useTransferClusterModal(cluster as Cluster);
-  const sponsorClusterModal = useSponsorClusterModal(cluster as Cluster);
+  const transferClusterModal = useTransferClusterModal(cluster);
+  const sponsorClusterModal = useSponsorClusterModal(cluster);
 
   const owner = useMemo(() => {
     if (!cluster || !cluster.cell) {

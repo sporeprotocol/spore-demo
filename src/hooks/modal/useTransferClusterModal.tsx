@@ -12,25 +12,22 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
-import { Cluster } from 'spore-graphql';
 import { useConnect } from '../useConnect';
 import useSponsorClusterModal from './useSponsorClusterModal';
+import { QueryCluster } from '../query/type';
+import { useClusterQuery } from '../query/useClusterQuery';
 
-export default function useTransferClusterModal(cluster: Cluster | undefined) {
+export default function useTransferClusterModal(
+  cluster: QueryCluster | undefined,
+) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
+  const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
 
   // FIXME
-  const capacityMargin = '0';
   // const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
-
-  // const { data: capacityMargin, refetch: refetchCapacityMargin } =
-  //   trpc.cluster.getCapacityMargin.useQuery(
-  //     { id: cluster?.id },
-  //     { enabled: !!cluster && opened },
-  //   );
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);
 
@@ -86,7 +83,7 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         children: (
           <TransferModal
             type="cluster"
-            capacityMargin={capacityMargin}
+            capacityMargin={capacityMargin || undefined}
             onSubmit={handleSubmit}
             onSponsor={() => {
               close();

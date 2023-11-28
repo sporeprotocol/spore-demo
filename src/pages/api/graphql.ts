@@ -1,5 +1,5 @@
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
-import { createContext, createApolloServer, ContextValue } from 'spore-graphql';
+import { createContext, createApolloServer } from 'spore-graphql';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl';
 import { KeyvAdapter } from '@apollo/utils.keyvadapter';
@@ -8,10 +8,6 @@ import Keyv, { Store } from 'keyv';
 
 export const config = {
   maxDuration: 300,
-};
-
-type CustomContext = ContextValue & {
-  disableCache?: boolean;
 };
 
 const store: Store<string> = {
@@ -36,18 +32,26 @@ const store: Store<string> = {
 
 const cache = new KeyvAdapter(new Keyv({ store }));
 
-export default startServerAndCreateNextHandler(
-  createApolloServer<CustomContext>({
-    introspection: true,
-    cache,
-    plugins: [
-      ApolloServerPluginCacheControl({
-        defaultMaxAge: 60 * 24,
-      }),
-      responseCachePlugin(),
-    ],
-  }),
-  {
-    context: async () => createContext(),
-  },
-);
+export const server = createApolloServer({
+  introspection: true,
+  cache,
+  plugins: [
+    ApolloServerPluginCacheControl({
+      defaultMaxAge: 60 * 60,
+    }),
+    responseCachePlugin({
+      shouldReadFromCache: async (requestContext) => {
+        if (requestContext.request.http?.headers.get('Cache-Control') === 'no-cache') {
+          return false;
+        }
+        return true;
+      }
+    }),
+  ],
+});
+
+export const context = createContext();
+
+export default startServerAndCreateNextHandler(server, {
+  context: async () => context,
+});

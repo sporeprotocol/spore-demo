@@ -26,6 +26,7 @@ import { NAVS } from '@/constants';
 import { BI } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
 import { showSuccess } from '@/utils/notifications';
+import {useCapacity} from '@/hooks/query/useCapacity';
 
 const useStyles = createStyles((theme) => ({
   connect: {
@@ -109,8 +110,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     });
   }, [address]);
 
-  // FIXME
-  const capacity = 0;
+  const { data: capacity = '0x0' } = useCapacity(address);
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 

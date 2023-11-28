@@ -29,7 +29,6 @@ import SporeContentRender from '@/components/SporeContentRender';
 import Popover from '@/components/Popover';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 import { useSporeQuery } from '@/hooks/query/useSporeQuery';
-import { Spore } from 'spore-graphql';
 import { useClusterSporesQuery } from '@/hooks/query/useClusterSporesQuery';
 
 export const useStyles = createStyles((theme) => ({
@@ -67,21 +66,13 @@ export default function SporePage() {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { classes } = useStyles();
 
-  const { data: sporeData, isLoading: isSporeLoading } = useSporeQuery(
+  const { data: spore, isLoading: isSporeLoading } = useSporeQuery(
     id as string,
-  );
-  const spore = useMemo(
-    () => (sporeData?.spore as Spore) || undefined,
-    [sporeData],
   );
   const isLoading = isSporeLoading || !spore;
 
-  const { data: sporesData } = useClusterSporesQuery(
+  const { data: spores } = useClusterSporesQuery(
     spore?.cluster?.id || undefined,
-  );
-  const spores = useMemo(
-    () => (sporesData?.spores as Spore[]) || [],
-    [sporesData],
   );
 
   const transferSpore = useTransferSporeModal(spore);

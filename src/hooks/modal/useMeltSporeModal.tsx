@@ -11,19 +11,15 @@ import MeltSporeModal from '@/components/MeltSporeModal';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
-import { Spore } from 'spore-graphql';
+import { QuerySpore } from '../query/type';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 
-export default function useMeltSporeModal(spore: Spore | undefined) {
+export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const router = useRouter();
-
-  // FIXME
-  // const { refetch } = trpc.spore.list.useQuery(
-  //   { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
-  //   { enabled: false },
-  // );
+  const { refresh } = useSporesByAddressQuery(address);
 
   const meltSpore = useCallback(
     async (...args: Parameters<typeof _meltSpore>) => {
@@ -38,7 +34,7 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
   const meltSporeMutation = useMutation({
     mutationFn: meltSpore,
     onSuccess: () => {
-      // refetch();
+      refresh();
     },
   });
 
@@ -69,7 +65,7 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
         closeOnClickOutside: !meltSporeMutation.isPending,
         children: (
           <MeltSporeModal
-            spore={spore}
+            spore={spore!}
             onSubmit={handleSubmit}
             onClose={() => modals.close(modalId)}
           />

@@ -1,7 +1,7 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
-  schema: 'http://localhost:3000/api/graphql',
+  schema: './node_modules/spore-graphql/schema.graphql',
   documents: ['src/**/*.tsx', 'src/**/*.ts'],
   ignoreNoDocuments: true,
   generates: {

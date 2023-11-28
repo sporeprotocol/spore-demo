@@ -1,10 +1,9 @@
 import 'react-loading-skeleton/dist/skeleton.css';
 import { Box, Group, createStyles } from '@mantine/core';
 import { ImageSporeContentRender } from './renders/image';
-import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { TEXT_MIME_TYPE, isImageMIMEType, isTextMIMEType } from '@/utils/mime';
+import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
 import { TextSporeContentRender } from './renders/text';
-import { Spore } from 'spore-graphql';
+import { QuerySpore } from '@/hooks/query/type';
 
 const useStyles = createStyles((theme) => ({
   image: {
@@ -30,7 +29,7 @@ const useStyles = createStyles((theme) => ({
 export default function SporeContentRender({
   spore,
 }: {
-  spore: Spore | undefined;
+  spore: QuerySpore | undefined;
 }) {
   const { classes } = useStyles();
 
