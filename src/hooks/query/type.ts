@@ -2,8 +2,8 @@ import { CellOutput, OutPoint } from 'spore-graphql';
 
 export type QuerySpore = {
   id: string;
-  clusterId: string;
   contentType: string;
+  clusterId?: string | null;
   capacityMargin?: string | null;
   cluster?: {
     id: string;

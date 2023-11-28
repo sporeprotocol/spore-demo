@@ -106,7 +106,7 @@ export default function SporeCard({ spore }: SporeCardProps) {
   const { lock } = useConnect();
 
   const isOwner = useMemo(
-    () => isSameScript(lock, spore.cell.cellOutput.lock),
+    () => isSameScript(lock, spore.cell?.cellOutput.lock),
     [spore, lock],
   );
 
@@ -114,7 +114,7 @@ export default function SporeCard({ spore }: SporeCardProps) {
   const meltSporeModal = useMeltSporeModal(spore);
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
-  const amount = BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8;
+  const amount = BI.from(spore.cell?.cellOutput.capacity).toNumber() / 10 ** 8;
 
   if (!spore) {
     return <SporeSkeletonCard />;

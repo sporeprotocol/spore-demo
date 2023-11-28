@@ -48,7 +48,7 @@ export default function MeltSporeModal(props: MeltSporeModalProps) {
   const [error, setError] = useState<Error | null>(null);
 
   const amount = Math.ceil(
-    BI.from(spore.cell.cellOutput.capacity ?? 0).toNumber() / 10 ** 8,
+    BI.from(spore.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8,
   );
 
   const handleSubmit = useCallback(async () => {
