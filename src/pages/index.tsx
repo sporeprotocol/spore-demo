@@ -95,7 +95,7 @@ export default function HomePage() {
     data: sporesData,
     hasNextPage,
     isFetchingNextPage,
-    isFetching,
+    status,
     fetchNextPage,
   } = useInfiniteSporesQuery();
 
@@ -227,7 +227,7 @@ export default function HomePage() {
               })}
             </Group>
           }
-          isLoading={isFetching}
+          isLoading={status === 'pending'}
           disablePlaceholder
         />
         <Group position="center" mt="48px">
