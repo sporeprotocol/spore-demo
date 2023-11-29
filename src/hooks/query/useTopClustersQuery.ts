@@ -1,7 +1,6 @@
 import { graphql } from '@/gql';
 import request from 'graphql-request';
 import { useQuery } from '@tanstack/react-query';
-import { QueryCluster } from './type';
 
 const topClustersQueryDocument = graphql(`
   query GetTopClustersQuery($first: Int) {
@@ -9,36 +8,17 @@ const topClustersQueryDocument = graphql(`
       id
       name
       description
-      spores {
-        id
-        contentType
-        cell {
-          cellOutput {
-            capacity
-          }
-        }
-      }
-      cell {
-        cellOutput {
-          capacity
-          lock {
-            args
-            codeHash
-            hashType
-          }
-        }
-      }
     }
   }
 `);
 
 export function useTopClustersQuery(limit = 4) {
   const { data, isLoading } = useQuery({
-    queryKey: ['topClusters', limit],
+    queryKey: ['topClusters'],
     queryFn: async () =>
       request('/api/graphql', topClustersQueryDocument, { first: limit }),
   });
-  const clusters = (data?.topClusters as QueryCluster[]) ?? [];
+  const clusters = (data?.topClusters) ?? [];
   return {
     data: clusters,
     isLoading,

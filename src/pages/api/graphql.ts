@@ -5,10 +5,13 @@ import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheContr
 import { KeyvAdapter } from '@apollo/utils.keyvadapter';
 import { kv } from '@vercel/kv';
 import Keyv, { Store } from 'keyv';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export const config = {
   maxDuration: 300,
 };
+
+export const fetchCache = 'force-no-store';
 
 const store: Store<string> = {
   async get(key: string): Promise<string | undefined> {
@@ -41,11 +44,14 @@ export const server = createApolloServer({
     }),
     responseCachePlugin({
       shouldReadFromCache: async (requestContext) => {
-        if (requestContext.request.http?.headers.get('Cache-Control') === 'no-cache') {
+        if (
+          requestContext.request.http?.headers.get('Cache-Control') ===
+          'no-cache'
+        ) {
           return false;
         }
         return true;
-      }
+      },
     }),
   ],
 });

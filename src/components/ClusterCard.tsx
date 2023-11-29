@@ -23,6 +23,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import DropMenu from './DropMenu';
 import SporeCoverRender from './SporeCoverRender';
 import { QueryCluster } from '@/hooks/query/type';
+import {useClusterQuery} from '@/hooks/query/useClusterQuery';
 
 export interface ClusterCardProps {
   cluster: QueryCluster;
@@ -110,21 +111,27 @@ export function ClusterSkeletonCard() {
   );
 }
 
-export default function ClusterCard({ cluster }: ClusterCardProps) {
+export default function ClusterCard(props: ClusterCardProps) {
   const { classes } = useStyles();
-  const spores = cluster.spores ?? [];
   const theme = useMantineTheme();
-  const cols = spores.length >= 4 ? 2 : 1;
   const { lock } = useConnect();
   const [hovered, { close, open }] = useDisclosure(false);
+  const { data: cluster } = useClusterQuery(props.cluster.id, props.cluster);
+
+  const spores = cluster?.spores ?? [];
+  const cols = spores.length >= 4 ? 2 : 1;
 
   const isOwner = useMemo(
-    () => isSameScript(lock, cluster.cell?.cellOutput.lock),
+    () => isSameScript(lock, cluster?.cell?.cellOutput.lock),
     [cluster, lock],
   );
 
   const transferClusterModal = useTransferClusterModal(cluster);
   const sponsorClusterModal = useSponsorClusterModal(cluster);
+
+  if (!cluster) {
+    return <ClusterSkeletonCard />;
+  }
 
   return (
     <Box

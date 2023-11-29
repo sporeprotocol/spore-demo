@@ -1,20 +1,20 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from '@tanstack/react-query';
-// import { trpc } from '@/server';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
-import { BI } from '@ckb-lumos/lumos';
+import { BI, OutPoint } from '@ckb-lumos/lumos';
 import { useAtomValue } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
 import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
+import { update, cloneDeep } from 'lodash-es';
 
 export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -24,27 +24,45 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
-
-  // FIXME
-  // const { refetch } = trpc.spore.get.useQuery(
-  //   { id: spore?.id },
-  //   { enabled: false },
-  // );
+  const queryClient = useQueryClient();
+  const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorSpore = useCallback(
     async (...args: Parameters<typeof _transferSpore>) => {
-      const { txSkeleton } = await _transferSpore(...args);
+      const { txSkeleton, outputIndex } = await _transferSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
+  const onSuccess = useCallback(async (outPoint: OutPoint) => {
+    if (!spore) return;
+    const capacityMargin = nextCapacityMarginRef.current;
+    const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
+      .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
+      .toHexString();
+
+    queryClient.setQueryData(
+      ['spore', spore.id],
+      (data: { spore: QuerySpore }) => {
+        const { spore } = data;
+        const newSpore = cloneDeep(spore);
+        update(newSpore, 'capacityMargin', () => capacityMargin);
+        update(newSpore, 'cell.cellOutput.capacity', () => capacity);
+        update(newSpore, 'cell.outPoint', () => outPoint);
+        return { spore: newSpore };
+      },
+    );
+  }, [queryClient, spore]);
+
   const sponsorSporeMutation = useMutation({
     mutationFn: sponsorSpore,
-    // FIXME
-    // onSuccess: () => refetch(),
+    onSuccess,
   });
   const loading =
     sponsorSporeMutation.isPending && !sponsorSporeMutation.isError;
@@ -55,16 +73,17 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
         return;
       }
       const { amount } = values;
-      const newCapacity = BI.from(capacityMargin).add(
+      const nextCapacityMargin = BI.from(capacityMargin).add(
         BI.from(amount).mul(100_000_000),
       );
+      nextCapacityMarginRef.current = nextCapacityMargin.toHexString();
 
       await sponsorSporeMutation.mutateAsync({
         outPoint: spore.cell!.outPoint!,
         fromInfos: [address],
         toLock: lock!,
         config: predefinedSporeConfigs.Aggron4,
-        capacityMargin: newCapacity.toHexString(),
+        capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });
       showSuccess(`${amount.toLocaleString('en-US')} CKB sponsored to Spore!`);

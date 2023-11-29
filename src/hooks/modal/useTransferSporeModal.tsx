@@ -14,6 +14,7 @@ import { useSetAtom } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
 import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 
 export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -21,12 +22,8 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
-
-  // FIXME
-  // const { refetch } = trpc.spore.get.useQuery(
-  //   { id: spore?.id },
-  //   { enabled: false },
-  // );
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
+  const { refresh: refreshSpore } = useSporeQuery(spore?.id);
 
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
@@ -40,10 +37,14 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
     [signTransaction],
   );
 
+  const onSuccess = useCallback(async () => {
+    await refreshSpore();
+    await refreshSporesByAddress();
+  }, [refreshSpore, refreshSporesByAddress]);
+
   const transferSporeMutation = useMutation({
     mutationFn: transferSpore,
-    // FIXME
-    // onSuccess: () => refetch(),
+    onSuccess,
   });
   const loading =
     transferSporeMutation.isPending && !transferSporeMutation.isError;

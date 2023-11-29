@@ -9,30 +9,6 @@ const infiniteClustersQueryDocument = graphql(`
       id
       name
       description
-      spores {
-        id
-        contentType
-        cluster {
-          id
-          name
-          description
-        }
-        cell {
-          cellOutput {
-            capacity
-          }
-        }
-      }
-      cell {
-        cellOutput {
-          capacity
-          lock {
-            args
-            codeHash
-            hashType
-          }
-        }
-      }
     }
   }
 `);

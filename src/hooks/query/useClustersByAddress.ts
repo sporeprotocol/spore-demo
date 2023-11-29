@@ -9,31 +9,12 @@ const clustersByAddressQueryDocument = graphql(`
       id
       name
       description
-      spores {
-        id
-        clusterId
-        contentType
-      }
-      cell {
-        cellOutput {
-          capacity
-          lock {
-            args
-            codeHash
-            hashType
-          }
-        }
-        outPoint {
-          txHash
-          index
-        }
-      }
     }
   }
 `);
 
 export function useClustersByAddressQuery(address: string) {
-  const { data, isLoading } = useQuery({
+  const { data, ...rest } = useQuery({
     queryKey: ['clustersByAddress', address],
     queryFn: async () =>
       request('/api/graphql', clustersByAddressQueryDocument, { address }),
@@ -41,7 +22,7 @@ export function useClustersByAddressQuery(address: string) {
   });
   const clusters: QueryCluster[] = data?.clusters ?? [];
   return {
+    ...rest,
     data: clusters,
-    isLoading,
   };
 }

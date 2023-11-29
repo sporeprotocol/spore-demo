@@ -9,33 +9,57 @@ import { useRouter } from 'next/router';
 import { useConnect } from '../useConnect';
 import MeltSporeModal from '@/components/MeltSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { QuerySpore } from '../query/type';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
+import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 
 export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const router = useRouter();
-  const { refresh } = useSporesByAddressQuery(address);
+  const queryClient = useQueryClient();
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
+    spore?.clusterId || undefined,
+  );
 
   const meltSpore = useCallback(
     async (...args: Parameters<typeof _meltSpore>) => {
       const { txSkeleton } = await _meltSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return txHash;
     },
     [signTransaction],
   );
 
+  const onSuccess = useCallback(async () => {
+    const updater = (data: { spores: QuerySpore[] }) => {
+      const spores = data.spores.filter((s) => s.id !== spore?.id);
+      return {
+        spores,
+      };
+    };
+    queryClient.setQueryData(['sporesByAddress', address], updater);
+    if (spore?.clusterId) {
+      queryClient.setQueryData(['clusterSpores', spore.clusterId], updater);
+    }
+    await refreshSporesByAddress();
+    await refreshClusterSpores();
+  }, [
+    address,
+    queryClient,
+    refreshClusterSpores,
+    refreshSporesByAddress,
+    spore,
+  ]);
+
   const meltSporeMutation = useMutation({
     mutationFn: meltSpore,
-    onSuccess: () => {
-      refresh();
-    },
+    onSuccess,
   });
 
   const handleSubmit = useCallback(async () => {

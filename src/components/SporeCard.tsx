@@ -24,6 +24,7 @@ import { isSameScript } from '@/utils/script';
 import SporeCoverRender from './SporeCoverRender';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 import { QuerySpore } from '@/hooks/query/type';
+import { useSporeQuery } from '@/hooks/query/useSporeQuery';
 
 export interface SporeCardProps {
   spore: QuerySpore;
@@ -100,13 +101,14 @@ export function SporeSkeletonCard() {
   );
 }
 
-export default function SporeCard({ spore }: SporeCardProps) {
+export default function SporeCard(props: SporeCardProps) {
   const { classes } = useStyles();
   const [hovered, { close, open }] = useDisclosure(false);
   const { lock } = useConnect();
+  const { data: spore } = useSporeQuery(props.spore.id, props.spore);
 
   const isOwner = useMemo(
-    () => isSameScript(lock, spore.cell?.cellOutput.lock),
+    () => isSameScript(lock, spore?.cell?.cellOutput.lock),
     [spore, lock],
   );
 
@@ -114,7 +116,7 @@ export default function SporeCard({ spore }: SporeCardProps) {
   const meltSporeModal = useMeltSporeModal(spore);
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
-  const amount = BI.from(spore.cell?.cellOutput.capacity).toNumber() / 10 ** 8;
+  const amount = BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8;
 
   if (!spore) {
     return <SporeSkeletonCard />;
@@ -145,7 +147,7 @@ export default function SporeCard({ spore }: SporeCardProps) {
               </Title>
               <Flex>
                 <Text size="md" color="white">
-                  {amount.toLocaleString('en-US')} CKB
+                  {amount.toLocaleString('en-US')} CKBytes
                 </Text>
               </Flex>
             </Flex>

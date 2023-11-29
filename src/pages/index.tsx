@@ -89,8 +89,7 @@ export default function HomePage() {
   const [contentType, setContentType] = useState(SporeContentType.All);
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { data: topClusters, isLoading: isTopClustersLoading } =
-    useTopClustersQuery();
+  const { data: topClusters, isLoading: isTopClustersLoading } = useTopClustersQuery();
   const {
     data: sporesData,
     hasNextPage,

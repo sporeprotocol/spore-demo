@@ -1,4 +1,8 @@
-import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
+import {
+  SporeDataProps,
+  createSpore,
+  predefinedSporeConfigs,
+} from '@spore-sdk/core';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -6,14 +10,13 @@ import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '../useConnect';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
 import { BI } from '@ckb-lumos/lumos';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
-import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -22,9 +25,9 @@ export default function useMintSporeModal(id?: string) {
   const { address, lock, signTransaction } = useConnect();
   const router = useRouter();
   const modalId = useId();
+  const queryClient = useQueryClient();
 
   const { data: clusters = [] } = useClustersByAddressQuery(address);
-  const { refresh } = useSporesByAddressQuery(address);
 
   const selectableClusters = useMemo(() => {
     return clusters.filter(({ cell }) => {
@@ -47,11 +50,21 @@ export default function useMintSporeModal(id?: string) {
     [signTransaction],
   );
 
+  const onSuccess = useCallback(
+    async (_: unknown, variables: { data: SporeDataProps }) => {
+      queryClient.refetchQueries({
+        queryKey: ['sporesByAddress', address],
+      });
+      queryClient.refetchQueries({
+        queryKey: ['clusterSpores', variables.data.clusterId],
+      });
+    },
+    [address, queryClient],
+  );
+
   const addSporeMutation = useMutation({
     mutationFn: addSpore,
-    onSuccess: () => {
-      refresh();
-    },
+    onSuccess,
   });
 
   const handleSubmit = useCallback(
@@ -66,7 +79,7 @@ export default function useMintSporeModal(id?: string) {
 
       const contentBuffer = await content.arrayBuffer();
       const contentType = content.type || getMIMETypeByName(content.name);
-      const spore = await addSporeMutation.mutateAsync({
+      const sporeCell = await addSporeMutation.mutateAsync({
         data: {
           contentType,
           content: new Uint8Array(contentBuffer),
@@ -79,7 +92,7 @@ export default function useMintSporeModal(id?: string) {
         capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });
       showSuccess('Spore minted!', () => {
-        router.push(`/spore/${spore?.cellOutput.type?.args}`);
+        router.push(`/spore/${sporeCell?.cellOutput.type?.args}`);
       });
       close();
     },

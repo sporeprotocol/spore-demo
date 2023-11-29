@@ -16,8 +16,6 @@ import {
 import Head from 'next/head';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-// import { isAnyoneCanPay, isSameScript } from '@/utils/script';
-// import { useConnect } from '@/hooks/useConnect';
 import { useInfiniteClustersQuery } from '@/hooks/query/useInfiniteClustersQuery';
 import { QueryCluster } from '@/hooks/query/type';
 

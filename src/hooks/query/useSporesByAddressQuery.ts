@@ -2,7 +2,7 @@ import { graphql } from '@/gql';
 import request from 'graphql-request';
 import { useQuery } from '@tanstack/react-query';
 import { QuerySpore } from './type';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 const sporesByAddressQueryDocument = graphql(`
   query GetSporesByAddress($address: String) {
@@ -10,34 +10,16 @@ const sporesByAddressQueryDocument = graphql(`
       id
       clusterId
       contentType
-      cluster {
-        id
-        name
-        description
-      }
-      cell {
-        cellOutput {
-          capacity
-          lock {
-            args
-            codeHash
-            hashType
-          }
-        }
-        outPoint {
-          txHash
-          index
-        }
-      }
     }
   }
 `);
 
 export function useSporesByAddressQuery(address: string) {
   const headersRef = useRef<Headers>(new Headers());
-  const { data, isLoading, refetch } = useQuery({
+
+  const { data, ...rest } = useQuery({
     queryKey: ['sporesByAddress', address],
-    queryFn: async () =>
+    queryFn: async () => 
       request(
         '/api/graphql',
         sporesByAddressQueryDocument,
@@ -48,15 +30,19 @@ export function useSporesByAddressQuery(address: string) {
   });
   const spores: QuerySpore[] = data?.spores ?? [];
 
-  async function refresh() {
+  const { refetch } = rest;
+  const refresh = useCallback(async () => {
     headersRef.current.set('Cache-Control', 'no-cache');
     await refetch();
     headersRef.current.delete('Cache-Control');
-  }
+  }, [refetch]);
+
+  const isLoading = rest.isLoading || rest.isPending;
 
   return {
+    ...rest,
     data: spores,
-    isLoading,
     refresh,
+    isLoading,
   };
 }
