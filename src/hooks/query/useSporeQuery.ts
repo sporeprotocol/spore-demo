@@ -1,8 +1,7 @@
 import { graphql } from '@/gql';
-import request from 'graphql-request';
-import { useQuery } from '@tanstack/react-query';
 import { QuerySpore } from './type';
-import { useRef } from 'react';
+import { graphQLClient } from '@/utils/graphql';
+import { useRefreshableQuery } from './useRefreshableQuery';
 
 const sporeQueryDocument = graphql(`
   query GetSporeQuery($id: String!) {
@@ -33,40 +32,24 @@ const sporeQueryDocument = graphql(`
   }
 `);
 
-export function useSporeQuery(
-  id: string | undefined,
-  initialData?: QuerySpore,
-) {
-  const headersRef = useRef<Headers>(new Headers());
-  const { data, ...rest } = useQuery({
+export function useSporeQuery(id: string | undefined) {
+  const { data, ...rest } = useRefreshableQuery({
     queryKey: ['spore', id],
-    queryFn: async () => {
-      return request(
-        '/api/graphql',
+    queryFn: async (ctx) => {
+      return graphQLClient.request(
         sporeQueryDocument,
         { id: id! },
-        headersRef.current,
+        ctx.meta?.headers as Headers,
       );
     },
     enabled: !!id,
-    placeholderData: {
-      spore: initialData,
-    },
   });
   const spore = data?.spore as QuerySpore | undefined;
-
-  const refresh = async () => {
-    headersRef.current.set('Cache-Control', 'no-cache');
-    await rest.refetch();
-    headersRef.current.delete('Cache-Control');
-  };
-
   const isLoading = rest.isLoading || rest.isPending;
 
   return {
     ...rest,
     data: spore,
     isLoading,
-    refresh,
   };
 }

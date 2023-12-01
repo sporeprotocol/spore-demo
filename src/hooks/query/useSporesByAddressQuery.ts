@@ -1,8 +1,7 @@
 import { graphql } from '@/gql';
-import request from 'graphql-request';
-import { useQuery } from '@tanstack/react-query';
 import { QuerySpore } from './type';
-import { useCallback, useRef } from 'react';
+import { graphQLClient } from '@/utils/graphql';
+import { useRefreshableQuery } from './useRefreshableQuery';
 
 const sporesByAddressQueryDocument = graphql(`
   query GetSporesByAddress($address: String) {
@@ -34,42 +33,23 @@ const sporesByAddressQueryDocument = graphql(`
 `);
 
 export function useSporesByAddressQuery(address: string) {
-  const headersRef = useRef<Headers>(new Headers());
-
-  const { data, ...rest } = useQuery({
+  const { data, ...rest } = useRefreshableQuery({
     queryKey: ['sporesByAddress', address],
-    queryFn: async () => {
-      const fetch = () =>
-        request(
-          '/api/graphql',
-          sporesByAddressQueryDocument,
-          { address },
-          headersRef.current,
-        );
-      const response = await fetch();
-      if (headersRef.current.get('Cache-Control') !== 'no-cache') {
-        headersRef.current.set('Cache-Control', 'no-cache');
-        fetch().finally(() => headersRef.current.delete('Cache-Control'));
-      }
-      return response;
+    queryFn: async (ctx) => {
+      return graphQLClient.request(
+        sporesByAddressQueryDocument,
+        { address },
+        ctx.meta?.headers as Headers,
+      );
     },
     enabled: !!address,
   });
   const spores: QuerySpore[] = data?.spores ?? [];
-
-  const { refetch } = rest;
-  const refresh = useCallback(async () => {
-    headersRef.current.set('Cache-Control', 'no-cache');
-    await refetch();
-    headersRef.current.delete('Cache-Control');
-  }, [refetch]);
-
   const isLoading = rest.isLoading || rest.isPending;
 
   return {
     ...rest,
     data: spores,
-    refresh,
     isLoading,
   };
 }

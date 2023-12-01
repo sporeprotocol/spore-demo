@@ -11,7 +11,7 @@ import MetaMaskConnector from '@/connectors/metamask';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
-import { cache } from '@/utils/cache';
+import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
 
@@ -106,7 +106,7 @@ function App({ Component, pageProps }: AppProps) {
         withNormalizeCSS
         withGlobalStyles
         theme={theme}
-        emotionCache={cache}
+        emotionCache={emotionCache}
       >
         <ConnectProvider value={config}>
           <StateProvider pageProps={pageProps}>
