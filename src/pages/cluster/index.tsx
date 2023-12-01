@@ -18,6 +18,8 @@ import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useInfiniteClustersQuery } from '@/hooks/query/useInfiniteClustersQuery';
 import { QueryCluster } from '@/hooks/query/type';
+import { useConnect } from '@/hooks/useConnect';
+import { useMintableClustersQuery } from '@/hooks/query/useMintableClusters';
 
 export const useStyles = createStyles(
   (theme, params: { showMintableOnly: boolean }) => ({
@@ -75,13 +77,14 @@ export const useStyles = createStyles(
 );
 
 export default function ClustersPage() {
-  // const { lock } = useConnect();
+  const { address } = useConnect();
   const [showMintableOnly, setShowMintableOnly] = useState(false);
   const { classes } = useStyles({ showMintableOnly });
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage, status } =
     useInfiniteClustersQuery();
+  const { data: mintableClusters = [] } = useMintableClustersQuery(address);
 
   useEffect(() => {
     if (isFetchingNextPage || !hasNextPage) return;
@@ -105,19 +108,14 @@ export default function ClustersPage() {
     return clusters as QueryCluster[];
   }, [data]);
 
-  // FIXME
-  const displayClusters = clusters;
-  // const displayClusters = useMemo(() => {
-  //   if (showMintableOnly) {
-  //     return sortedClusters.filter(({ cell }) => {
-  //       return (
-  //         isAnyoneCanPay(cell.cellOutput.lock) ||
-  //         isSameScript(lock, cell.cellOutput.lock)
-  //       );
-  //     });
-  //   }
-  //   return sortedClusters;
-  // }, [sortedClusters, showMintableOnly, lock]);
+  const displayClusters = useMemo(() => {
+    if (showMintableOnly) {
+      return clusters.filter(({ id }) =>
+        mintableClusters.some((c) => c.id === id),
+      );
+    }
+    return clusters;
+  }, [showMintableOnly, clusters, mintableClusters]);
 
   const header = (
     <Flex align="center" className={classes.banner}>

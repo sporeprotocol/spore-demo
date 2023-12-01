@@ -165,8 +165,8 @@ dependencies:
     specifier: ^2.1.0
     version: 2.1.0(react@18.2.0)
   spore-graphql:
-    specifier: 0.1.0-beta.23
-    version: 0.1.0-beta.23(cross-fetch@3.1.8)(jsbi@4.3.0)
+    specifier: 0.1.0-beta.25
+    version: 0.1.0-beta.25(cross-fetch@3.1.8)(jsbi@4.3.0)
   superjson:
     specifier: ^1.13.3
     version: 1.13.3
@@ -8740,8 +8740,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /spore-graphql@0.1.0-beta.23(cross-fetch@3.1.8)(jsbi@4.3.0):
-    resolution: {integrity: sha512-DcKmjDv2Q9+L0b+m/Ywd1msysEu8ojRo5I6+IJehMsiYmYGg/YU5uY+I9sBR9aTmor0ynDBWYc2+1ErBdY9rBQ==}
+  /spore-graphql@0.1.0-beta.25(cross-fetch@3.1.8)(jsbi@4.3.0):
+    resolution: {integrity: sha512-H7GTz34ad2TF10rF/Sf2PhomOI6oM69ENSnRC41EZm7chzwdTQjYGyBQ5uKi4SGY/O791kFKI1p47pYabIFedQ==}
     dependencies:
       '@apollo/server': 4.9.5(graphql@16.8.1)
       '@ckb-lumos/lumos': 0.20.0(cross-fetch@3.1.8)(jsbi@4.3.0)

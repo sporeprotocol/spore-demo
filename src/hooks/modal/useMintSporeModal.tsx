@@ -6,19 +6,18 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { isAnyoneCanPay, isSameScript } from '@/utils/script';
 import { useConnect } from '../useConnect';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
 import { BI } from '@ckb-lumos/lumos';
-import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
+import { useMintableClustersQuery } from '../query/useMintableClusters';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -33,17 +32,7 @@ export default function useMintSporeModal(id?: string) {
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     mindedSporeData?.clusterId,
   );
-
-  const { data: clusters = [] } = useClustersByAddressQuery(address);
-
-  const selectableClusters = useMemo(() => {
-    return clusters.filter(({ cell }) => {
-      return (
-        isSameScript(cell?.cellOutput.lock, lock) ||
-        isAnyoneCanPay(cell?.cellOutput.lock)
-      );
-    });
-  }, [clusters, lock]);
+  const { data: mintableClusters = [] } = useMintableClustersQuery(address);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -120,7 +109,7 @@ export default function useMintSporeModal(id?: string) {
         children: (
           <MintSporeModal
             defaultClusterId={id!}
-            clusters={selectableClusters}
+            clusters={mintableClusters}
             onSubmit={handleSubmit}
           />
         ),
@@ -132,7 +121,7 @@ export default function useMintSporeModal(id?: string) {
     isMobile,
     modalId,
     addSporeMutation.isPending,
-    selectableClusters,
+    mintableClusters,
     handleSubmit,
     opened,
     close,
