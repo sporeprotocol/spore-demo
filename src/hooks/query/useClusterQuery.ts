@@ -5,15 +5,16 @@ import { QueryCluster } from './type';
 import { useRef } from 'react';
 import { useRefreshableQuery } from './useRefreshableQuery';
 import { graphQLClient } from '@/utils/graphql';
+import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 
 const clusterQueryDocument = graphql(`
-  query GetClusterQuery($id: String!) {
+  query GetClusterQuery($id: String!, $contentTypes: [String!]) {
     cluster(id: $id) {
       id
       name
       description
       capacityMargin
-      spores {
+      spores(filter: { contentTypes: $contentTypes }) {
         id
         clusterId
         contentType
@@ -42,7 +43,7 @@ export function useClusterQuery(id: string | undefined) {
     queryFn: async (ctx) => {
       return graphQLClient.request(
         clusterQueryDocument,
-        { id: id! },
+        { id: id!, contentTypes: SUPPORTED_MIME_TYPE },
         ctx.meta?.headers as Headers,
       );
     },

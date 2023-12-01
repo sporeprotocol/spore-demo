@@ -1,17 +1,16 @@
 import { graphql } from '@/gql';
-import request from 'graphql-request';
-import { useQuery } from '@tanstack/react-query';
 import { useRefreshableQuery } from './useRefreshableQuery';
 import { graphQLClient } from '@/utils/graphql';
+import {SUPPORTED_MIME_TYPE} from '@/utils/mime';
 
 const topClustersQueryDocument = graphql(`
-  query GetTopClustersQuery($first: Int) {
+  query GetTopClustersQuery($first: Int, $contentTypes: [String!]) {
     topClusters(first: $first) {
       id
       name
       description
       capacityMargin
-      spores {
+      spores(filter: { contentTypes: $contentTypes }) {
         id
         clusterId
         contentType
@@ -40,7 +39,7 @@ export function useTopClustersQuery(limit = 4) {
     queryFn: async (ctx) =>
       graphQLClient.request(
         topClustersQueryDocument,
-        { first: limit },
+        { first: limit, contentTypes: SUPPORTED_MIME_TYPE },
         ctx.meta?.headers as Headers,
       ),
   });

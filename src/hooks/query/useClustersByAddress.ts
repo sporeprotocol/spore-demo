@@ -4,15 +4,16 @@ import { useQuery } from '@tanstack/react-query';
 import { QueryCluster } from './type';
 import { useRefreshableQuery } from './useRefreshableQuery';
 import { graphQLClient } from '@/utils/graphql';
+import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 
 const clustersByAddressQueryDocument = graphql(`
-  query GetClustersByAddress($address: String) {
-    clusters(filter: { address: $address }) {
+  query GetClustersByAddress($address: String!, $contentTypes: [String!]) {
+    clusters(filter: { addresses: [$address] }) {
       id
       name
       description
       capacityMargin
-      spores {
+      spores(filter: { contentTypes: $contentTypes }) {
         id
         clusterId
         contentType
@@ -41,7 +42,7 @@ export function useClustersByAddressQuery(address: string) {
     queryFn: async (ctx) =>
       graphQLClient.request(
         clustersByAddressQueryDocument,
-        { address },
+        { address, contentTypes: SUPPORTED_MIME_TYPE },
         ctx.meta?.headers as Headers,
       ),
     enabled: !!address,

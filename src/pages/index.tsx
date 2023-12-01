@@ -4,7 +4,13 @@ import SporeGrid from '@/components/SporeGrid';
 import { QuerySpore } from '@/hooks/query/type';
 import { useInfiniteSporesQuery } from '@/hooks/query/useInfiniteSporesQuery';
 import { useTopClustersQuery } from '@/hooks/query/useTopClustersQuery';
-import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
+import {
+  IMAGE_MIME_TYPE,
+  SUPPORTED_MIME_TYPE,
+  TEXT_MIME_TYPE,
+  isImageMIMEType,
+  isTextMIMEType,
+} from '@/utils/mime';
 import {
   Box,
   Button,
@@ -89,14 +95,25 @@ export default function HomePage() {
   const [contentType, setContentType] = useState(SporeContentType.All);
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { data: topClusters, isLoading: isTopClustersLoading } = useTopClustersQuery();
+  const contentTypes = useMemo(() => {
+    if (contentType === SporeContentType.Image) {
+      return IMAGE_MIME_TYPE;
+    }
+    if (contentType === SporeContentType.Text) {
+      return TEXT_MIME_TYPE;
+    }
+    return SUPPORTED_MIME_TYPE;
+  }, [contentType]);
+
+  const { data: topClusters, isLoading: isTopClustersLoading } =
+    useTopClustersQuery();
   const {
     data: sporesData,
     hasNextPage,
     isFetchingNextPage,
     status,
     fetchNextPage,
-  } = useInfiniteSporesQuery();
+  } = useInfiniteSporesQuery(contentTypes);
 
   useEffect(() => {
     if (isFetchingNextPage || !hasNextPage) return;
@@ -119,21 +136,6 @@ export default function HomePage() {
     const spores = pages?.flatMap((page) => page?.spores ?? []);
     return spores as QuerySpore[];
   }, [sporesData]);
-
-  const filteredSpores = useMemo(() => {
-    if (contentType === SporeContentType.All) {
-      return spores;
-    }
-    if (contentType === SporeContentType.Image) {
-      return spores.filter((spore) =>
-        isImageMIMEType(spore.contentType as any),
-      );
-    }
-    if (contentType === SporeContentType.Text) {
-      return spores.filter((spore) => isTextMIMEType(spore.contentType as any));
-    }
-    return spores;
-  }, [spores, contentType]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -203,7 +205,7 @@ export default function HomePage() {
       <Container py="48px" size="xl">
         <SporeGrid
           title="Explore All Spores"
-          spores={filteredSpores}
+          spores={spores}
           filter={
             <Group mt="16px">
               {[

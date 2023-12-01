@@ -2,14 +2,15 @@ import TransferModal from '@/components/TransferModal';
 import { modalStackAtom } from '@/state/modal';
 import { showSuccess } from '@/utils/notifications';
 import { sendTransaction } from '@/utils/transaction';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { BI, OutPoint, Script, config, helpers } from '@ckb-lumos/lumos';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import {
+  ClusterDataProps,
   transferCluster as _transferCluster,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
 import { useConnect } from '../useConnect';
@@ -25,8 +26,9 @@ export default function useTransferClusterModal(
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-  const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
-  const { refresh: refreShCluster } = useClusterQuery(cluster?.id);
+  const queryClient = useQueryClient();
+  const { data: { capacityMargin } = {}, refresh: refreShCluster } =
+    useClusterQuery(cluster?.id);
   const { refresh: refreshClustersByAddress } =
     useClustersByAddressQuery(address);
 
@@ -34,17 +36,40 @@ export default function useTransferClusterModal(
 
   const transferCluster = useCallback(
     async (...args: Parameters<typeof _transferCluster>) => {
-      const { txSkeleton } = await _transferCluster(...args);
+      const { txSkeleton, outputIndex } = await _transferCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
-  const onSuccess = useCallback(async () => {
-    await Promise.all([refreShCluster(), refreshClustersByAddress()]);
-  }, [refreShCluster, refreshClustersByAddress]);
+  const onSuccess = useCallback(
+    async (outPoint: OutPoint, variables: { toLock: Script }) => {
+      await Promise.all([refreShCluster(), refreshClustersByAddress()]);
+      queryClient.setQueryData(
+        ['cluster', cluster?.id],
+        (data: { cluster: QueryCluster }) => {
+          const cluster = {
+            ...data.cluster,
+            cell: {
+              ...data.cluster.cell,
+              cellOutput: {
+                ...data.cluster.cell?.cellOutput,
+                lock: variables.toLock,
+              },
+              outPoint,
+            },
+          };
+          return { cluster };
+        },
+      );
+    },
+    [cluster, queryClient, refreShCluster, refreshClustersByAddress],
+  );
 
   const transferClusterMutation = useMutation({
     mutationFn: transferCluster,

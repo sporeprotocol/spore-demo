@@ -1,17 +1,21 @@
 import { graphql } from '@/gql';
 import { GetInfiniteClustersQueryQuery } from '@/gql/graphql';
 import { graphQLClient } from '@/utils/graphql';
+import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import request from 'graphql-request';
 
 const infiniteClustersQueryDocument = graphql(`
-  query GetInfiniteClustersQuery($first: Int, $after: String) {
-    clusters(first: $first, after: $after) {
+  query GetInfiniteClustersQuery(
+    $first: Int
+    $after: String
+    $contentTypes: [String!]
+  ) {
+    clusters: topClusters(first: $first, after: $after) {
       id
       name
       description
       capacityMargin
-      spores {
+      spores(filter: { contentTypes: $contentTypes }) {
         id
         clusterId
         contentType
@@ -46,7 +50,11 @@ export function useInfiniteClustersQuery() {
   } = useInfiniteQuery({
     queryKey: ['infiniteClusters'],
     queryFn: async ({ pageParam }) => {
-      const params = { first: 12, after: pageParam };
+      const params = {
+        first: 12,
+        after: pageParam,
+        contentTypes: SUPPORTED_MIME_TYPE,
+      };
       const response = await graphQLClient.request(
         infiniteClustersQueryDocument,
         params,

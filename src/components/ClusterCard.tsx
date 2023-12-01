@@ -44,6 +44,7 @@ const useStyles = createStyles((theme) => ({
     },
   },
   description: {
+    height: '21px',
     textOverflow: 'ellipsis',
     maxWidth: '100%',
     whiteSpace: 'nowrap',

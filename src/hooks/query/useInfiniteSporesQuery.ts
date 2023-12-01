@@ -5,8 +5,16 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import request from 'graphql-request';
 
 const infiniteSporesQueryDocument = graphql(`
-  query GetInfiniteSporesQuery($first: Int, $after: String) {
-    spores(first: $first, after: $after) {
+  query GetInfiniteSporesQuery(
+    $first: Int
+    $after: String
+    $contentTypes: [String!]
+  ) {
+    spores(
+      first: $first
+      after: $after
+      filter: { contentTypes: $contentTypes }
+    ) {
       id
       contentType
       capacityMargin
@@ -33,7 +41,7 @@ const infiniteSporesQueryDocument = graphql(`
   }
 `);
 
-export function useInfiniteSporesQuery() {
+export function useInfiniteSporesQuery(contentTypes?: string[]) {
   const {
     data,
     error,
@@ -43,9 +51,9 @@ export function useInfiniteSporesQuery() {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ['infiniteSpores'],
+    queryKey: ['infiniteSpores', contentTypes],
     queryFn: async ({ pageParam }) => {
-      const params = { first: 12, after: pageParam };
+      const params = { first: 12, after: pageParam, contentTypes };
       const response = await graphQLClient.request(
         infiniteSporesQueryDocument,
         params,

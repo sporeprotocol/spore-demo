@@ -4,8 +4,8 @@ import { graphQLClient } from '@/utils/graphql';
 import { useRefreshableQuery } from './useRefreshableQuery';
 
 const sporesByAddressQueryDocument = graphql(`
-  query GetSporesByAddress($address: String) {
-    spores(filter: { address: $address }) {
+  query GetSporesByAddress($address: String!) {
+    spores(filter: { addresses: [$address] }) {
       id
       contentType
       capacityMargin
