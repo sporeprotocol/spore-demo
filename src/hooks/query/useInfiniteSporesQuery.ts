@@ -7,8 +7,27 @@ const infiniteSporesQueryDocument = graphql(`
   query GetInfiniteSporesQuery($first: Int, $after: String) {
     spores(first: $first, after: $after) {
       id
-      clusterId
       contentType
+      capacityMargin
+      cluster {
+        id
+        name
+        description
+      }
+      cell {
+        cellOutput {
+          capacity
+          lock {
+            args
+            codeHash
+            hashType
+          }
+        }
+        outPoint {
+          txHash
+          index
+        }
+      }
     }
   }
 `);

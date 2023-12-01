@@ -3,7 +3,7 @@ import {
   createSpore,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { isAnyoneCanPay, isSameScript } from '@/utils/script';
@@ -17,6 +17,8 @@ import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
 import { BI } from '@ckb-lumos/lumos';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
+import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 
 export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
@@ -25,7 +27,12 @@ export default function useMintSporeModal(id?: string) {
   const { address, lock, signTransaction } = useConnect();
   const router = useRouter();
   const modalId = useId();
-  const queryClient = useQueryClient();
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
+
+  const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
+    mindedSporeData?.clusterId,
+  );
 
   const { data: clusters = [] } = useClustersByAddressQuery(address);
 
@@ -52,14 +59,10 @@ export default function useMintSporeModal(id?: string) {
 
   const onSuccess = useCallback(
     async (_: unknown, variables: { data: SporeDataProps }) => {
-      queryClient.refetchQueries({
-        queryKey: ['sporesByAddress', address],
-      });
-      queryClient.refetchQueries({
-        queryKey: ['clusterSpores', variables.data.clusterId],
-      });
+      setMindedSporeData(variables.data);
+      await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
     },
-    [address, queryClient],
+    [refreshClusterSpores, refreshSporesByAddress],
   );
 
   const addSporeMutation = useMutation({

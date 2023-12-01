@@ -8,6 +8,26 @@ const topClustersQueryDocument = graphql(`
       id
       name
       description
+      capacityMargin
+      spores {
+        id
+        clusterId
+        contentType
+      }
+      cell {
+        cellOutput {
+          capacity
+          lock {
+            args
+            codeHash
+            hashType
+          }
+        }
+        outPoint {
+          txHash
+          index
+        }
+      }
     }
   }
 `);
@@ -18,7 +38,7 @@ export function useTopClustersQuery(limit = 4) {
     queryFn: async () =>
       request('/api/graphql', topClustersQueryDocument, { first: limit }),
   });
-  const clusters = (data?.topClusters) ?? [];
+  const clusters = data?.topClusters ?? [];
   return {
     data: clusters,
     isLoading,

@@ -8,8 +8,27 @@ const sporesByAddressQueryDocument = graphql(`
   query GetSporesByAddress($address: String) {
     spores(filter: { address: $address }) {
       id
-      clusterId
       contentType
+      capacityMargin
+      cluster {
+        id
+        name
+        description
+      }
+      cell {
+        cellOutput {
+          capacity
+          lock {
+            args
+            codeHash
+            hashType
+          }
+        }
+        outPoint {
+          txHash
+          index
+        }
+      }
     }
   }
 `);
@@ -19,13 +38,21 @@ export function useSporesByAddressQuery(address: string) {
 
   const { data, ...rest } = useQuery({
     queryKey: ['sporesByAddress', address],
-    queryFn: async () => 
-      request(
-        '/api/graphql',
-        sporesByAddressQueryDocument,
-        { address },
-        headersRef.current,
-      ),
+    queryFn: async () => {
+      const fetch = () =>
+        request(
+          '/api/graphql',
+          sporesByAddressQueryDocument,
+          { address },
+          headersRef.current,
+        );
+      const response = await fetch();
+      if (headersRef.current.get('Cache-Control') !== 'no-cache') {
+        headersRef.current.set('Cache-Control', 'no-cache');
+        fetch().finally(() => headersRef.current.delete('Cache-Control'));
+      }
+      return response;
+    },
     enabled: !!address,
   });
   const spores: QuerySpore[] = data?.spores ?? [];

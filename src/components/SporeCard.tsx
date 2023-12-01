@@ -24,7 +24,6 @@ import { isSameScript } from '@/utils/script';
 import SporeCoverRender from './SporeCoverRender';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 import { QuerySpore } from '@/hooks/query/type';
-import { useSporeQuery } from '@/hooks/query/useSporeQuery';
 
 export interface SporeCardProps {
   spore: QuerySpore;
@@ -101,11 +100,10 @@ export function SporeSkeletonCard() {
   );
 }
 
-export default function SporeCard(props: SporeCardProps) {
+export default function SporeCard({ spore }: SporeCardProps) {
   const { classes } = useStyles();
   const [hovered, { close, open }] = useDisclosure(false);
   const { lock } = useConnect();
-  const { data: spore } = useSporeQuery(props.spore.id, props.spore);
 
   const isOwner = useMemo(
     () => isSameScript(lock, spore?.cell?.cellOutput.lock),

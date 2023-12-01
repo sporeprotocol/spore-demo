@@ -9,6 +9,26 @@ const clustersByAddressQueryDocument = graphql(`
       id
       name
       description
+      capacityMargin
+      spores {
+        id
+        clusterId
+        contentType
+      }
+      cell {
+        cellOutput {
+          capacity
+          lock {
+            args
+            codeHash
+            hashType
+          }
+        }
+        outPoint {
+          txHash
+          index
+        }
+      }
     }
   }
 `);

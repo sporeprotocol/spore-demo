@@ -37,6 +37,8 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   );
 
   const onSuccess = useCallback(async () => {
+    await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+
     const updater = (data: { spores: QuerySpore[] }) => {
       const spores = data.spores.filter((s) => s.id !== spore?.id);
       return {
@@ -47,8 +49,6 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
     if (spore?.clusterId) {
       queryClient.setQueryData(['clusterSpores', spore.clusterId], updater);
     }
-    await refreshSporesByAddress();
-    await refreshClusterSpores();
   }, [
     address,
     queryClient,

@@ -8,8 +8,22 @@ const clusterSporesQueryDocument = graphql(`
   query GetClusterSporesQuery($clusterId: String) {
     spores(filter: { clusterId: $clusterId }) {
       id
-      clusterId
       contentType
+      capacityMargin
+      cell {
+        cellOutput {
+          capacity
+          lock {
+            args
+            codeHash
+            hashType
+          }
+        }
+        outPoint {
+          txHash
+          index
+        }
+      }
     }
   }
 `);
@@ -30,7 +44,6 @@ export function useClusterSporesQuery(id: string | undefined) {
       if (headersRef.current.get('Cache-Control') !== 'no-cache') {
         headersRef.current.set('Cache-Control', 'no-cache');
         fetch().finally(() => headersRef.current.delete('Cache-Control'));
-        headersRef.current.delete('Cache-Control');
       }
       return response;
     },
