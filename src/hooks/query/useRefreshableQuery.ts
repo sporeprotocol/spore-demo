@@ -18,7 +18,6 @@ export function useRefreshableQuery<
   const queryResult = useQuery({
     queryKey,
     queryFn: async (ctx) => {
-      console.log(ctx);
       const fetch = () => {
         if (!ctx.meta) {
           ctx.meta = {};

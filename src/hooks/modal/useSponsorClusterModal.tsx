@@ -2,13 +2,13 @@ import {
   predefinedSporeConfigs,
   transferCluster as _transferCluster,
 } from '@spore-sdk/core';
-import { BI } from '@ckb-lumos/lumos';
-import { useCallback, useEffect } from 'react';
+import { BI, OutPoint } from '@ckb-lumos/lumos';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { modalStackAtom } from '@/state/modal';
 import { useAtomValue } from 'jotai';
@@ -16,6 +16,7 @@ import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
 import { QueryCluster } from '../query/type';
 import { useClusterQuery } from '../query/useClusterQuery';
+import { cloneDeep, update } from 'lodash-es';
 
 export default function useSponsorClusterModal(
   cluster: QueryCluster | undefined,
@@ -27,27 +28,50 @@ export default function useSponsorClusterModal(
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
-
-  // FIXME
-  // const { refetch } = trpc.cluster.get.useQuery(
-  //   { id: cluster?.id },
-  //   { enabled: false },
-  // );
+  const queryClient = useQueryClient();
+  const { refresh: refreShCluster } = useClusterQuery(cluster?.id);
+  const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorCluster = useCallback(
     async (...args: Parameters<typeof _transferCluster>) => {
-      const { txSkeleton } = await _transferCluster(...args);
+      const { txSkeleton, outputIndex } = await _transferCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
+  const onSuccess = useCallback(
+    async (outPoint: OutPoint) => {
+      if (!cluster) return;
+      const capacityMargin = nextCapacityMarginRef.current;
+      const capacity = BI.from(cluster?.cell?.cellOutput.capacity ?? 0)
+        .add(BI.from(capacityMargin).sub(cluster?.capacityMargin ?? 0))
+        .toHexString();
+
+      queryClient.setQueryData(
+        ['cluster', cluster.id],
+        (data: { cluster: QueryCluster }) => {
+          const { cluster } = data;
+          const newCluster = cloneDeep(cluster);
+          update(newCluster, 'capacityMargin', () => capacityMargin);
+          update(newCluster, 'cell.cellOutput.capacity', () => capacity);
+          update(newCluster, 'cell.outPoint', () => outPoint);
+          return { cluster: newCluster };
+        },
+      );
+      await refreShCluster();
+    },
+    [cluster, queryClient, refreShCluster],
+  );
+
   const sponsorClusterMutation = useMutation({
     mutationFn: sponsorCluster,
-    // FIXME
-    // onSuccess: () => refetch(),
+    onSuccess,
   });
   const loading =
     sponsorClusterMutation.isPending && !sponsorClusterMutation.isError;
@@ -58,15 +82,17 @@ export default function useSponsorClusterModal(
         return;
       }
       const { amount } = values;
-      const newCapacity = BI.from(capacityMargin).add(
+      const nextCapacityMargin = BI.from(capacityMargin).add(
         BI.from(amount).mul(100_000_000),
       );
+      nextCapacityMarginRef.current = nextCapacityMargin.toHexString();
+
       await sponsorClusterMutation.mutateAsync({
         outPoint: cluster.cell?.outPoint!,
         fromInfos: [address],
         toLock: lock!,
         config: predefinedSporeConfigs.Aggron4,
-        capacityMargin: newCapacity.toHexString(),
+        capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });
       showSuccess(

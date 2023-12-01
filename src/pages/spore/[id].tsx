@@ -288,7 +288,7 @@ export default function SporePage() {
                 />
               ) : (
                 <Popover
-                  label={`The amount of CKB locked up on-chain, redeemable upon destruction`}
+                  label={`The amount of CKBytes locked up on-chain, redeemable upon destruction`}
                   width={320}
                   position="bottom-start"
                 >
@@ -300,7 +300,7 @@ export default function SporePage() {
                       display: 'inline',
                     }}
                   >
-                    {amount.toLocaleString('en-US')} CKB
+                    {amount.toLocaleString('en-US')} CKBytes
                   </Title>
                 </Popover>
               )}

@@ -1,5 +1,6 @@
 import { graphql } from '@/gql';
 import { GetInfiniteClustersQueryQuery } from '@/gql/graphql';
+import { graphQLClient } from '@/utils/graphql';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import request from 'graphql-request';
 
@@ -45,10 +46,15 @@ export function useInfiniteClustersQuery() {
   } = useInfiniteQuery({
     queryKey: ['infiniteClusters'],
     queryFn: async ({ pageParam }) => {
-      return request('/api/graphql', infiniteClustersQueryDocument, {
-        first: 12,
-        after: pageParam,
-      });
+      const params = { first: 12, after: pageParam };
+      const response = await graphQLClient.request(
+        infiniteClustersQueryDocument,
+        params,
+      );
+      const headers = new Headers();
+      headers.set('cache-control', 'no-cache');
+      graphQLClient.request(infiniteClustersQueryDocument, params, headers);
+      return response;
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage: GetInfiniteClustersQueryQuery) => {

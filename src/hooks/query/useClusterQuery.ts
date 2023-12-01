@@ -3,6 +3,8 @@ import request from 'graphql-request';
 import { useQuery } from '@tanstack/react-query';
 import { QueryCluster } from './type';
 import { useRef } from 'react';
+import { useRefreshableQuery } from './useRefreshableQuery';
+import { graphQLClient } from '@/utils/graphql';
 
 const clusterQueryDocument = graphql(`
   query GetClusterQuery($id: String!) {
@@ -34,42 +36,24 @@ const clusterQueryDocument = graphql(`
   }
 `);
 
-export function useClusterQuery(
-  id: string | undefined,
-  initialData?: QueryCluster,
-) {
-  const headersRef = useRef<Headers>(new Headers());
-  const { data, ...rest } = useQuery({
+export function useClusterQuery(id: string | undefined) {
+  const { data, ...rest } = useRefreshableQuery({
     queryKey: ['cluster', id],
-    queryFn: async () => {
-      const fetch = () =>
-        request('/api/graphql', clusterQueryDocument, { id: id! });
-      const response = await fetch();
-      if (headersRef.current.get('Cache-Control') !== 'no-cache') {
-        headersRef.current.set('Cache-Control', 'no-cache');
-        fetch().finally(() => headersRef.current.delete('Cache-Control'));
-        headersRef.current.delete('Cache-Control');
-      }
-      return response;
+    queryFn: async (ctx) => {
+      return graphQLClient.request(
+        clusterQueryDocument,
+        { id: id! },
+        ctx.meta?.headers as Headers,
+      );
     },
     enabled: !!id,
-    placeholderData: {
-      cluster: initialData,
-    },
   });
   const cluster = data?.cluster as QueryCluster | undefined;
   const isLoading = rest.isLoading || rest.isPending;
-
-  const refresh = async () => {
-    headersRef.current.set('Cache-Control', 'no-cache');
-    await rest.refetch();
-    headersRef.current.delete('Cache-Control');
-  };
 
   return {
     ...rest,
     data: cluster,
     isLoading,
-    refresh,
   };
 }

@@ -1,8 +1,7 @@
 import { graphql } from '@/gql';
-import request from 'graphql-request';
-import { useQuery } from '@tanstack/react-query';
 import { QuerySpore } from './type';
-import { useCallback, useRef } from 'react';
+import { useRefreshableQuery } from './useRefreshableQuery';
+import { graphQLClient } from '@/utils/graphql';
 
 const clusterSporesQueryDocument = graphql(`
   query GetClusterSporesQuery($clusterId: String) {
@@ -29,40 +28,28 @@ const clusterSporesQueryDocument = graphql(`
 `);
 
 export function useClusterSporesQuery(id: string | undefined) {
-  const headersRef = useRef<Headers>(new Headers());
-  const { data, ...rest } = useQuery({
+  const { data, ...rest } = useRefreshableQuery({
     queryKey: ['clusterSpores', id],
-    queryFn: async () => {
+    queryFn: async (ctx) => {
       if (!id) {
         return undefined;
       }
-      const fetch = () =>
-        request('/api/graphql', clusterSporesQueryDocument, {
+      return graphQLClient.request(
+        clusterSporesQueryDocument,
+        {
           clusterId: id,
-        });
-      const response = await fetch();
-      if (headersRef.current.get('Cache-Control') !== 'no-cache') {
-        headersRef.current.set('Cache-Control', 'no-cache');
-        fetch().finally(() => headersRef.current.delete('Cache-Control'));
-      }
-      return response;
+        },
+        ctx.meta?.headers as Headers,
+      );
     },
     enabled: !!id,
   });
   const spores = (data?.spores as QuerySpore[]) ?? [];
-
-  const { refetch } = rest;
-  const refresh = useCallback(async () => {
-    headersRef.current.set('Cache-Control', 'no-cache');
-    await refetch();
-    headersRef.current.delete('Cache-Control');
-  }, [refetch]);
-
   const isLoading = rest.isLoading || rest.isPending;
 
   return {
+    ...rest,
     data: spores,
     isLoading,
-    refresh,
   };
 }

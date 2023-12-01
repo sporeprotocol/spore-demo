@@ -1,5 +1,5 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
@@ -25,6 +25,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
   const queryClient = useQueryClient();
+  const { refresh: refreshSpore } = useSporeQuery(spore?.id);
   const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorSpore = useCallback(
@@ -40,25 +41,29 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
     [signTransaction],
   );
 
-  const onSuccess = useCallback(async (outPoint: OutPoint) => {
-    if (!spore) return;
-    const capacityMargin = nextCapacityMarginRef.current;
-    const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
-      .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
-      .toHexString();
+  const onSuccess = useCallback(
+    async (outPoint: OutPoint) => {
+      if (!spore) return;
+      const capacityMargin = nextCapacityMarginRef.current;
+      const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
+        .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
+        .toHexString();
 
-    queryClient.setQueryData(
-      ['spore', spore.id],
-      (data: { spore: QuerySpore }) => {
-        const { spore } = data;
-        const newSpore = cloneDeep(spore);
-        update(newSpore, 'capacityMargin', () => capacityMargin);
-        update(newSpore, 'cell.cellOutput.capacity', () => capacity);
-        update(newSpore, 'cell.outPoint', () => outPoint);
-        return { spore: newSpore };
-      },
-    );
-  }, [queryClient, spore]);
+      queryClient.setQueryData(
+        ['spore', spore.id],
+        (data: { spore: QuerySpore }) => {
+          const { spore } = data;
+          const newSpore = cloneDeep(spore);
+          update(newSpore, 'capacityMargin', () => capacityMargin);
+          update(newSpore, 'cell.cellOutput.capacity', () => capacity);
+          update(newSpore, 'cell.outPoint', () => outPoint);
+          return { spore: newSpore };
+        },
+      );
+      await refreshSpore();
+    },
+    [queryClient, refreshSpore, spore],
+  );
 
   const sponsorSporeMutation = useMutation({
     mutationFn: sponsorSpore,

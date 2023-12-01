@@ -16,6 +16,7 @@ import { useConnect } from '../useConnect';
 import useSponsorClusterModal from './useSponsorClusterModal';
 import { QueryCluster } from '../query/type';
 import { useClusterQuery } from '../query/useClusterQuery';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
 export default function useTransferClusterModal(
   cluster: QueryCluster | undefined,
@@ -25,9 +26,9 @@ export default function useTransferClusterModal(
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
-
-  // FIXME
-  // const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
+  const { refresh: refreShCluster } = useClusterQuery(cluster?.id);
+  const { refresh: refreshClustersByAddress } =
+    useClustersByAddressQuery(address);
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);
 
@@ -41,10 +42,13 @@ export default function useTransferClusterModal(
     [signTransaction],
   );
 
+  const onSuccess = useCallback(async () => {
+    await Promise.all([refreShCluster(), refreshClustersByAddress()]);
+  }, [refreShCluster, refreshClustersByAddress]);
+
   const transferClusterMutation = useMutation({
     mutationFn: transferCluster,
-    // FIXME
-    // onSuccess: () => refetch(),
+    onSuccess,
   });
   const loading =
     transferClusterMutation.isPending && !transferClusterMutation.isError;

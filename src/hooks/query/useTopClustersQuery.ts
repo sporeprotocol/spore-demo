@@ -1,6 +1,8 @@
 import { graphql } from '@/gql';
 import request from 'graphql-request';
 import { useQuery } from '@tanstack/react-query';
+import { useRefreshableQuery } from './useRefreshableQuery';
+import { graphQLClient } from '@/utils/graphql';
 
 const topClustersQueryDocument = graphql(`
   query GetTopClustersQuery($first: Int) {
@@ -33,12 +35,18 @@ const topClustersQueryDocument = graphql(`
 `);
 
 export function useTopClustersQuery(limit = 4) {
-  const { data, isLoading } = useQuery({
+  const { data, ...rest } = useRefreshableQuery({
     queryKey: ['topClusters'],
-    queryFn: async () =>
-      request('/api/graphql', topClustersQueryDocument, { first: limit }),
+    queryFn: async (ctx) =>
+      graphQLClient.request(
+        topClustersQueryDocument,
+        { first: limit },
+        ctx.meta?.headers as Headers,
+      ),
   });
   const clusters = data?.topClusters ?? [];
+  const isLoading = rest.isLoading || rest.isPending;
+
   return {
     data: clusters,
     isLoading,

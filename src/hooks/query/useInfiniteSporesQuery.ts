@@ -1,5 +1,6 @@
 import { graphql } from '@/gql';
 import { GetInfiniteSporesQueryQuery } from '@/gql/graphql';
+import { graphQLClient } from '@/utils/graphql';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import request from 'graphql-request';
 
@@ -44,10 +45,15 @@ export function useInfiniteSporesQuery() {
   } = useInfiniteQuery({
     queryKey: ['infiniteSpores'],
     queryFn: async ({ pageParam }) => {
-      return request('/api/graphql', infiniteSporesQueryDocument, {
-        first: 12,
-        after: pageParam,
-      });
+      const params = { first: 12, after: pageParam };
+      const response = await graphQLClient.request(
+        infiniteSporesQueryDocument,
+        params,
+      );
+      const headers = new Headers();
+      headers.set('cache-control', 'no-cache');
+      graphQLClient.request(infiniteSporesQueryDocument, params, headers);
+      return response;
     },
     initialPageParam: undefined,
     getNextPageParam: (lastPage: GetInfiniteSporesQueryQuery) => {

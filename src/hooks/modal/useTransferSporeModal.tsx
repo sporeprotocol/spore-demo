@@ -15,6 +15,7 @@ import { modalStackAtom } from '@/state/modal';
 import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
+import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 
 export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -22,8 +23,11 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
   const { refresh: refreshSpore } = useSporeQuery(spore?.id);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
+    spore?.clusterId || undefined,
+  );
 
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
@@ -38,9 +42,12 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   );
 
   const onSuccess = useCallback(async () => {
-    await refreshSpore();
-    await refreshSporesByAddress();
-  }, [refreshSpore, refreshSporesByAddress]);
+    await Promise.all([
+      refreshSpore(),
+      refreshSporesByAddress(),
+      refreshClusterSpores(),
+    ]);
+  }, [refreshClusterSpores, refreshSpore, refreshSporesByAddress]);
 
   const transferSporeMutation = useMutation({
     mutationFn: transferSpore,
@@ -71,8 +78,7 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
 
   useEffect(() => {
     if (opened) {
-      // FIXME
-      // refetchCapacityMargin();
+      refreshSpore();
       modals.open({
         modalId,
         title: 'Transfer spore?',
@@ -107,6 +113,7 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
     open,
     spore,
     capacityMargin,
+    refreshSpore,
   ]);
 
   return {

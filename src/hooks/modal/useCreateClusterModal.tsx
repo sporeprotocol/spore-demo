@@ -10,6 +10,7 @@ import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { BI } from '@ckb-lumos/lumos';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -17,6 +18,8 @@ export default function useCreateClusterModal() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
+  const { refresh: refreShClustersByAddress } =
+    useClustersByAddressQuery(address);
   const modalId = useId();
 
   const addCluster = useCallback(
@@ -31,7 +34,11 @@ export default function useCreateClusterModal() {
     [signTransaction],
   );
 
-  const addClusterMutation = useMutation({ mutationFn: addCluster });
+  const onSuccess = useCallback(async () => {
+    await refreShClustersByAddress();
+  }, [refreShClustersByAddress]);
+
+  const addClusterMutation = useMutation({ mutationFn: addCluster, onSuccess });
   const loading = addClusterMutation.isPending && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
