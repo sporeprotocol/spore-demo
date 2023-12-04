@@ -28,6 +28,7 @@
     "@hapi/boom": "^10.0.1",
     "@joyid/core": "^0.1.3",
     "@joyid/evm": "0.2.0-beta.4",
+    "@keyv/redis": "^2.8.1",
     "@mantine/core": "^6.0.21",
     "@mantine/dropzone": "^6.0.21",
     "@mantine/form": "^6.0.21",

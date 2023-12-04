@@ -3,9 +3,10 @@ import { createContext, createApolloServer } from 'spore-graphql';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl';
 import { KeyvAdapter } from '@apollo/utils.keyvadapter';
-import { kv } from '@vercel/kv';
+import KeyvRedis from '@keyv/redis';
 import Keyv, { Store } from 'keyv';
-import { NextApiRequest, NextApiResponse } from 'next';
+import { GraphQLRequestContext } from '@apollo/server';
+import { MD5 } from 'crypto-js';
 
 export const config = {
   maxDuration: 300,
@@ -13,47 +14,71 @@ export const config = {
 
 export const fetchCache = 'force-no-store';
 
+const keyvRedis = new KeyvRedis(process.env.KV_URL!);
+
 const store: Store<string> = {
   async get(key: string): Promise<string | undefined> {
-    const val = await kv.get(key);
+    const val = await keyvRedis.get(key);
     return val as string | undefined;
   },
   async set(key: string, value: string, ttl?: number | undefined) {
     if (ttl) {
-      return kv.set(key, value, { px: ttl });
+      return keyvRedis.set(key, value, ttl);
     }
-    return kv.set(key, value);
+    return keyvRedis.set(key, value);
   },
   async delete(key: string): Promise<boolean> {
-    const count = await kv.del(key);
-    return count === 1;
+    return keyvRedis.delete(key);
   },
   async clear(): Promise<void> {
-    await kv.flushall();
+    await keyvRedis.clear();
   },
 };
 
 const cache = new KeyvAdapter(new Keyv({ store }));
 
+function generateCacheKey(
+  requestContext: GraphQLRequestContext<Record<string, any>>,
+) {
+  const { request } = requestContext;
+  const { query, variables } = request;
+  return MD5(JSON.stringify({ query, variables })).toString();
+}
+
 export const server = createApolloServer({
   introspection: true,
-  cache,
-  plugins: [
-    ApolloServerPluginCacheControl({
-      defaultMaxAge: 60 * 60 * 24 * 365,
-    }),
-    responseCachePlugin({
-      shouldReadFromCache: async (requestContext) => {
-        if (
-          requestContext.request.http?.headers.get('Cache-Control') ===
-          'no-cache'
-        ) {
-          return false;
-        }
-        return true;
-      },
-    }),
-  ],
+  ...(process.env.NODE_ENV !== 'development' && process.env.KV_URL
+    ? {
+        cache,
+        plugins: [
+          ApolloServerPluginCacheControl({
+            defaultMaxAge: 60 * 60 * 24 * 365,
+          }),
+          responseCachePlugin({
+            generateCacheKey,
+            shouldReadFromCache: async (requestContext) => {
+              return (
+                requestContext.request.http?.headers.get('Cache-Control') !==
+                'no-cache'
+              );
+            },
+            shouldWriteToCache: async (requestContext) => {
+              if (
+                requestContext.response.http?.headers.get('Cache-Control') ===
+                'no-cache'
+              ) {
+                return true;
+              }
+              const key = generateCacheKey(requestContext);
+              if (!(await requestContext.cache.get(key))) {
+                return true;
+              }
+              return false;
+            },
+          }),
+        ],
+      }
+    : {}),
 });
 
 export const context = createContext();
