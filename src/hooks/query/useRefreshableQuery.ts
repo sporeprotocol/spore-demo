@@ -26,14 +26,11 @@ export function useRefreshableQuery<
         return Promise.resolve(queryFn?.(ctx));
       };
       const response = await fetch();
-      if (headersRef.current.get('Cache-Control') !== 'no-cache') {
-        headersRef.current.set('Cache-Control', 'no-cache');
-        fetch().finally(() => headersRef.current.delete('Cache-Control'));
-      }
       return response;
     },
     enabled,
     initialData,
+    refetchOnWindowFocus: true,
   });
 
   const refresh = useCallback(async () => {
