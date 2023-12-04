@@ -43,6 +43,12 @@ const useStyles = createStyles((theme) => ({
       borderRadius: '16px',
     },
   },
+  title: {
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+  },
   skeleton: {
     height: '100%',
     width: '100%',
@@ -114,7 +120,8 @@ export default function SporeCard({ spore }: SporeCardProps) {
   const meltSporeModal = useMeltSporeModal(spore);
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
-  const amount = BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8;
+  const amount =
+    BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8;
 
   if (!spore) {
     return <SporeSkeletonCard />;
@@ -137,7 +144,12 @@ export default function SporeCard({ spore }: SporeCardProps) {
           </Card.Section>
           <Box p="24px">
             <Flex direction="column">
-              <Text color="rgba(255, 255, 255, 0.8)" size="sm" mb="8px">
+              <Text
+                color="rgba(255, 255, 255, 0.8)"
+                className={classes.title}
+                size="sm"
+                mb="8px"
+              >
                 {spore.cluster?.name ?? '<No Cluster>'}
               </Text>
               <Title color="white" order={5} mb="8px">

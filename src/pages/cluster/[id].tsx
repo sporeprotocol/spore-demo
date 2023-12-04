@@ -31,7 +31,7 @@ import { showSuccess } from '@/utils/notifications';
 import DropMenu from '@/components/DropMenu';
 import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
 import { useClusterQuery } from '@/hooks/query/useClusterQuery';
-import { QuerySpore } from '@/hooks/query/type';
+import { useClusterSporesQuery } from '@/hooks/query/useClusterSporesQuery';
 
 export const useStyles = createStyles((theme) => ({
   header: {
@@ -113,10 +113,7 @@ export default function ClusterPage() {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
   const { data: cluster, isLoading } = useClusterQuery(id as string);
-  const spores = useMemo(() => {
-    const spores = cluster?.spores || [];
-    return spores as QuerySpore[];
-  }, [cluster]);
+  const { data: spores, isLoading: isSporesLoading } = useClusterSporesQuery(cluster?.id);
 
   const mintSporeModal = useMintSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);
@@ -393,9 +390,9 @@ export default function ClusterPage() {
       <ClusterOpenGraph id={id as string} />
       <Container py="48px" size="xl">
         <SporeGrid
-          title={isLoading ? '' : `${spores.length ?? '0'} Spores`}
+          title={isSporesLoading ? '' : `${spores.length ?? '0'} Spores`}
           spores={spores.map((spore) => ({ ...spore, cluster }))}
-          isLoading={isLoading}
+          isLoading={isSporesLoading}
         />
       </Container>
     </Layout>

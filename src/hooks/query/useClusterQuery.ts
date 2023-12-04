@@ -1,24 +1,16 @@
 import { graphql } from '@/gql';
-import request from 'graphql-request';
-import { useQuery } from '@tanstack/react-query';
 import { QueryCluster } from './type';
-import { useRef } from 'react';
 import { useRefreshableQuery } from './useRefreshableQuery';
 import { graphQLClient } from '@/utils/graphql';
 import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 
 const clusterQueryDocument = graphql(`
-  query GetClusterQuery($id: String!, $contentTypes: [String!]) {
+  query GetClusterQuery($id: String!) {
     cluster(id: $id) {
       id
       name
       description
       capacityMargin
-      spores(filter: { contentTypes: $contentTypes }) {
-        id
-        clusterId
-        contentType
-      }
       cell {
         cellOutput {
           capacity
