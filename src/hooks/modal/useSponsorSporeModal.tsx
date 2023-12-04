@@ -67,19 +67,42 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
         .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
         .toHexString();
 
+      const updateSpore = (spore: QuerySpore) => {
+        update(spore, 'capacityMargin', () => capacityMargin);
+        update(spore, 'cell.cellOutput.capacity', () => capacity);
+        update(spore, 'cell.outPoint', () => outPoint);
+        return spore;
+      };
+
       queryClient.setQueryData(
         ['spore', spore.id],
         (data: { spore: QuerySpore }) => {
           const { spore } = data;
-          const newSpore = cloneDeep(spore);
-          update(newSpore, 'capacityMargin', () => capacityMargin);
-          update(newSpore, 'cell.cellOutput.capacity', () => capacity);
-          update(newSpore, 'cell.outPoint', () => outPoint);
+          const newSpore = updateSpore(cloneDeep(spore));
           return { spore: newSpore };
         },
       );
+
+      const sporesUpdater = (data: { spores: QuerySpore[] }) => {
+        const spores = data.spores.map((spore) => {
+          if (spore.id !== spore.id) return spore;
+          return updateSpore(cloneDeep(spore));
+        });
+        return { spores };
+      };
+      queryClient.setQueryData(
+        ['sporesByAddress', ownerAddress],
+        sporesUpdater,
+      );
+      if (spore.clusterId) {
+        queryClient.setQueryData(
+          ['clusterSpores', spore.clusterId],
+          sporesUpdater,
+        );
+      }
     },
     [
+      ownerAddress,
       queryClient,
       refreshClusterSpores,
       refreshSpore,

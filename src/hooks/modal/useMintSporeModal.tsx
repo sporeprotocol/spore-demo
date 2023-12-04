@@ -55,14 +55,18 @@ export default function useMintSporeModal(id?: string) {
     async (_: unknown, variables: { data: SporeDataProps }) => {
       setMindedSporeData(variables.data);
       await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
-      queryClient.setQueryData(
-        ['sporesByAddress', address],
-        (data: { spores: SporeDataProps[] }) => {
-          return {
-            spores: [variables.data, ...data.spores],
-          };
-        },
-      );
+      const sporesUpdater = (data: { spores: SporeDataProps[] }) => {
+        return {
+          spores: [variables.data, ...data.spores],
+        };
+      };
+      queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
+      if (variables.data.clusterId) {
+        queryClient.setQueryData(
+          ['clusterSpores', variables.data.clusterId],
+          sporesUpdater,
+        );
+      }
     },
     [address, queryClient, refreshClusterSpores, refreshSporesByAddress],
   );
