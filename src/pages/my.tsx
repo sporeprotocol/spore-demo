@@ -29,7 +29,7 @@ import { useMemo, useState } from 'react';
 const useStyles = createStyles((theme) => ({
   banner: {
     height: '280px',
-    overflowY: 'hidden',
+    overflow: 'hidden',
     borderBottomWidth: '2px',
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
@@ -96,10 +96,8 @@ export default function MySpacePage() {
   const [showSpores, setShowSpores] = useState(true);
 
   const { data: capacity = '0x0' } = useCapacity(address as string);
-  const { data: spores, isLoading: isSporesLoading } =
-    useSporesByAddressQuery(address);
-  const { data: clusters, isLoading: isClustersLoading } =
-    useClustersByAddressQuery(address);
+  const { data: spores, isLoading: isSporesLoading } = useSporesByAddressQuery(address);
+  const { data: clusters, isLoading: isClustersLoading } = useClustersByAddressQuery(address);
 
   const balance = useMemo(() => {
     if (!capacity) return 0;
@@ -121,21 +119,11 @@ export default function MySpacePage() {
         <Flex direction="column" justify="center" align="center" gap="32px">
           <MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
             <Box px="68px">
-              <Image
-                src="/images/my-space-title.png"
-                width="495"
-                height="60"
-                alt="My Space"
-              />
+              <Image src="/images/my-space-title.png" width="495" height="60" alt="My Space" />
             </Box>
           </MediaQuery>
           <MediaQuery largerThan="xs" styles={{ display: 'none' }}>
-            <Image
-              src="/images/my-space-title.png"
-              width="324"
-              height="40"
-              alt="My Space"
-            />
+            <Image src="/images/my-space-title.png" width="324" height="40" alt="My Space" />
           </MediaQuery>
           <Flex
             direction={{ base: 'column', xs: 'row' }}
@@ -145,13 +133,7 @@ export default function MySpacePage() {
             justify="space-around"
           >
             <Flex align="center">
-              <Text
-                component="span"
-                size="xl"
-                align="center"
-                color="text.0"
-                mr="sm"
-              >
+              <Text component="span" size="xl" align="center" color="text.0" mr="sm">
                 Address:
               </Text>
               <Link
@@ -159,13 +141,7 @@ export default function MySpacePage() {
                 target="_blank"
                 style={{ textDecoration: 'none' }}
               >
-                <Text
-                  component="span"
-                  size="xl"
-                  weight="bold"
-                  color="text.0"
-                  mr="5px"
-                >
+                <Text component="span" size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 10)}...{address.slice(-10)}
                 </Text>
               </Link>

@@ -42,7 +42,7 @@ export function useTopClustersQuery(limit = 4) {
         { first: limit, contentTypes: SUPPORTED_MIME_TYPE },
         ctx.meta?.headers as Headers,
       ),
-  });
+  }, true);
   const clusters = data?.topClusters ?? [];
   const isLoading = rest.isLoading || rest.isPending;
 

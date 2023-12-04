@@ -25,7 +25,7 @@ export const useStyles = createStyles(
   (theme, params: { showMintableOnly: boolean }) => ({
     banner: {
       height: '280px',
-      overflowY: 'hidden',
+      overflow: 'hidden',
       borderBottomWidth: '2px',
       borderBottomColor: theme.colors.text[0],
       borderBottomStyle: 'solid',

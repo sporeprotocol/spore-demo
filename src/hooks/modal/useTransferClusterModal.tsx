@@ -5,11 +5,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { BI, OutPoint, Script, config, helpers } from '@ckb-lumos/lumos';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import {
-  ClusterDataProps,
-  transferCluster as _transferCluster,
-  predefinedSporeConfigs,
-} from '@spore-sdk/core';
+import { transferCluster as _transferCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
@@ -19,18 +15,18 @@ import { QueryCluster } from '../query/type';
 import { useClusterQuery } from '../query/useClusterQuery';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
-export default function useTransferClusterModal(
-  cluster: QueryCluster | undefined,
-) {
+export default function useTransferClusterModal(cluster: QueryCluster | undefined) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const queryClient = useQueryClient();
-  const { data: { capacityMargin } = {}, refresh: refreshCluster } =
-    useClusterQuery(cluster?.id);
-  const { refresh: refreshClustersByAddress } =
-    useClustersByAddressQuery(address);
+  const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
+    opened ? cluster?.id : undefined,
+  );
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(
+    opened ? address : undefined,
+  );
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);
 
@@ -50,23 +46,20 @@ export default function useTransferClusterModal(
   const onSuccess = useCallback(
     async (outPoint: OutPoint, variables: { toLock: Script }) => {
       await Promise.all([refreshCluster(), refreshClustersByAddress()]);
-      queryClient.setQueryData(
-        ['cluster', cluster?.id],
-        (data: { cluster: QueryCluster }) => {
-          const cluster = {
-            ...data.cluster,
-            cell: {
-              ...data.cluster.cell,
-              cellOutput: {
-                ...data.cluster.cell?.cellOutput,
-                lock: variables.toLock,
-              },
-              outPoint,
+      queryClient.setQueryData(['cluster', cluster?.id], (data: { cluster: QueryCluster }) => {
+        const cluster = {
+          ...data.cluster,
+          cell: {
+            ...data.cluster.cell,
+            cellOutput: {
+              ...data.cluster.cell?.cellOutput,
+              lock: variables.toLock,
             },
-          };
-          return { cluster };
-        },
-      );
+            outPoint,
+          },
+        };
+        return { cluster };
+      });
     },
     [cluster, queryClient, refreshCluster, refreshClustersByAddress],
   );
@@ -75,8 +68,7 @@ export default function useTransferClusterModal(
     mutationFn: transferCluster,
     onSuccess,
   });
-  const loading =
-    transferClusterMutation.isPending && !transferClusterMutation.isError;
+  const loading = transferClusterMutation.isPending && !transferClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
@@ -100,8 +92,6 @@ export default function useTransferClusterModal(
 
   useEffect(() => {
     if (opened) {
-      // FIXME
-      // refetchCapacityMargin();
       modals.open({
         modalId,
         title: `Transfer "${cluster!.name}"?`,
@@ -133,7 +123,6 @@ export default function useTransferClusterModal(
     close,
     modalId,
     capacityMargin,
-    // refetchCapacityMargin,
     open,
     setModalStack,
     sponsorClusterModal,

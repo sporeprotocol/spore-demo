@@ -1,7 +1,4 @@
-import {
-  predefinedSporeConfigs,
-  meltSpore as _meltSpore,
-} from '@spore-sdk/core';
+import { predefinedSporeConfigs, meltSpore as _meltSpore } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -21,9 +18,9 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const { address, signTransaction } = useConnect();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    spore?.clusterId || undefined,
+    opened ? spore?.clusterId || undefined : undefined,
   );
 
   const meltSpore = useCallback(
@@ -49,13 +46,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
     if (spore?.clusterId) {
       queryClient.setQueryData(['clusterSpores', spore.clusterId], sporesUpdater);
     }
-  }, [
-    address,
-    queryClient,
-    refreshClusterSpores,
-    refreshSporesByAddress,
-    spore,
-  ]);
+  }, [address, queryClient, refreshClusterSpores, refreshSporesByAddress, spore]);
 
   const meltSporeMutation = useMutation({
     mutationFn: meltSpore,
@@ -98,14 +89,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
     } else {
       modals.close(modalId);
     }
-  }, [
-    modalId,
-    meltSporeMutation.isPending,
-    handleSubmit,
-    opened,
-    close,
-    spore,
-  ]);
+  }, [modalId, meltSporeMutation.isPending, handleSubmit, opened, close, spore]);
 
   return {
     open,

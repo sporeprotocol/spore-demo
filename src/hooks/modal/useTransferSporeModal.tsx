@@ -23,12 +23,12 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-  const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
   const queryClient = useQueryClient();
-  const { refresh: refreshSpore } = useSporeQuery(spore?.id);
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
+  const { data: { capacityMargin } = {} } = useSporeQuery(opened ? spore?.id : undefined);
+  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    spore?.clusterId || undefined,
+    opened ? spore?.clusterId || undefined : undefined,
   );
 
   const sponsorSporeModal = useSponsorSporeModal(spore);
@@ -49,67 +49,47 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const onSuccess = useCallback(
     async (outPoint: OutPoint, variables: { toLock: Script }) => {
       if (!spore) return;
-      await Promise.all([
-        refreshSpore(),
-        refreshSporesByAddress(),
-        refreshClusterSpores(),
-      ]);
-      queryClient.setQueryData(
-        ['spore', spore.id],
-        (data: { spore: QuerySpore }) => {
-          const spore = cloneDeep(data.spore);
-          update(spore, 'spore.cell.cellOutput.lock', () => variables.toLock);
-          update(spore, 'spore.cell.outPoint', () => outPoint);
-          return { spore };
-        },
-      );
-      queryClient.setQueryData(
-        ['sporesByAddress', address],
-        (data: { spores: QuerySpore[] }) => {
-          const currentSpore = spore;
-          const toAddress = helpers.encodeToAddress(variables.toLock, {
-            config: config.predefined.AGGRON4,
-          });
-          if (toAddress !== address) {
-            const spores = data.spores.filter(
-              (spore) => spore.id !== currentSpore.id,
-            );
-            return { spores };
-          }
-          const spores = data.spores.map((spore) => {
-            if (spore.id !== spore.id) return spore;
-            return {
-              ...spore,
-              cell: {
-                ...spore.cell,
-                cellOutput: {
-                  ...spore.cell?.cellOutput,
-                  lock: variables.toLock,
-                },
-                outPoint,
-              },
-            };
-          });
+      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+      queryClient.setQueryData(['spore', spore.id], (data: { spore: QuerySpore }) => {
+        const spore = cloneDeep(data.spore);
+        update(spore, 'spore.cell.cellOutput.lock', () => variables.toLock);
+        update(spore, 'spore.cell.outPoint', () => outPoint);
+        return { spore };
+      });
+      queryClient.setQueryData(['sporesByAddress', address], (data: { spores: QuerySpore[] }) => {
+        const currentSpore = spore;
+        const toAddress = helpers.encodeToAddress(variables.toLock, {
+          config: config.predefined.AGGRON4,
+        });
+        if (toAddress !== address) {
+          const spores = data.spores.filter((spore) => spore.id !== currentSpore.id);
           return { spores };
-        },
-      );
+        }
+        const spores = data.spores.map((spore) => {
+          if (spore.id !== spore.id) return spore;
+          return {
+            ...spore,
+            cell: {
+              ...spore.cell,
+              cellOutput: {
+                ...spore.cell?.cellOutput,
+                lock: variables.toLock,
+              },
+              outPoint,
+            },
+          };
+        });
+        return { spores };
+      });
     },
-    [
-      address,
-      queryClient,
-      refreshClusterSpores,
-      refreshSpore,
-      refreshSporesByAddress,
-      spore,
-    ],
+    [address, queryClient, refreshClusterSpores, refreshSpore, refreshSporesByAddress, spore],
   );
 
   const transferSporeMutation = useMutation({
     mutationFn: transferSpore,
     onSuccess,
   });
-  const loading =
-    transferSporeMutation.isPending && !transferSporeMutation.isError;
+  const loading = transferSporeMutation.isPending && !transferSporeMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {

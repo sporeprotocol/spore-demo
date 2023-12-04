@@ -27,7 +27,7 @@ import { useState } from 'react';
 const useStyles = createStyles((theme) => ({
   banner: {
     height: '280px',
-    overflowY: 'hidden',
+    overflow: 'hidden',
     borderBottomWidth: '2px',
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',

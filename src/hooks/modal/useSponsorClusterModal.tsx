@@ -1,7 +1,4 @@
-import {
-  predefinedSporeConfigs,
-  transferCluster as _transferCluster,
-} from '@spore-sdk/core';
+import { predefinedSporeConfigs, transferCluster as _transferCluster } from '@spore-sdk/core';
 import { BI, OutPoint } from '@ckb-lumos/lumos';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
@@ -18,18 +15,17 @@ import { QueryCluster } from '../query/type';
 import { useClusterQuery } from '../query/useClusterQuery';
 import { cloneDeep, update } from 'lodash-es';
 
-export default function useSponsorClusterModal(
-  cluster: QueryCluster | undefined,
-) {
+export default function useSponsorClusterModal(cluster: QueryCluster | undefined) {
   const modalId = useId();
-  const [opened, { open, close }] = useDisclosure(false);
-  const { address, signTransaction, lock } = useConnect();
   const modalStack = useAtomValue(modalStackAtom);
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
+  const [opened, { open, close }] = useDisclosure(false);
+  const { address, signTransaction, lock } = useConnect();
   const queryClient = useQueryClient();
-  const { refresh: refreshCluster } = useClusterQuery(cluster?.id);
+  const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
+    opened ? cluster?.id : undefined,
+  );
   const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorCluster = useCallback(
@@ -54,17 +50,14 @@ export default function useSponsorClusterModal(
         .add(BI.from(capacityMargin).sub(cluster?.capacityMargin ?? 0))
         .toHexString();
 
-      queryClient.setQueryData(
-        ['cluster', cluster.id],
-        (data: { cluster: QueryCluster }) => {
-          const { cluster } = data;
-          const newCluster = cloneDeep(cluster);
-          update(newCluster, 'capacityMargin', () => capacityMargin);
-          update(newCluster, 'cell.cellOutput.capacity', () => capacity);
-          update(newCluster, 'cell.outPoint', () => outPoint);
-          return { cluster: newCluster };
-        },
-      );
+      queryClient.setQueryData(['cluster', cluster.id], (data: { cluster: QueryCluster }) => {
+        const { cluster } = data;
+        const newCluster = cloneDeep(cluster);
+        update(newCluster, 'capacityMargin', () => capacityMargin);
+        update(newCluster, 'cell.cellOutput.capacity', () => capacity);
+        update(newCluster, 'cell.outPoint', () => outPoint);
+        return { cluster: newCluster };
+      });
     },
     [cluster, queryClient, refreshCluster],
   );
@@ -73,8 +66,7 @@ export default function useSponsorClusterModal(
     mutationFn: sponsorCluster,
     onSuccess,
   });
-  const loading =
-    sponsorClusterMutation.isPending && !sponsorClusterMutation.isError;
+  const loading = sponsorClusterMutation.isPending && !sponsorClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { amount: number }) => {
@@ -82,9 +74,7 @@ export default function useSponsorClusterModal(
         return;
       }
       const { amount } = values;
-      const nextCapacityMargin = BI.from(capacityMargin).add(
-        BI.from(amount).mul(100_000_000),
-      );
+      const nextCapacityMargin = BI.from(capacityMargin).add(BI.from(amount).mul(100_000_000));
       nextCapacityMarginRef.current = nextCapacityMargin.toHexString();
 
       await sponsorClusterMutation.mutateAsync({
@@ -95,9 +85,7 @@ export default function useSponsorClusterModal(
         capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });
-      showSuccess(
-        `${amount.toLocaleString('en-US')} CKB sponsored to Cluster!`,
-      );
+      showSuccess(`${amount.toLocaleString('en-US')} CKB sponsored to Cluster!`);
       modals.close(modalId);
     },
     [address, cluster, sponsorClusterMutation, modalId, capacityMargin, lock],
@@ -123,13 +111,7 @@ export default function useSponsorClusterModal(
         closeOnEscape: !sponsorClusterMutation.isPending,
         withCloseButton: !sponsorClusterMutation.isPending,
         closeOnClickOutside: !sponsorClusterMutation.isPending,
-        children: (
-          <SponsorModal
-            type="cluster"
-            data={cluster!}
-            onSubmit={handleSubmit}
-          />
-        ),
+        children: <SponsorModal type="cluster" data={cluster!} onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);

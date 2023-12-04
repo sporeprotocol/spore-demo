@@ -1,6 +1,4 @@
 import { graphql } from '@/gql';
-import request from 'graphql-request';
-import { useQuery } from '@tanstack/react-query';
 import { QueryCluster } from './type';
 import { useRefreshableQuery } from './useRefreshableQuery';
 import { graphQLClient } from '@/utils/graphql';
@@ -36,13 +34,13 @@ const clustersByAddressQueryDocument = graphql(`
   }
 `);
 
-export function useClustersByAddressQuery(address: string) {
+export function useClustersByAddressQuery(address: string | undefined) {
   const { data, ...rest } = useRefreshableQuery({
     queryKey: ['clustersByAddress', address],
     queryFn: async (ctx) =>
       graphQLClient.request(
         clustersByAddressQueryDocument,
-        { address, contentTypes: SUPPORTED_MIME_TYPE },
+        { address: address!, contentTypes: SUPPORTED_MIME_TYPE },
         ctx.meta?.headers as Headers,
       ),
     enabled: !!address,

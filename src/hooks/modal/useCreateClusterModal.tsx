@@ -18,8 +18,9 @@ export default function useCreateClusterModal() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
-  const { refresh: refreShClustersByAddress } =
-    useClustersByAddressQuery(address);
+  const { refresh: refreShClustersByAddress } = useClustersByAddressQuery(
+    opened ? address : undefined,
+  );
   const modalId = useId();
 
   const addCluster = useCallback(
@@ -90,14 +91,7 @@ export default function useCreateClusterModal() {
     } else {
       modals.close(modalId);
     }
-  }, [
-    modalId,
-    addClusterMutation.isPending,
-    handleSubmit,
-    opened,
-    close,
-    isMobile,
-  ]);
+  }, [modalId, addClusterMutation.isPending, handleSubmit, opened, close, isMobile]);
 
   return {
     open,

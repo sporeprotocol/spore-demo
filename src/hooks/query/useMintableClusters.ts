@@ -27,18 +27,21 @@ const mintableClustersQueryDocument = graphql(`
   }
 `);
 
-export function useMintableClustersQuery(address: string) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['mintableClusters', address],
-    queryFn: async (ctx) => {
-      return graphQLClient.request(
-        mintableClustersQueryDocument,
-        { address },
-        ctx.meta?.headers as Headers,
-      );
+export function useMintableClustersQuery(address: string | undefined) {
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['mintableClusters', address],
+      queryFn: async (ctx) => {
+        return graphQLClient.request(
+          mintableClustersQueryDocument,
+          { address: address! },
+          ctx.meta?.headers as Headers,
+        );
+      },
+      enabled: !!address,
     },
-    enabled: !!address,
-  });
+    true,
+  );
   const clusters = data?.clusters as QueryCluster[] | undefined;
   const isLoading = rest.isLoading || rest.isPending;
 

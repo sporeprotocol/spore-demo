@@ -11,11 +11,7 @@ const infiniteClustersQueryDocument = graphql(`
     $contentTypes: [String!]
     $mintableBy: String
   ) {
-    clusters: topClusters(
-      first: $first
-      after: $after
-      filter: { mintableBy: $mintableBy }
-    ) {
+    clusters: topClusters(first: $first, after: $after, filter: { mintableBy: $mintableBy }) {
       id
       name
       description
@@ -53,13 +49,12 @@ export function useInfiniteClustersQuery(address?: string) {
         contentTypes: SUPPORTED_MIME_TYPE,
         mintableBy: address,
       };
-      const response = await graphQLClient.request(
-        infiniteClustersQueryDocument,
-        params,
-      );
+      const response = await graphQLClient.request(infiniteClustersQueryDocument, params);
       const headers = new Headers();
       headers.set('cache-control', 'no-cache');
-      graphQLClient.request(infiniteClustersQueryDocument, params, headers);
+      graphQLClient
+        .request(infiniteClustersQueryDocument, params, headers)
+        .finally(() => headers.delete('cache-control'));
       return response;
     },
     initialPageParam: undefined,

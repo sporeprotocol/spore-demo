@@ -25,7 +25,6 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const { address, lock, signTransaction } = useConnect();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
   const ownerAddress = useMemo(() => {
     if (spore?.cell?.cellOutput.lock === undefined) return undefined;
     return helpers.encodeToAddress(spore.cell?.cellOutput.lock, {
@@ -33,11 +32,11 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
     });
   }, [spore?.cell?.cellOutput.lock]);
   const queryClient = useQueryClient();
-  const { refresh: refreshSpore } = useSporeQuery(spore?.id);
-  const { refresh: refreshSporesByAddress } =
-    useSporesByAddressQuery(ownerAddress);
+  const { data: { capacityMargin } = {} } = useSporeQuery(opened ? spore?.id : undefined);
+  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    spore?.clusterId ?? undefined,
+    opened ? spore?.clusterId ?? undefined : undefined,
   );
   const nextCapacityMarginRef = useRef<string | undefined>();
 
@@ -57,11 +56,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const onSuccess = useCallback(
     async (outPoint: OutPoint) => {
       if (!spore) return;
-      await Promise.all([
-        refreshSpore(),
-        refreshSporesByAddress(),
-        refreshClusterSpores(),
-      ]);
+      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
       const capacityMargin = nextCapacityMarginRef.current;
       const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
         .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
@@ -74,14 +69,11 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
         return spore;
       };
 
-      queryClient.setQueryData(
-        ['spore', spore.id],
-        (data: { spore: QuerySpore }) => {
-          const { spore } = data;
-          const newSpore = updateSpore(cloneDeep(spore));
-          return { spore: newSpore };
-        },
-      );
+      queryClient.setQueryData(['spore', spore.id], (data: { spore: QuerySpore }) => {
+        const { spore } = data;
+        const newSpore = updateSpore(cloneDeep(spore));
+        return { spore: newSpore };
+      });
 
       const sporesUpdater = (data: { spores: QuerySpore[] }) => {
         const spores = data.spores.map((spore) => {
@@ -90,33 +82,19 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
         });
         return { spores };
       };
-      queryClient.setQueryData(
-        ['sporesByAddress', ownerAddress],
-        sporesUpdater,
-      );
+      queryClient.setQueryData(['sporesByAddress', ownerAddress], sporesUpdater);
       if (spore.clusterId) {
-        queryClient.setQueryData(
-          ['clusterSpores', spore.clusterId],
-          sporesUpdater,
-        );
+        queryClient.setQueryData(['clusterSpores', spore.clusterId], sporesUpdater);
       }
     },
-    [
-      ownerAddress,
-      queryClient,
-      refreshClusterSpores,
-      refreshSpore,
-      refreshSporesByAddress,
-      spore,
-    ],
+    [ownerAddress, queryClient, refreshClusterSpores, refreshSpore, refreshSporesByAddress, spore],
   );
 
   const sponsorSporeMutation = useMutation({
     mutationFn: sponsorSpore,
     onSuccess,
   });
-  const loading =
-    sponsorSporeMutation.isPending && !sponsorSporeMutation.isError;
+  const loading = sponsorSporeMutation.isPending && !sponsorSporeMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { amount: number }) => {
@@ -124,9 +102,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
         return;
       }
       const { amount } = values;
-      const nextCapacityMargin = BI.from(capacityMargin).add(
-        BI.from(amount).mul(100_000_000),
-      );
+      const nextCapacityMargin = BI.from(capacityMargin).add(BI.from(amount).mul(100_000_000));
       nextCapacityMarginRef.current = nextCapacityMargin.toHexString();
 
       await sponsorSporeMutation.mutateAsync({
@@ -163,9 +139,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
         closeOnEscape: !sponsorSporeMutation.isPending,
         withCloseButton: !sponsorSporeMutation.isPending,
         closeOnClickOutside: !sponsorSporeMutation.isPending,
-        children: (
-          <SponsorModal type="spore" data={spore!} onSubmit={handleSubmit} />
-        ),
+        children: <SponsorModal type="spore" data={spore!} onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);

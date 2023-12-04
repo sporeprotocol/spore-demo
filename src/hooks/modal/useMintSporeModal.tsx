@@ -1,19 +1,11 @@
-import {
-  SporeDataProps,
-  createSpore,
-  predefinedSporeConfigs,
-} from '@spore-sdk/core';
+import { SporeDataProps, createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect, useState } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
@@ -24,20 +16,21 @@ import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useMintableClustersQuery } from '../query/useMintableClusters';
 
 export default function useMintSporeModal(id?: string) {
-  const [opened, { open, close }] = useDisclosure(false);
   const theme = useMantineTheme();
-  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const { address, lock, signTransaction } = useConnect();
   const router = useRouter();
   const modalId = useId();
-  const queryClient = useQueryClient();
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
 
+  const [opened, { open, close }] = useDisclosure(false);
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const { address, lock, signTransaction } = useConnect();
+
+  const queryClient = useQueryClient();
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    mindedSporeData?.clusterId,
+    opened ? mindedSporeData?.clusterId : undefined,
   );
-  const { data: mintableClusters = [] } = useMintableClustersQuery(address);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
+  const { data: mintableClusters = [] } = useMintableClustersQuery(opened ? address : undefined);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -62,10 +55,7 @@ export default function useMintSporeModal(id?: string) {
       };
       queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
       if (variables.data.clusterId) {
-        queryClient.setQueryData(
-          ['clusterSpores', variables.data.clusterId],
-          sporesUpdater,
-        );
+        queryClient.setQueryData(['clusterSpores', variables.data.clusterId], sporesUpdater);
       }
     },
     [address, queryClient, refreshClusterSpores, refreshSporesByAddress],
@@ -77,11 +67,7 @@ export default function useMintSporeModal(id?: string) {
   });
 
   const handleSubmit = useCallback(
-    async (
-      content: Blob | null,
-      clusterId: string | undefined,
-      useCapacityMargin?: boolean,
-    ) => {
+    async (content: Blob | null, clusterId: string | undefined, useCapacityMargin?: boolean) => {
       if (!content || !address || !lock) {
         return;
       }

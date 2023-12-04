@@ -17,16 +17,13 @@ import { GoogleAnalytics } from 'nextjs-google-analytics';
 
 function StateProvider({
   children,
-  pageProps,
 }: React.PropsWithChildren<{
   pageProps: AppProps['pageProps'];
 }>) {
   const [queryClient] = useState(() => new QueryClient());
   return (
     <JotaiProvider store={store}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </JotaiProvider>
   );
 }
@@ -96,18 +93,10 @@ function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>Spore Demo</title>
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width"
-        />
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
         <link rel="icon" href="/images/favicon.png" />
       </Head>
-      <MantineProvider
-        withNormalizeCSS
-        withGlobalStyles
-        theme={theme}
-        emotionCache={emotionCache}
-      >
+      <MantineProvider withNormalizeCSS withGlobalStyles theme={theme} emotionCache={emotionCache}>
         <ConnectProvider value={config}>
           <StateProvider pageProps={pageProps}>
             <UIProvider>
