@@ -8,8 +8,6 @@ import {
   IMAGE_MIME_TYPE,
   SUPPORTED_MIME_TYPE,
   TEXT_MIME_TYPE,
-  isImageMIMEType,
-  isTextMIMEType,
 } from '@/utils/mime';
 import {
   Box,
@@ -202,6 +200,7 @@ export default function HomePage() {
             }
             clusters={topClusters}
             isLoading={isTopClustersLoading}
+            loadingCount={4}
             disablePlaceholder
           />
         </Container>

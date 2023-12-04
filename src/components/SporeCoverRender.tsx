@@ -2,6 +2,7 @@ import { QuerySpore } from '@/hooks/query/type';
 import { ImageSporeCoverRender } from './renders/image';
 import { TextSporeCoverRender } from './renders/text';
 import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
+import { AspectRatio } from '@mantine/core';
 
 export interface SporeRenderProps {
   spore: QuerySpore;
@@ -22,5 +23,5 @@ export default function SporeCoverRender({
     return <TextSporeCoverRender spore={spore} ratio={ratio} size={size} />;
   }
 
-  return null;
+  return <AspectRatio ratio={ratio ?? 1} bg="#F4F5F9"></AspectRatio>;
 }
