@@ -9,8 +9,13 @@ const infiniteClustersQueryDocument = graphql(`
     $first: Int
     $after: String
     $contentTypes: [String!]
+    $mintableBy: String
   ) {
-    clusters: topClusters(first: $first, after: $after) {
+    clusters: topClusters(
+      first: $first
+      after: $after
+      filter: { mintableBy: $mintableBy }
+    ) {
       id
       name
       description
@@ -38,22 +43,15 @@ const infiniteClustersQueryDocument = graphql(`
   }
 `);
 
-export function useInfiniteClustersQuery() {
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ['infiniteClusters'],
+export function useInfiniteClustersQuery(address?: string) {
+  const queryResult = useInfiniteQuery({
+    queryKey: ['infiniteClusters', address],
     queryFn: async ({ pageParam }) => {
       const params = {
         first: 12,
         after: pageParam,
         contentTypes: SUPPORTED_MIME_TYPE,
+        mintableBy: address,
       };
       const response = await graphQLClient.request(
         infiniteClustersQueryDocument,
@@ -71,13 +69,5 @@ export function useInfiniteClustersQuery() {
     },
   });
 
-  return {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  };
+  return queryResult;
 }

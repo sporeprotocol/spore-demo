@@ -72,6 +72,10 @@ export const useStyles = createStyles((theme) => ({
   active: {
     backgroundColor: theme.colors.brand[1],
     color: '#FFF',
+
+    '&:hover': {
+      color: theme.colors.text[0],
+    },
   },
   more: {
     color: theme.colors.brand[1],

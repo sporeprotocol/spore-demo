@@ -83,8 +83,7 @@ export default function ClustersPage() {
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage, status } =
-    useInfiniteClustersQuery();
-  const { data: mintableClusters = [] } = useMintableClustersQuery(address);
+    useInfiniteClustersQuery(showMintableOnly ? address : undefined);
 
   useEffect(() => {
     if (isFetchingNextPage || !hasNextPage) return;
@@ -107,15 +106,6 @@ export default function ClustersPage() {
     const clusters = pages?.flatMap((page) => page?.clusters ?? []);
     return clusters as QueryCluster[];
   }, [data]);
-
-  const displayClusters = useMemo(() => {
-    if (showMintableOnly) {
-      return clusters.filter(({ id }) =>
-        mintableClusters.some((c) => c.id === id),
-      );
-    }
-    return clusters;
-  }, [showMintableOnly, clusters, mintableClusters]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -182,7 +172,7 @@ export default function ClustersPage() {
                 />
               </Flex>
             }
-            clusters={displayClusters}
+            clusters={clusters}
             isLoading={status === 'pending'}
           />
           <Group position="center" mt="48px">
