@@ -30,7 +30,8 @@ export default function useMintSporeModal(id?: string) {
     opened ? mindedSporeData?.clusterId : undefined,
   );
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
-  const { data: mintableClusters = [] } = useMintableClustersQuery(opened ? address : undefined);
+  const { data: mintableClusters = [], refresh: refreshMintableClusters } =
+    useMintableClustersQuery(opened ? address : undefined);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -96,6 +97,7 @@ export default function useMintSporeModal(id?: string) {
 
   useEffect(() => {
     if (opened) {
+      refreshMintableClusters();
       modals.open({
         modalId,
         title: 'Add New Spore',
@@ -129,6 +131,7 @@ export default function useMintSporeModal(id?: string) {
     opened,
     close,
     id,
+    refreshMintableClusters,
   ]);
 
   return {
