@@ -29,7 +29,7 @@ export default function useSponsorClusterModal(
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { data: { capacityMargin } = {} } = useClusterQuery(cluster?.id);
   const queryClient = useQueryClient();
-  const { refresh: refreShCluster } = useClusterQuery(cluster?.id);
+  const { refresh: refreshCluster } = useClusterQuery(cluster?.id);
   const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorCluster = useCallback(
@@ -48,6 +48,7 @@ export default function useSponsorClusterModal(
   const onSuccess = useCallback(
     async (outPoint: OutPoint) => {
       if (!cluster) return;
+      await refreshCluster();
       const capacityMargin = nextCapacityMarginRef.current;
       const capacity = BI.from(cluster?.cell?.cellOutput.capacity ?? 0)
         .add(BI.from(capacityMargin).sub(cluster?.capacityMargin ?? 0))
@@ -64,9 +65,8 @@ export default function useSponsorClusterModal(
           return { cluster: newCluster };
         },
       );
-      await refreShCluster();
     },
-    [cluster, queryClient, refreShCluster],
+    [cluster, queryClient, refreshCluster],
   );
 
   const sponsorClusterMutation = useMutation({

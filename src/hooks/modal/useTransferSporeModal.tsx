@@ -1,12 +1,12 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { BI, OutPoint, Script, config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
 import useSponsorSporeModal from './useSponsorSporeModal';
@@ -16,6 +16,7 @@ import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
+import { cloneDeep, update } from 'lodash-es';
 
 export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -23,6 +24,7 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
+  const queryClient = useQueryClient();
   const { refresh: refreshSpore } = useSporeQuery(spore?.id);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
@@ -33,21 +35,74 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
 
   const transferSpore = useCallback(
     async (...args: Parameters<typeof _transferSpore>) => {
-      const { txSkeleton } = await _transferSpore(...args);
+      const { txSkeleton, outputIndex } = await _transferSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
-  const onSuccess = useCallback(async () => {
-    await Promise.all([
-      refreshSpore(),
-      refreshSporesByAddress(),
-      refreshClusterSpores(),
-    ]);
-  }, [refreshClusterSpores, refreshSpore, refreshSporesByAddress]);
+  const onSuccess = useCallback(
+    async (outPoint: OutPoint, variables: { toLock: Script }) => {
+      if (!spore) return;
+      await Promise.all([
+        refreshSpore(),
+        refreshSporesByAddress(),
+        refreshClusterSpores(),
+      ]);
+      queryClient.setQueryData(
+        ['spore', spore.id],
+        (data: { spore: QuerySpore }) => {
+          const spore = cloneDeep(data.spore);
+          update(spore, 'spore.cell.cellOutput.lock', () => variables.toLock);
+          update(spore, 'spore.cell.outPoint', () => outPoint);
+          return { spore };
+        },
+      );
+      queryClient.setQueryData(
+        ['sporesByAddress', address],
+        (data: { spores: QuerySpore[] }) => {
+          const currentSpore = spore;
+          const toAddress = helpers.encodeToAddress(variables.toLock, {
+            config: config.predefined.AGGRON4,
+          });
+          if (toAddress !== address) {
+            const spores = data.spores.filter(
+              (spore) => spore.id !== currentSpore.id,
+            );
+            return { spores };
+          }
+          const spores = data.spores.map((spore) => {
+            if (spore.id !== spore.id) return spore;
+            return {
+              ...spore,
+              cell: {
+                ...spore.cell,
+                cellOutput: {
+                  ...spore.cell?.cellOutput,
+                  lock: variables.toLock,
+                },
+                outPoint,
+              },
+            };
+          });
+          return { spores };
+        },
+      );
+    },
+    [
+      address,
+      queryClient,
+      refreshClusterSpores,
+      refreshSpore,
+      refreshSporesByAddress,
+      spore,
+    ],
+  );
 
   const transferSporeMutation = useMutation({
     mutationFn: transferSpore,

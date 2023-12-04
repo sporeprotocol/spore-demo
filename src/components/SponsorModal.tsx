@@ -102,12 +102,12 @@ export default function SponsorModal(props: TransferModalProps) {
     [onSubmit],
   );
 
-  const size = useMemo(() => {
+  const amount = useMemo(() => {
     if (!data) {
       return 0;
     }
     const capacity = BI.from(data?.cell?.cellOutput.capacity ?? 0).toNumber();
-    return Math.floor(capacity / 100_000_000);
+    return capacity / 10 ** 8;
   }, [data]);
 
   return (
@@ -213,7 +213,7 @@ export default function SponsorModal(props: TransferModalProps) {
               : "Cluster's on-chain size"}
           </Text>
           <Group spacing="4px" align="center">
-            <Text color="text.0">{size.toLocaleString('en-US')} CKB</Text>
+            <Text color="text.0">{amount.toLocaleString('en-US')} CKB</Text>
             {form.values.amount > 0 && (
               <>
                 <Image
@@ -223,7 +223,7 @@ export default function SponsorModal(props: TransferModalProps) {
                   height="18"
                 />
                 <Text color="brand.1" weight="bold">
-                  {(size + form.values.amount).toLocaleString('en-US')} CKB
+                  {(amount + form.values.amount).toLocaleString('en-US')} CKB
                 </Text>
               </>
             )}

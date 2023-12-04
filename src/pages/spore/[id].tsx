@@ -80,7 +80,7 @@ export default function SporePage() {
   const sponsorSpore = useSponsorSporeModal(spore);
 
   const amount = spore?.cell
-    ? Math.ceil(BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8)
+    ? BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8
     : 0;
   const owner = spore?.cell
     ? helpers.encodeToAddress(spore.cell.cellOutput.lock, {

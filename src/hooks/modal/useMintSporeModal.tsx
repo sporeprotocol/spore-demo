@@ -9,7 +9,11 @@ import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from '@tanstack/react-query';
+import {
+  QueryClient,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
@@ -26,6 +30,7 @@ export default function useMintSporeModal(id?: string) {
   const { address, lock, signTransaction } = useConnect();
   const router = useRouter();
   const modalId = useId();
+  const queryClient = useQueryClient();
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address);
 
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
@@ -50,8 +55,16 @@ export default function useMintSporeModal(id?: string) {
     async (_: unknown, variables: { data: SporeDataProps }) => {
       setMindedSporeData(variables.data);
       await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+      queryClient.setQueryData(
+        ['sporesByAddress', address],
+        (data: { spores: SporeDataProps[] }) => {
+          return {
+            spores: [variables.data, ...data.spores],
+          };
+        },
+      );
     },
-    [refreshClusterSpores, refreshSporesByAddress],
+    [address, queryClient, refreshClusterSpores, refreshSporesByAddress],
   );
 
   const addSporeMutation = useMutation({

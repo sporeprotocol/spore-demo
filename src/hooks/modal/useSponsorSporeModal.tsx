@@ -1,5 +1,5 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
@@ -9,12 +9,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
-import { BI, OutPoint } from '@ckb-lumos/lumos';
+import { BI, OutPoint, helpers } from '@ckb-lumos/lumos';
 import { useAtomValue } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
 import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { update, cloneDeep } from 'lodash-es';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
+import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 
 export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -24,8 +26,19 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
+  const ownerAddress = useMemo(() => {
+    if (spore?.cell?.cellOutput.lock === undefined) return undefined;
+    return helpers.encodeToAddress(spore.cell?.cellOutput.lock, {
+      config: predefinedSporeConfigs.Aggron4.lumos,
+    });
+  }, [spore?.cell?.cellOutput.lock]);
   const queryClient = useQueryClient();
   const { refresh: refreshSpore } = useSporeQuery(spore?.id);
+  const { refresh: refreshSporesByAddress } =
+    useSporesByAddressQuery(ownerAddress);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
+    spore?.clusterId ?? undefined,
+  );
   const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorSpore = useCallback(
@@ -44,6 +57,11 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const onSuccess = useCallback(
     async (outPoint: OutPoint) => {
       if (!spore) return;
+      await Promise.all([
+        refreshSpore(),
+        refreshSporesByAddress(),
+        refreshClusterSpores(),
+      ]);
       const capacityMargin = nextCapacityMarginRef.current;
       const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
         .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
@@ -60,9 +78,14 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
           return { spore: newSpore };
         },
       );
-      await refreshSpore();
     },
-    [queryClient, refreshSpore, spore],
+    [
+      queryClient,
+      refreshClusterSpores,
+      refreshSpore,
+      refreshSporesByAddress,
+      spore,
+    ],
   );
 
   const sponsorSporeMutation = useMutation({

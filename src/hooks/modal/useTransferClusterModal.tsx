@@ -27,7 +27,7 @@ export default function useTransferClusterModal(
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const queryClient = useQueryClient();
-  const { data: { capacityMargin } = {}, refresh: refreShCluster } =
+  const { data: { capacityMargin } = {}, refresh: refreshCluster } =
     useClusterQuery(cluster?.id);
   const { refresh: refreshClustersByAddress } =
     useClustersByAddressQuery(address);
@@ -49,7 +49,7 @@ export default function useTransferClusterModal(
 
   const onSuccess = useCallback(
     async (outPoint: OutPoint, variables: { toLock: Script }) => {
-      await Promise.all([refreShCluster(), refreshClustersByAddress()]);
+      await Promise.all([refreshCluster(), refreshClustersByAddress()]);
       queryClient.setQueryData(
         ['cluster', cluster?.id],
         (data: { cluster: QueryCluster }) => {
@@ -68,7 +68,7 @@ export default function useTransferClusterModal(
         },
       );
     },
-    [cluster, queryClient, refreShCluster, refreshClustersByAddress],
+    [cluster, queryClient, refreshCluster, refreshClustersByAddress],
   );
 
   const transferClusterMutation = useMutation({
