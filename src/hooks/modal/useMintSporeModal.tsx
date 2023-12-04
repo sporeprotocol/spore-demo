@@ -3,7 +3,7 @@ import {
   createSpore,
   predefinedSporeConfigs,
 } from '@spore-sdk/core';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';

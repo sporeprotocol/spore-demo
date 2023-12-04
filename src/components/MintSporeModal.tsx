@@ -365,7 +365,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               )}
               <Stack spacing={0}>
                 <Text weight="bold" color="text.0">
-                  {content.name}
+                  {content.name.length > 20
+                    ? `${content.name.slice(0, 10)}...${content.name.slice(-10)}`
+                    : content.name}
                 </Text>
                 <Text size="sm" color="text.1">
                   {content.size.toLocaleString('en-US')} CKB
