@@ -93,6 +93,7 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
 
   useEffect(() => {
     if (opened) {
+      refreshCluster();
       modals.open({
         modalId,
         title: `Sponsor Cluster`,
@@ -125,6 +126,7 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
     modalId,
     modalStack,
     isMobile,
+    refreshCluster,
   ]);
 
   return {

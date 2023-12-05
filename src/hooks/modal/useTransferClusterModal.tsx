@@ -92,6 +92,7 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
 
   useEffect(() => {
     if (opened) {
+      refreshCluster();
       modals.open({
         modalId,
         title: `Transfer "${cluster!.name}"?`,
@@ -126,6 +127,7 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
     open,
     setModalStack,
     sponsorClusterModal,
+    refreshCluster,
   ]);
 
   return {

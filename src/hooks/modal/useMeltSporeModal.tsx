@@ -11,6 +11,7 @@ import { showSuccess } from '@/utils/notifications';
 import { QuerySpore } from '../query/type';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
+import { useSporeQuery } from '../query/useSporeQuery';
 
 export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -18,6 +19,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const { address, signTransaction } = useConnect();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     opened ? spore?.clusterId || undefined : undefined,
@@ -71,6 +73,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
 
   useEffect(() => {
     if (opened) {
+      refreshSpore();
       modals.open({
         modalId,
         title: 'Melt spore?',
@@ -89,7 +92,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
     } else {
       modals.close(modalId);
     }
-  }, [modalId, meltSporeMutation.isPending, handleSubmit, opened, close, spore]);
+  }, [modalId, meltSporeMutation.isPending, handleSubmit, opened, close, spore, refreshSpore]);
 
   return {
     open,

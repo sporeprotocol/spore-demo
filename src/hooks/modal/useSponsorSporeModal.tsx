@@ -121,6 +121,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
 
   useEffect(() => {
     if (opened) {
+      refreshSpore();
       modals.open({
         modalId,
         title: 'Sponsor Spore',
@@ -153,6 +154,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
     modalId,
     spore,
     modalStack,
+    refreshSpore,
   ]);
 
   return {
