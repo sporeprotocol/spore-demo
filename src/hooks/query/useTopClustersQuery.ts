@@ -47,7 +47,7 @@ export function useTopClustersQuery(limit = 4) {
     true,
   );
   const clusters = data?.topClusters ?? [];
-  const isLoading = rest.isLoading || rest.isPending;
+  const isLoading = rest.isPending;
 
   return {
     data: clusters,

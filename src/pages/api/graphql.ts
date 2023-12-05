@@ -7,7 +7,6 @@ import KeyvRedis from '@keyv/redis';
 import Keyv, { Store } from 'keyv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
-import { NextApiRequest, NextApiResponse } from 'next';
 
 const RESPONSE_CACHE_ENABLED =
   process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true' && process.env.KV_URL;
@@ -15,8 +14,6 @@ const RESPONSE_CACHE_ENABLED =
 export const config = {
   maxDuration: 300,
 };
-
-export const fetchCache = 'force-no-store';
 
 const keyvRedis = new KeyvRedis(process.env.KV_URL!);
 
@@ -53,33 +50,25 @@ export const server = createApolloServer({
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {
-      cache,
-      plugins: [
-        ApolloServerPluginCacheControl({
-          defaultMaxAge: 60 * 60 * 24 * 365,
-          calculateHttpHeaders: false,
-        }),
-        responseCachePlugin({
-          generateCacheKey,
-          shouldReadFromCache: async (requestContext) => {
-            return requestContext.request.http?.headers.get('Cache-Control') !== 'no-store';
-          },
-          shouldWriteToCache: async (requestContext) => {
-            return requestContext.response.http?.headers.get('Cache-Control') === 'no-store';
-          }
-        }),
-      ],
-    }
+        cache,
+        plugins: [
+          ApolloServerPluginCacheControl({
+            defaultMaxAge: 60 * 60 * 24 * 365,
+            calculateHttpHeaders: false,
+          }),
+          responseCachePlugin({
+            generateCacheKey,
+            shouldReadFromCache: async (requestContext) => {
+              return requestContext.request.http?.headers.get('Cache-Control') !== 'no-store';
+            },
+          }),
+        ],
+      }
     : {}),
 });
 
 export const context = createContext();
 
-const handler = (req: NextApiRequest, res: NextApiResponse) => {
-  res.setHeader('Cache-Control', 'no-store');
-  startServerAndCreateNextHandler(server, {
-    context: async () => context,
-  })(req, res);
-};
-
-export default handler;
+export default startServerAndCreateNextHandler(server, {
+  context: async () => context,
+});
