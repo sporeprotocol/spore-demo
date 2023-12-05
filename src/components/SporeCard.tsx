@@ -157,7 +157,7 @@ export default function SporeCard({ spore }: SporeCardProps) {
               </Title>
               <Flex>
                 <Text size="md" color="white">
-                  {amount.toLocaleString('en-US')} CKBytes
+                  {amount.toLocaleString('en-US')} CKByte
                 </Text>
               </Flex>
             </Flex>

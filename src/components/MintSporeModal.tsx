@@ -449,7 +449,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               <Text weight="bold" color="text.0" mr="5px">
                 ≈ {onChainSize.toLocaleString('en-US')} CKB
               </Text>
-              <Popover label="By creating a spore, you are reserving this amount of CKB for on-chain storage. You can always melt spores to redeem your reserved CKB.">
+              <Popover label="By creating a spore, you are reserving this amount of CKByte for on-chain storage. You can always melt spores to redeem your reserved CKByte.">
                 <Image
                   src="/svg/icon-info.svg"
                   alt="info"
@@ -490,7 +490,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
             <label style={{ cursor: 'pointer' }} htmlFor="zero-fee">
               Enable Zero-Fee Transfers
             </label>
-            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+            <Popover label="By checking this option, you allocate 1 CKByte to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
               <Image
                 src="/svg/icon-info.svg"
                 alt="info"
@@ -516,7 +516,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               onChange={(e) => setUseCapacityMargin(e.target.checked)}
             />
             <Text>Enable Zero-Fee Transfers</Text>
-            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+            <Popover label="By checking this option, you allocate 1 CKByte to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
               <Image
                 src="/svg/icon-info.svg"
                 alt="info"

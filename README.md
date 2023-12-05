@@ -61,7 +61,7 @@ This will start the development server. Navigate to `http://localhost:3000` in y
 ## Q & A
 ### Question: Is this project purely front-end? 
  
- Yes, this is a pure front-end project without any backend storage. It only requires a browser client and Nervos CKB to interact directly with the blockchain through the Indexer and PRC interfaces provided by [Lumos](https://github.com/ckb-js/lumos). Therefore, the front-end application will directly interact with Nervos CKB, which will also result in certain limitations in the implementation of some functions. If you want to have a better user experience, you can add some temporary storage in between to achieve it.
+ Yes, this is a pure front-end project without any backend storage. It only requires a browser client and Nervos CKByte to interact directly with the blockchain through the Indexer and PRC interfaces provided by [Lumos](https://github.com/ckb-js/lumos). Therefore, the front-end application will directly interact with Nervos CKB, which will also result in certain limitations in the implementation of some functions. If you want to have a better user experience, you can add some temporary storage in between to achieve it.
 
 ## License
 

@@ -85,7 +85,7 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
         capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });
-      showSuccess(`${amount.toLocaleString('en-US')} CKB sponsored to Cluster!`);
+      showSuccess(`${amount.toLocaleString('en-US')} CKByte sponsored to Cluster!`);
       modals.close(modalId);
     },
     [address, cluster, sponsorClusterMutation, modalId, capacityMargin, lock],

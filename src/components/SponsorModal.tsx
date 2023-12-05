@@ -114,8 +114,8 @@ export default function SponsorModal(props: TransferModalProps) {
     <Stack>
       <Text color="text.1">
         {type === 'spore'
-          ? `Sponsoring additional CKB for this Spore enables Zero-Fee Transfers and enhances your Spore's value as it grows with on-chain usage.`
-          : `Enable Zero-Fee Transfers by adding CKB to this Cluster to sponsor future transfers.`}
+          ? `Sponsoring additional CKByte for this Spore enables Zero-Fee Transfers and enhances your Spore's value as it grows with on-chain usage.`
+          : `Enable Zero-Fee Transfers by adding CKByte to this Cluster to sponsor future transfers.`}
       </Text>
       <form onSubmit={form.onSubmit(handleSubmit)} ref={focusTrapRef}>
         <Group w="100%" align="center" mb="8px">

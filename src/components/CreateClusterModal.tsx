@@ -163,7 +163,7 @@ export default function CreateClusterModal(props: CreateClusterModalProps) {
               onChange={(e) => setUseCapacityMargin(e.target.checked)}
             />
             <Text>Enable Zero-Fee Transfers</Text>
-            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+            <Popover label="By checking this option, you allocate 1 CKByte to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
               <Image
                 src="/svg/icon-info.svg"
                 alt="info"

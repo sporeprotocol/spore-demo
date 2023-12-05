@@ -66,7 +66,7 @@ export default function MeltSporeModal(props: MeltSporeModalProps) {
   return (
     <Box>
       <Text color="text.0" mb="32px">
-        After melt this spore, you will be able to get ~{amount} CKB back in
+        After melt this spore, you will be able to get ~{amount} CKByte back in
         your wallet. This action cannot be undone.
       </Text>
 
