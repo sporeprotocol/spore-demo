@@ -36,7 +36,7 @@ const useStyles = createStyles((theme, props: TextSporeRenderProps) => ({
 
 export function TextSporeCoverRender(props: TextSporeRenderProps) {
   const { spore, ratio = 1 } = props;
-  const [text, setText] = useState<string | ArrayBuffer | null>(null);
+  const [text, setText] = useState<string | ArrayBuffer>('');
   const { classes } = useStyles(props);
 
   useEffect(() => {
@@ -45,10 +45,6 @@ export function TextSporeCoverRender(props: TextSporeRenderProps) {
       setText(text);
     });
   }, [spore]);
-
-  if (!text) {
-    return null;
-  }
 
   return (
     <AspectRatio ratio={ratio} bg="#F4F5F9">

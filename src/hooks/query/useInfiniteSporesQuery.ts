@@ -42,7 +42,7 @@ export function useInfiniteSporesQuery(contentTypes?: string[]) {
         const response = await graphQLClient.request(infiniteSporesQueryDocument, params);
         if (RESPONSE_CACHE_ENABLED) {
           const headers = new Headers();
-          headers.set('cache-control', 'no-cache');
+          headers.set('cache-control', 'no-store');
           graphQLClient
             .request(infiniteSporesQueryDocument, params, headers)
             .finally(() => headers.delete('cache-control'));

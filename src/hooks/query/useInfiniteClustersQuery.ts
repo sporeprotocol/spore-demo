@@ -53,7 +53,7 @@ export function useInfiniteClustersQuery(address?: string) {
       const response = await graphQLClient.request(infiniteClustersQueryDocument, params);
       if (RESPONSE_CACHE_ENABLED) {
         const headers = new Headers();
-        headers.set('cache-control', 'no-cache');
+        headers.set('cache-control', 'no-store');
         graphQLClient
           .request(infiniteClustersQueryDocument, params, headers)
           .finally(() => headers.delete('cache-control'));

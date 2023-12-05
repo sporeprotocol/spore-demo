@@ -16,6 +16,7 @@ import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
+import { cloneDeep, update } from 'lodash-es';
 
 export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -56,10 +57,47 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
     [signTransaction],
   );
 
-  const onSuccess = useCallback(async () => {
-    if (!spore) return;
-    await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
-  }, [refreshClusterSpores, refreshSpore, refreshSporesByAddress, spore]);
+  const onSuccess = useCallback(
+    async (outPoint: OutPoint) => {
+      if (!spore) return;
+      Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+      const capacityMargin = nextCapacityMarginRef.current;
+      const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
+        .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))
+        .toHexString();
+
+      const updateSpore = (spore: QuerySpore) => {
+        update(spore, 'capacityMargin', () => capacityMargin);
+        update(spore, 'cell.cellOutput.capacity', () => capacity);
+        update(spore, 'cell.outPoint', () => outPoint);
+        return spore;
+      };
+
+      queryClient.setQueryData(['spore', spore.id], (data: { spore: QuerySpore }) => {
+        if (!data || !data.spore) {
+          return data;
+        }
+        const newSpore = updateSpore(cloneDeep(data.spore));
+        return { spore: newSpore };
+      });
+
+      const sporesUpdater = (data: { spores: QuerySpore[] }) => {
+        if (!data || !data.spores) {
+          return data;
+        }
+        const spores = data.spores.map((spore) => {
+          if (spore.id !== spore.id) return spore;
+          return updateSpore(cloneDeep(spore));
+        });
+        return { spores };
+      };
+      queryClient.setQueryData(['sporesByAddress', ownerAddress], sporesUpdater);
+      if (spore.clusterId) {
+        queryClient.setQueryData(['clusterSpores', spore.clusterId], sporesUpdater);
+      }
+    },
+    [ownerAddress, queryClient, refreshClusterSpores, refreshSpore, refreshSporesByAddress, spore],
+  );
 
   const sponsorSporeMutation = useMutation({
     mutationFn: sponsorSpore,

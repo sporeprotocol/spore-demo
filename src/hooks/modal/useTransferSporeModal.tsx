@@ -55,12 +55,18 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
       if (!spore) return;
       await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
       queryClient.setQueryData(['spore', spore.id], (data: { spore: QuerySpore }) => {
+        if (!data || !data.spore) {
+          return data;
+        }
         const spore = cloneDeep(data.spore);
         update(spore, 'spore.cell.cellOutput.lock', () => variables.toLock);
         update(spore, 'spore.cell.outPoint', () => outPoint);
         return { spore };
       });
       queryClient.setQueryData(['sporesByAddress', address], (data: { spores: QuerySpore[] }) => {
+        if (!data || !data.spores) {
+          return data;
+        }
         const currentSpore = spore;
         const toAddress = helpers.encodeToAddress(variables.toLock, {
           config: config.predefined.AGGRON4,

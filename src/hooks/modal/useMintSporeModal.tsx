@@ -10,7 +10,7 @@ import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
-import { BI } from '@ckb-lumos/lumos';
+import { BI, Cell } from '@ckb-lumos/lumos';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useMintableClustersQuery } from '../query/useMintableClusters';
@@ -23,16 +23,13 @@ export default function useMintSporeModal(id?: string) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
-  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    opened ? mindedSporeData?.clusterId : undefined,
-    false,
-  );
+  useClusterSporesQuery(opened ? mindedSporeData?.clusterId : undefined);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
     opened ? address : undefined,
     false,
   );
   const { data: mintableClusters = [], refresh: refreshMintableClusters } =
-    useMintableClustersQuery(opened ? address : undefined);
+    useMintableClustersQuery(address);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -46,21 +43,12 @@ export default function useMintSporeModal(id?: string) {
     [signTransaction],
   );
 
-  const onSuccess = useCallback(
-    async (_: unknown, variables: { data: SporeDataProps }) => {
-      setMindedSporeData(variables.data);
-      const refreshers = [refreshSporesByAddress()];
-      if (variables.data.clusterId) {
-        refreshers.push(refreshClusterSpores());
-      }
-      await Promise.all(refreshers);
-    },
-    [refreshClusterSpores, refreshSporesByAddress],
-  );
-
   const addSporeMutation = useMutation({
     mutationFn: addSpore,
-    onSuccess,
+    onSuccess: async (_: Cell | undefined, variables) => {
+      setMindedSporeData(variables.data);
+      await refreshSporesByAddress();
+    },
   });
 
   const handleSubmit = useCallback(
