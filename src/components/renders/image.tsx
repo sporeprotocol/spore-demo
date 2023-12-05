@@ -28,14 +28,10 @@ const useStyles = createStyles((_, params?: { pixelated: boolean }) => ({
 export function ImageSporeCoverRender(props: ImageSporeRenderProps) {
   const { spore, ratio = 1 } = props;
   const capacity = useMemo(
-    () => BI.from(spore?.cell?.cellOutput.capacity ?? 0).toNumber(),
+    () => BI.from(spore.cell?.cellOutput.capacity ?? 0).toNumber(),
     [spore],
   );
   const { classes } = useStyles({ pixelated: capacity < 10_000 * 10 ** 8 });
-
-  if (!spore) {
-    return null;
-  }
 
   return (
     <AspectRatio ratio={ratio} bg="#F4F5F9">

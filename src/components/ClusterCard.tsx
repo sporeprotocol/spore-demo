@@ -121,7 +121,7 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
   const cols = spores.length >= 4 ? 2 : 1;
 
   const isOwner = useMemo(
-    () => isSameScript(lock, cluster?.cell?.cellOutput.lock),
+    () => isSameScript(lock, cluster.cell?.cellOutput.lock),
     [cluster, lock],
   );
 

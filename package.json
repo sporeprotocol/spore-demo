@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "generate": "graphql-codegen",
+    "postinstall": "npm run generate",
     "analyze": "cross-env SKIP_BUILD_STATIC_GENERATION=true ANALYZE=true next build"
   },
   "dependencies": {

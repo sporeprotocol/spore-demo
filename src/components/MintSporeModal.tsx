@@ -252,7 +252,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   const selectableClusters = useMemo(() => {
     const ownerClusters = clusters.filter((cluster) => {
-      if (!address || !cluster?.cell) {
+      if (!address || !cluster.cell) {
         return false;
       }
 
@@ -279,13 +279,13 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
     return [
       ...ownerClusters.map(({ id, name }) => ({
-        value: id!,
-        label: name!,
+        value: id,
+        label: name,
         group: 'My Clusters',
       })),
       ...publicClusters.map(({ id, name }) => ({
-        value: id!,
-        label: name!,
+        value: id,
+        label: name,
         group: 'All Public Clusters',
       })),
     ];
