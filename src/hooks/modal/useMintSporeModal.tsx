@@ -19,12 +19,9 @@ export default function useMintSporeModal(id?: string) {
   const theme = useMantineTheme();
   const router = useRouter();
   const modalId = useId();
-
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
-
-  const queryClient = useQueryClient();
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     opened ? mindedSporeData?.clusterId : undefined,
@@ -57,18 +54,8 @@ export default function useMintSporeModal(id?: string) {
         refreshers.push(refreshClusterSpores());
       }
       await Promise.all(refreshers);
-
-      const sporesUpdater = (data: { spores: SporeDataProps[] }) => {
-        return {
-          spores: [variables.data, ...data.spores],
-        };
-      };
-      queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
-      if (variables.data.clusterId) {
-        queryClient.setQueryData(['clusterSpores', variables.data.clusterId], sporesUpdater);
-      }
     },
-    [address, queryClient, refreshClusterSpores, refreshSporesByAddress],
+    [refreshClusterSpores, refreshSporesByAddress],
   );
 
   const addSporeMutation = useMutation({
