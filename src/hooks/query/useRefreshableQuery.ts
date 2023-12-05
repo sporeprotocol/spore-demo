@@ -29,7 +29,12 @@ export function useRefreshableQuery<
     queryKey,
     queryFn: async (ctx) => {
       const response = await fetch(ctx);
-      if (RESPONSE_CACHE_ENABLED && refreshOnMount && !hasRefreshOnRequestRef.current) {
+      if (
+        RESPONSE_CACHE_ENABLED &&
+        refreshOnMount &&
+        !hasRefreshOnRequestRef.current &&
+        headersRef.current.get('Cache-Control') !== 'no-cache'
+      ) {
         hasRefreshOnRequestRef.current = true;
         headersRef.current.set('Cache-Control', 'no-cache');
         fetch({})
