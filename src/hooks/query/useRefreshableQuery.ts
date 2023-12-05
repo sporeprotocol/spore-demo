@@ -44,9 +44,16 @@ export function useRefreshableQuery<
   });
 
   const refresh = useCallback(async () => {
-    headersRef.current.set('Cache-Control', 'no-cache');
-    await fetch({});
-    headersRef.current.delete('Cache-Control');
+    try {
+      headersRef.current.set('Cache-Control', 'no-cache');
+      await fetch({});
+      headersRef.current.delete('Cache-Control');
+    } catch (error) {
+      // catch refresh request error and remove cache-control header
+      // to avoid subsequent requests to be no-cache
+      headersRef.current.delete('Cache-Control');
+      console.error(error);
+    }
   }, [fetch]);
 
   return {

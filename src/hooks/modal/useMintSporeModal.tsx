@@ -49,6 +49,7 @@ export default function useMintSporeModal(id?: string) {
     async (_: unknown, variables: { data: SporeDataProps }) => {
       setMindedSporeData(variables.data);
       await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+
       const sporesUpdater = (data: { spores: SporeDataProps[] }) => {
         return {
           spores: [variables.data, ...data.spores],
