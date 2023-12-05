@@ -2,6 +2,7 @@ import { graphql } from '@/gql';
 import { GetInfiniteSporesQueryQuery } from '@/gql/graphql';
 import { graphQLClient } from '@/utils/graphql';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { RESPONSE_CACHE_ENABLED } from './useRefreshableQuery';
 
 const infiniteSporesQueryDocument = graphql(`
   query GetInfiniteSporesQuery($first: Int, $after: String, $contentTypes: [String!]) {
@@ -39,11 +40,13 @@ export function useInfiniteSporesQuery(contentTypes?: string[]) {
       queryFn: async ({ pageParam }) => {
         const params = { first: 12, after: pageParam, contentTypes };
         const response = await graphQLClient.request(infiniteSporesQueryDocument, params);
-        const headers = new Headers();
-        headers.set('cache-control', 'no-cache');
-        graphQLClient
-          .request(infiniteSporesQueryDocument, params, headers)
-          .finally(() => headers.delete('cache-control'));
+        if (RESPONSE_CACHE_ENABLED) {
+          const headers = new Headers();
+          headers.set('cache-control', 'no-cache');
+          graphQLClient
+            .request(infiniteSporesQueryDocument, params, headers)
+            .finally(() => headers.delete('cache-control'));
+        }
         return response;
       },
       initialPageParam: undefined,

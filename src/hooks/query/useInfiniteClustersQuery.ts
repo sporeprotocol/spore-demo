@@ -3,6 +3,7 @@ import { GetInfiniteClustersQueryQuery } from '@/gql/graphql';
 import { graphQLClient } from '@/utils/graphql';
 import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { RESPONSE_CACHE_ENABLED } from './useRefreshableQuery';
 
 const infiniteClustersQueryDocument = graphql(`
   query GetInfiniteClustersQuery(
@@ -50,11 +51,13 @@ export function useInfiniteClustersQuery(address?: string) {
         mintableBy: address,
       };
       const response = await graphQLClient.request(infiniteClustersQueryDocument, params);
-      const headers = new Headers();
-      headers.set('cache-control', 'no-cache');
-      graphQLClient
-        .request(infiniteClustersQueryDocument, params, headers)
-        .finally(() => headers.delete('cache-control'));
+      if (RESPONSE_CACHE_ENABLED) {
+        const headers = new Headers();
+        headers.set('cache-control', 'no-cache');
+        graphQLClient
+          .request(infiniteClustersQueryDocument, params, headers)
+          .finally(() => headers.delete('cache-control'));
+      }
       return response;
     },
     initialPageParam: undefined,

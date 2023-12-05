@@ -8,6 +8,9 @@ import Keyv, { Store } from 'keyv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
 
+const RESPONSE_CACHE_ENABLED =
+  process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true' && process.env.KV_URL;
+
 export const config = {
   maxDuration: 300,
 };
@@ -37,9 +40,7 @@ const store: Store<string> = {
 
 const cache = new KeyvAdapter(new Keyv({ store }));
 
-function generateCacheKey(
-  requestContext: GraphQLRequestContext<Record<string, any>>,
-) {
+function generateCacheKey(requestContext: GraphQLRequestContext<Record<string, any>>) {
   const { request } = requestContext;
   const { query, variables } = request;
   return MD5(JSON.stringify({ query, variables })).toString();
@@ -47,7 +48,7 @@ function generateCacheKey(
 
 export const server = createApolloServer({
   introspection: true,
-  ...(process.env.NODE_ENV !== 'development' && process.env.KV_URL
+  ...(RESPONSE_CACHE_ENABLED
     ? {
         cache,
         plugins: [
@@ -57,23 +58,10 @@ export const server = createApolloServer({
           responseCachePlugin({
             generateCacheKey,
             shouldReadFromCache: async (requestContext) => {
-              return (
-                requestContext.request.http?.headers.get('Cache-Control') !==
-                'no-cache'
-              );
+              return requestContext.request.http?.headers.get('Cache-Control') !== 'no-cache';
             },
             shouldWriteToCache: async (requestContext) => {
-              if (
-                requestContext.response.http?.headers.get('Cache-Control') ===
-                'no-cache'
-              ) {
-                return true;
-              }
-              const key = generateCacheKey(requestContext);
-              if (!(await requestContext.cache.get(key))) {
-                return true;
-              }
-              return false;
+              return requestContext.request.http?.headers.get('Cache-Control') === 'no-cache';
             },
           }),
         ],

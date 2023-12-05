@@ -1,7 +1,7 @@
 import { graphql } from '@/gql';
 import { useRefreshableQuery } from './useRefreshableQuery';
 import { graphQLClient } from '@/utils/graphql';
-import {SUPPORTED_MIME_TYPE} from '@/utils/mime';
+import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 
 const topClustersQueryDocument = graphql(`
   query GetTopClustersQuery($first: Int, $contentTypes: [String!]) {
@@ -34,15 +34,18 @@ const topClustersQueryDocument = graphql(`
 `);
 
 export function useTopClustersQuery(limit = 4) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['topClusters'],
-    queryFn: async (ctx) =>
-      graphQLClient.request(
-        topClustersQueryDocument,
-        { first: limit, contentTypes: SUPPORTED_MIME_TYPE },
-        ctx.meta?.headers as Headers,
-      ),
-  }, true);
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['topClusters'],
+      queryFn: async (ctx) =>
+        graphQLClient.request(
+          topClustersQueryDocument,
+          { first: limit, contentTypes: SUPPORTED_MIME_TYPE },
+          ctx.meta?.headers as Headers,
+        ),
+    },
+    true,
+  );
   const clusters = data?.topClusters ?? [];
   const isLoading = rest.isLoading || rest.isPending;
 
