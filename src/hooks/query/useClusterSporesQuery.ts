@@ -10,6 +10,7 @@ const clusterSporesQueryDocument = graphql(`
       id
       contentType
       capacityMargin
+      clusterId
       cell {
         cellOutput {
           capacity
