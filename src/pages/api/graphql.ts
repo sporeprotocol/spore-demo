@@ -64,6 +64,9 @@ export const server = createApolloServer({
           shouldReadFromCache: async (requestContext) => {
             return requestContext.request.http?.headers.get('Cache-Control') !== 'no-store';
           },
+          shouldWriteToCache: async (requestContext) => {
+            return requestContext.response.http?.headers.get('Cache-Control') === 'no-store';
+          }
         }),
       ],
     }
