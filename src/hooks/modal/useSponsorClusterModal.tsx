@@ -44,7 +44,7 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
   const onSuccess = useCallback(
     async (outPoint: OutPoint) => {
       if (!cluster) return;
-      await refreshCluster();
+      refreshCluster();
       const capacityMargin = nextCapacityMarginRef.current;
       const capacity = BI.from(cluster?.cell?.cellOutput.capacity ?? 0)
         .add(BI.from(capacityMargin).sub(cluster?.capacityMargin ?? 0))

@@ -60,7 +60,7 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   const onSuccess = useCallback(
     async (outPoint: OutPoint) => {
       if (!spore) return;
-      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+      Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
       const capacityMargin = nextCapacityMarginRef.current;
       const capacity = BI.from(spore?.cell?.cellOutput.capacity ?? 0)
         .add(BI.from(capacityMargin).sub(spore?.capacityMargin ?? 0))

@@ -53,7 +53,7 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const onSuccess = useCallback(
     async (outPoint: OutPoint, variables: { toLock: Script }) => {
       if (!spore) return;
-      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+      Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
       queryClient.setQueryData(['spore', spore.id], (data: { spore: QuerySpore }) => {
         const spore = cloneDeep(data.spore);
         update(spore, 'spore.cell.cellOutput.lock', () => variables.toLock);

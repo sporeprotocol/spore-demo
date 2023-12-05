@@ -5,7 +5,7 @@ import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import MintSporeModal from '@/components/MintSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';

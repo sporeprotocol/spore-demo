@@ -46,7 +46,7 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
 
   const onSuccess = useCallback(
     async (outPoint: OutPoint, variables: { toLock: Script }) => {
-      await Promise.all([refreshCluster(), refreshClustersByAddress()]);
+      Promise.all([refreshCluster(), refreshClustersByAddress()]);
       queryClient.setQueryData(['cluster', cluster?.id], (data: { cluster: QueryCluster }) => {
         const cluster = {
           ...data.cluster,
