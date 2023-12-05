@@ -35,16 +35,19 @@ const clustersByAddressQueryDocument = graphql(`
 `);
 
 export function useClustersByAddressQuery(address: string | undefined) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['clustersByAddress', address],
-    queryFn: async (ctx) =>
-      graphQLClient.request(
-        clustersByAddressQueryDocument,
-        { address: address!, contentTypes: SUPPORTED_MIME_TYPE },
-        ctx.meta?.headers as Headers,
-      ),
-    enabled: !!address,
-  });
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['clustersByAddress', address],
+      queryFn: async (ctx) =>
+        graphQLClient.request(
+          clustersByAddressQueryDocument,
+          { address: address!, contentTypes: SUPPORTED_MIME_TYPE },
+          ctx.meta?.headers as Headers,
+        ),
+      enabled: !!address,
+    },
+    true,
+  );
   const clusters: QueryCluster[] = data?.clusters ?? [];
   const isLoading = rest.isLoading || rest.isPending;
 

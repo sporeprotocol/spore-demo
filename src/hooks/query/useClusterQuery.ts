@@ -30,17 +30,20 @@ const clusterQueryDocument = graphql(`
 `);
 
 export function useClusterQuery(id: string | undefined) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['cluster', id],
-    queryFn: async (ctx) => {
-      return graphQLClient.request(
-        clusterQueryDocument,
-        { id: id!, contentTypes: SUPPORTED_MIME_TYPE },
-        ctx.meta?.headers as Headers,
-      );
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['cluster', id],
+      queryFn: async (ctx) => {
+        return graphQLClient.request(
+          clusterQueryDocument,
+          { id: id!, contentTypes: SUPPORTED_MIME_TYPE },
+          ctx.meta?.headers as Headers,
+        );
+      },
+      enabled: !!id,
     },
-    enabled: !!id,
-  });
+    true,
+  );
   const cluster = data?.cluster as QueryCluster | undefined;
   const isLoading = rest.isLoading || rest.isPending;
 

@@ -33,17 +33,20 @@ const sporesByAddressQueryDocument = graphql(`
 `);
 
 export function useSporesByAddressQuery(address: string | undefined) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['sporesByAddress', address],
-    queryFn: async (ctx) => {
-      return graphQLClient.request(
-        sporesByAddressQueryDocument,
-        { address: address! },
-        ctx.meta?.headers as Headers,
-      );
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['sporesByAddress', address],
+      queryFn: async (ctx) => {
+        return graphQLClient.request(
+          sporesByAddressQueryDocument,
+          { address: address! },
+          ctx.meta?.headers as Headers,
+        );
+      },
+      enabled: !!address,
     },
-    enabled: !!address,
-  });
+    true,
+  );
   const spores: QuerySpore[] = data?.spores ?? [];
   const isLoading = rest.isLoading || rest.isPending;
 

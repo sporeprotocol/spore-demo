@@ -29,23 +29,23 @@ const clusterSporesQueryDocument = graphql(`
 `);
 
 export function useClusterSporesQuery(id: string | undefined) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['clusterSpores', id],
-    queryFn: async (ctx) => {
-      if (!id) {
-        return undefined;
-      }
-      return graphQLClient.request(
-        clusterSporesQueryDocument,
-        {
-          clusterId: id,
-          contentTypes: SUPPORTED_MIME_TYPE,
-        },
-        ctx.meta?.headers as Headers,
-      );
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['clusterSpores', id],
+      queryFn: async (ctx) => {
+        return graphQLClient.request(
+          clusterSporesQueryDocument,
+          {
+            clusterId: id!,
+            contentTypes: SUPPORTED_MIME_TYPE,
+          },
+          ctx.meta?.headers as Headers,
+        );
+      },
+      enabled: !!id,
     },
-    enabled: !!id,
-  });
+    true,
+  );
   const spores = (data?.spores as QuerySpore[]) ?? [];
   const isLoading = rest.isLoading || rest.isPending;
 

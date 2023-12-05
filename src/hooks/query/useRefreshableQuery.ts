@@ -1,5 +1,6 @@
 import { DefaultError, QueryKey, UseQueryOptions, useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useRef } from 'react';
+import { throttle } from 'lodash-es';
+import { useCallback, useRef } from 'react';
 
 export const RESPONSE_CACHE_ENABLED = process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true';
 
@@ -26,7 +27,18 @@ export function useRefreshableQuery<
 
   const queryResult = useQuery({
     queryKey,
-    queryFn: async (ctx) => fetch(ctx),
+    queryFn: async (ctx) => {
+      const response = await fetch(ctx);
+      console.log(hasRefreshOnRequestRef.current, refreshOnMount);
+      if (RESPONSE_CACHE_ENABLED && refreshOnMount && !hasRefreshOnRequestRef.current) {
+        hasRefreshOnRequestRef.current = true;
+        headersRef.current.set('Cache-Control', 'no-cache');
+        fetch({}).finally(() => {
+          headersRef.current.delete('Cache-Control');
+        });
+      }
+      return response;
+    },
     enabled,
     initialData,
   });
@@ -37,19 +49,8 @@ export function useRefreshableQuery<
     headersRef.current.delete('Cache-Control');
   }, [fetch]);
 
-  useEffect(() => {
-    if (!RESPONSE_CACHE_ENABLED) {
-      return;
-    }
-
-    if (refreshOnMount && !hasRefreshOnRequestRef.current) {
-      hasRefreshOnRequestRef.current = true;
-      refresh();
-    }
-  }, [refresh, refreshOnMount]);
-
   return {
     ...queryResult,
-    refresh,
+    refresh: throttle(refresh, 300),
   };
 }
