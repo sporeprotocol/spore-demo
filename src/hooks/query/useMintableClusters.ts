@@ -27,7 +27,7 @@ const mintableClustersQueryDocument = graphql(`
   }
 `);
 
-export function useMintableClustersQuery(address: string | undefined) {
+export function useMintableClustersQuery(address: string | undefined, enabled = true) {
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['mintableClusters', address],
@@ -38,7 +38,7 @@ export function useMintableClustersQuery(address: string | undefined) {
           ctx.meta?.headers as Headers,
         );
       },
-      enabled: !!address,
+      enabled: !!address && enabled,
     },
   );
   const clusters = data?.clusters as QueryCluster[] | undefined;

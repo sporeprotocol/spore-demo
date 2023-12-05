@@ -28,8 +28,12 @@ export default function useMintSporeModal(id?: string) {
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     opened ? mindedSporeData?.clusterId : undefined,
+    false,
   );
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
+    opened ? address : undefined,
+    false,
+  );
   const { data: mintableClusters = [], refresh: refreshMintableClusters } =
     useMintableClustersQuery(opened ? address : undefined);
 
@@ -48,7 +52,7 @@ export default function useMintSporeModal(id?: string) {
   const onSuccess = useCallback(
     async (_: unknown, variables: { data: SporeDataProps }) => {
       setMindedSporeData(variables.data);
-      const refreshers = [refreshSporesByAddress()]
+      const refreshers = [refreshSporesByAddress()];
       if (variables.data.clusterId) {
         refreshers.push(refreshClusterSpores());
       }

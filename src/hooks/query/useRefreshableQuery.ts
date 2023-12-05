@@ -1,4 +1,10 @@
-import { DefaultError, QueryKey, UseQueryOptions, useQuery } from '@tanstack/react-query';
+import {
+  DefaultError,
+  QueryKey,
+  UseQueryOptions,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { throttle } from 'lodash-es';
 import { useCallback, useRef } from 'react';
 
@@ -12,6 +18,7 @@ export function useRefreshableQuery<
 >(options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, refreshOnMount?: boolean) {
   const { queryKey, queryFn, enabled, initialData } = options;
   const headersRef = useRef<Headers>(new Headers());
+  const queryClient = useQueryClient();
 
   const fetch = useCallback(
     (ctx: any) => {
@@ -31,10 +38,14 @@ export function useRefreshableQuery<
       if (
         RESPONSE_CACHE_ENABLED &&
         refreshOnMount &&
-        headersRef.current.get('Cache-Control') !== 'no-cache'
+        headersRef.current.get('Cache-Control') !== 'no-store'
       ) {
-        headersRef.current.set('Cache-Control', 'no-cache');
+        headersRef.current.set('Cache-Control', 'no-store');
         fetch({})
+          .then((data) => {
+            // @ts-ignore
+            queryClient.setQueryData(queryKey, data);
+          })
           .catch((e) => console.error(e))
           .finally(() => {
             headersRef.current.delete('Cache-Control');
@@ -48,12 +59,10 @@ export function useRefreshableQuery<
 
   const refresh = useCallback(async () => {
     try {
-      headersRef.current.set('Cache-Control', 'no-cache');
+      headersRef.current.set('Cache-Control', 'no-store');
       await fetch({});
       headersRef.current.delete('Cache-Control');
     } catch (error) {
-      // catch refresh request error and remove cache-control header
-      // to avoid subsequent requests to be no-cache
       headersRef.current.delete('Cache-Control');
       console.error(error);
     }

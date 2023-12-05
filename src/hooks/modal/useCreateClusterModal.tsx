@@ -20,6 +20,7 @@ export default function useCreateClusterModal() {
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(
     opened ? address : undefined,
+    false,
   );
   const modalId = useId();
 

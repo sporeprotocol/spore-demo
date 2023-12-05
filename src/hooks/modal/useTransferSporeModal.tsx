@@ -25,10 +25,14 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const { address, signTransaction } = useConnect();
   const queryClient = useQueryClient();
   const { data: { capacityMargin } = {} } = useSporeQuery(opened ? spore?.id : undefined);
-  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined);
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(opened ? address : undefined);
+  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined, false);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
+    opened ? address : undefined,
+    false,
+  );
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     opened ? spore?.clusterId || undefined : undefined,
+    false,
   );
 
   const sponsorSporeModal = useSponsorSporeModal(spore);

@@ -28,7 +28,7 @@ const clusterSporesQueryDocument = graphql(`
   }
 `);
 
-export function useClusterSporesQuery(id: string | undefined) {
+export function useClusterSporesQuery(id: string | undefined, enabled = true) {
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['clusterSpores', id],
@@ -45,7 +45,7 @@ export function useClusterSporesQuery(id: string | undefined) {
           ctx.meta?.headers as Headers,
         );
       },
-      enabled: !!id,
+      enabled: !!id && enabled,
     },
     true,
   );

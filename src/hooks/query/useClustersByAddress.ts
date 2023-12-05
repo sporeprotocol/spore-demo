@@ -34,7 +34,7 @@ const clustersByAddressQueryDocument = graphql(`
   }
 `);
 
-export function useClustersByAddressQuery(address: string | undefined) {
+export function useClustersByAddressQuery(address: string | undefined, enabled = true) {
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['clustersByAddress', address],

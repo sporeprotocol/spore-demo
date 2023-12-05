@@ -32,7 +32,7 @@ const sporesByAddressQueryDocument = graphql(`
   }
 `);
 
-export function useSporesByAddressQuery(address: string | undefined) {
+export function useSporesByAddressQuery(address: string | undefined, enabled = true) {
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['sporesByAddress', address],
@@ -43,7 +43,7 @@ export function useSporesByAddressQuery(address: string | undefined) {
           ctx.meta?.headers as Headers,
         );
       },
-      enabled: !!address,
+      enabled: !!address && enabled,
     },
     true,
   );

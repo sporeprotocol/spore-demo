@@ -29,7 +29,7 @@ const clusterQueryDocument = graphql(`
   }
 `);
 
-export function useClusterQuery(id: string | undefined) {
+export function useClusterQuery(id: string | undefined, enabled = true) {
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['cluster', id],
@@ -40,7 +40,7 @@ export function useClusterQuery(id: string | undefined) {
           ctx.meta?.headers as Headers,
         );
       },
-      enabled: !!id,
+      enabled: !!id && enabled,
     },
     true,
   );

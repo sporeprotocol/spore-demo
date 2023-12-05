@@ -26,6 +26,7 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
   );
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(
     opened ? address : undefined,
+    false,
   );
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);

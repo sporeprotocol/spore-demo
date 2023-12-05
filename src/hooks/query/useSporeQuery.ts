@@ -32,14 +32,14 @@ const sporeQueryDocument = graphql(`
   }
 `);
 
-export function useSporeQuery(id: string | undefined) {
+export function useSporeQuery(id: string | undefined, enabled = true) {
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['spore', id],
       queryFn: async (ctx) => {
         return graphQLClient.request(sporeQueryDocument, { id: id! }, ctx.meta?.headers as Headers);
       },
-      enabled: !!id,
+      enabled: !!id && enabled,
     },
     true,
   );
