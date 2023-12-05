@@ -1,3 +1,5 @@
+import { QuerySpore } from '@/hooks/query/type';
+import { IMAGE_MIME_TYPE } from '@/utils/mime';
 import { useMantineTheme } from '@mantine/core';
 import { DefaultSeo, NextSeo } from 'next-seo';
 
@@ -15,8 +17,7 @@ export function GlobalOpenGraph() {
         url: 'https://spore-demo.vercel.app',
         siteName: 'Spore Demo',
         title: 'Spore Demo',
-        description:
-          'A Spore Protocol Demo, based on Next.js + React + Spore SDK.',
+        description: 'A Spore Protocol Demo, based on Next.js + React + Spore SDK.',
         images: [
           {
             url: '/images/og.png',
@@ -49,31 +50,31 @@ export function ClusterOpenGraph(props: { id: string }) {
   );
 }
 
-export function SporeOpenGraph(props: { id: string }) {
-  const { id } = props;
-  // FIXME
-  return null;
-  // const { data: spore } = trpc.spore.get.useQuery({ id });
+export function SporeOpenGraph(props: { spore: QuerySpore | undefined }) {
+  const { spore } = props;
+  if (!spore) {
+    return null;
+  }
 
-  // return (
-  //   <NextSeo
-  //     title={`Spore: ${id.slice(0, 10)}...${id.slice(-10)} | Spore Demo`}
-  //     description={id}
-  //     openGraph={{
-  //       images: [
-  //         ...(IMAGE_MIME_TYPE.includes(spore?.contentType ?? ('' as any))
-  //           ? [
-  //               {
-  //                 url: `/api/media/${id}`,
-  //                 width: 400,
-  //                 height: 400,
-  //                 alt: id,
-  //                 type: spore?.contentType,
-  //               },
-  //             ]
-  //           : []),
-  //       ],
-  //     }}
-  //   />
-  // );
+  return (
+    <NextSeo
+      title={`Spore: ${spore.id.slice(0, 10)}...${spore.id.slice(-10)} | Spore Demo`}
+      description={spore.id}
+      openGraph={{
+        images: [
+          ...(IMAGE_MIME_TYPE.includes(spore?.contentType as (typeof IMAGE_MIME_TYPE)[number])
+            ? [
+              {
+                url: `/api/media/${spore.id}`,
+                width: 400,
+                height: 400,
+                alt: spore.id,
+                type: spore?.contentType,
+              },
+            ]
+            : []),
+        ],
+      }}
+    />
+  );
 }

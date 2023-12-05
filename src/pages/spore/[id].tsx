@@ -154,7 +154,7 @@ export default function SporePage() {
       <Head>
         <title>Spore: {id} - Spore Demo</title>
       </Head>
-      <SporeOpenGraph id={id as string} />
+      <SporeOpenGraph spore={spore} />
       <Box bg="background.0">
         <Container size="md" pt="24px" pb="24px">
           <Stack spacing="24px">
