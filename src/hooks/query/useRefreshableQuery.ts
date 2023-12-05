@@ -12,7 +12,6 @@ export function useRefreshableQuery<
 >(options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, refreshOnMount?: boolean) {
   const { queryKey, queryFn, enabled, initialData } = options;
   const headersRef = useRef<Headers>(new Headers());
-  const hasRefreshOnRequestRef = useRef(false);
 
   const fetch = useCallback(
     (ctx: any) => {
@@ -32,10 +31,8 @@ export function useRefreshableQuery<
       if (
         RESPONSE_CACHE_ENABLED &&
         refreshOnMount &&
-        !hasRefreshOnRequestRef.current &&
         headersRef.current.get('Cache-Control') !== 'no-cache'
       ) {
-        hasRefreshOnRequestRef.current = true;
         headersRef.current.set('Cache-Control', 'no-cache');
         fetch({})
           .catch((e) => console.error(e))
