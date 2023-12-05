@@ -29,13 +29,14 @@ export function useRefreshableQuery<
     queryKey,
     queryFn: async (ctx) => {
       const response = await fetch(ctx);
-      console.log(hasRefreshOnRequestRef.current, refreshOnMount);
       if (RESPONSE_CACHE_ENABLED && refreshOnMount && !hasRefreshOnRequestRef.current) {
         hasRefreshOnRequestRef.current = true;
         headersRef.current.set('Cache-Control', 'no-cache');
-        fetch({}).finally(() => {
-          headersRef.current.delete('Cache-Control');
-        });
+        fetch({})
+          .catch((e) => console.error(e))
+          .finally(() => {
+            headersRef.current.delete('Cache-Control');
+          });
       }
       return response;
     },

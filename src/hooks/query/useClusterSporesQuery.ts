@@ -33,10 +33,13 @@ export function useClusterSporesQuery(id: string | undefined) {
     {
       queryKey: ['clusterSpores', id],
       queryFn: async (ctx) => {
+        if (!id) {
+          return undefined;
+        }
         return graphQLClient.request(
           clusterSporesQueryDocument,
           {
-            clusterId: id!,
+            clusterId: id,
             contentTypes: SUPPORTED_MIME_TYPE,
           },
           ctx.meta?.headers as Headers,

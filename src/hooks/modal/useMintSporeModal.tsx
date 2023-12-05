@@ -48,7 +48,11 @@ export default function useMintSporeModal(id?: string) {
   const onSuccess = useCallback(
     async (_: unknown, variables: { data: SporeDataProps }) => {
       setMindedSporeData(variables.data);
-      await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+      const refreshers = [refreshSporesByAddress()]
+      if (variables.data.clusterId) {
+        refreshers.push(refreshClusterSpores());
+      }
+      await Promise.all(refreshers);
 
       const sporesUpdater = (data: { spores: SporeDataProps[] }) => {
         return {

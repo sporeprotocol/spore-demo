@@ -33,13 +33,16 @@ const sporeQueryDocument = graphql(`
 `);
 
 export function useSporeQuery(id: string | undefined) {
-  const { data, ...rest } = useRefreshableQuery({
-    queryKey: ['spore', id],
-    queryFn: async (ctx) => {
-      return graphQLClient.request(sporeQueryDocument, { id: id! }, ctx.meta?.headers as Headers);
+  const { data, ...rest } = useRefreshableQuery(
+    {
+      queryKey: ['spore', id],
+      queryFn: async (ctx) => {
+        return graphQLClient.request(sporeQueryDocument, { id: id! }, ctx.meta?.headers as Headers);
+      },
+      enabled: !!id,
     },
-    enabled: !!id,
-  });
+    true,
+  );
   const spore = data?.spore as QuerySpore | undefined;
   const isLoading = rest.isLoading || rest.isPending;
 

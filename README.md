@@ -10,7 +10,7 @@ the creation and transfer of clusters, as well as minting, transferring, and mel
 - **Next.js** - A JavaScript framework created by Vercel..
 - **React** - A JavaScript library for building user interfaces.
 - **Mantine** - A Fully Featured React components library.
-- **tRPC** - A framework for building typesafe APIs.
+- **Spore Graphql Layer** - A GraphQL Layer for query Spore/Cluster data.
 - **Spore SDK** - A SDK for interacting with the Spore Protocol.
 
 ## Supported Wallets
@@ -57,11 +57,6 @@ pnpm run dev
 ```
 
 This will start the development server. Navigate to `http://localhost:3000` in your browser to access the application.
-
-## Q & A
-### Question: Is this project purely front-end? 
- 
- Yes, this is a pure front-end project without any backend storage. It only requires a browser client and Nervos CKByte to interact directly with the blockchain through the Indexer and PRC interfaces provided by [Lumos](https://github.com/ckb-js/lumos). Therefore, the front-end application will directly interact with Nervos CKB, which will also result in certain limitations in the implementation of some functions. If you want to have a better user experience, you can add some temporary storage in between to achieve it.
 
 ## License
 
