@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import { throttle } from 'lodash-es';
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 
 export const RESPONSE_CACHE_ENABLED = process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true';
 
@@ -17,15 +17,22 @@ export function useRefreshableQuery<
   TQueryKey extends QueryKey = QueryKey,
 >(options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, refreshOnMount?: boolean) {
   const { queryKey, queryFn, enabled, initialData } = options;
-  const headersRef = useRef<Headers>(new Headers());
   const queryClient = useQueryClient();
 
-  const fetch = useCallback(
-    (ctx: any) => {
+  type QueryContext = {
+    queryKey: TQueryKey;
+    signal: AbortSignal;
+    meta: Record<string, unknown> | undefined;
+  };
+
+  const request = useCallback(
+    (ctx: QueryContext, headers?: Headers) => {
       if (!ctx.meta) {
         ctx.meta = {};
       }
-      ctx.meta.headers = headersRef.current;
+      if (headers) {
+        ctx.meta.headers = headers;
+      }
       return Promise.resolve(queryFn?.(ctx));
     },
     [queryFn],
@@ -34,22 +41,16 @@ export function useRefreshableQuery<
   const queryResult = useQuery({
     queryKey,
     queryFn: async (ctx) => {
-      const response = await fetch(ctx);
-      if (
-        RESPONSE_CACHE_ENABLED &&
-        refreshOnMount &&
-        headersRef.current.get('Cache-Control') !== 'no-store'
-      ) {
-        headersRef.current.set('Cache-Control', 'no-store');
-        fetch({})
+      const response = await request(ctx);
+      if (RESPONSE_CACHE_ENABLED && refreshOnMount) {
+        const headers = new Headers();
+        headers.set('Cache-Control', 'no-store');
+        request(ctx, headers)
           .then((data) => {
             // @ts-ignore
             queryClient.setQueryData(queryKey, data);
           })
-          .catch((e) => console.error(e))
-          .finally(() => {
-            headersRef.current.delete('Cache-Control');
-          });
+          .catch((e) => console.error(e));
       }
       return response;
     },
@@ -59,14 +60,22 @@ export function useRefreshableQuery<
 
   const refresh = useCallback(async () => {
     try {
-      headersRef.current.set('Cache-Control', 'no-store');
-      await fetch({});
-      headersRef.current.delete('Cache-Control');
+      const headers = new Headers();
+      headers.set('Cache-Control', 'no-store');
+      await request(
+        {
+          queryKey,
+          signal: new AbortController().signal,
+          meta: {
+            headers,
+          },
+        },
+        headers,
+      );
     } catch (error) {
-      headersRef.current.delete('Cache-Control');
       console.error(error);
     }
-  }, [fetch]);
+  }, [queryKey, request]);
 
   return {
     ...queryResult,

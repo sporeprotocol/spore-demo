@@ -5,8 +5,8 @@ import { graphQLClient } from '@/utils/graphql';
 import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 
 const clusterSporesQueryDocument = graphql(`
-  query GetClusterSporesQuery($clusterId: String!, $contentTypes: [String!]) {
-    spores(filter: { clusterIds: [$clusterId], contentTypes: $contentTypes }) {
+  query GetClusterSporesQuery($first: Int, $clusterId: String!, $contentTypes: [String!]) {
+    spores(first: $first, filter: { clusterIds: [$clusterId], contentTypes: $contentTypes }) {
       id
       contentType
       capacityMargin
@@ -40,6 +40,7 @@ export function useClusterSporesQuery(id: string | undefined, enabled = true) {
         return graphQLClient.request(
           clusterSporesQueryDocument,
           {
+            first: 9999,
             clusterId: id,
             contentTypes: SUPPORTED_MIME_TYPE,
           },
