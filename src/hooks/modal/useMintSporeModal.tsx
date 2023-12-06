@@ -24,10 +24,7 @@ export default function useMintSporeModal(id?: string) {
   const { address, lock, signTransaction } = useConnect();
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(mindedSporeData?.clusterId);
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
-    opened ? address : undefined,
-    false,
-  );
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { data: mintableClusters = [], refresh: refreshMintableClusters } =
     useMintableClustersQuery(address);
 

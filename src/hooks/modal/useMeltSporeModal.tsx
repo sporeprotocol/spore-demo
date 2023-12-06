@@ -19,11 +19,8 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const { address, signTransaction } = useConnect();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined, false);
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
-    opened ? address : undefined,
-    false,
-  );
+  const { refresh: refreshSpore } = useSporeQuery(spore?.id, false);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     spore?.clusterId || undefined,
     false,

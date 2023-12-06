@@ -33,13 +33,10 @@ export default function useSponsorSporeModal(spore: QuerySpore | undefined) {
   }, [spore?.cell?.cellOutput.lock]);
   const queryClient = useQueryClient();
   const { data: { capacityMargin } = {} } = useSporeQuery(opened ? spore?.id : undefined);
-  const { refresh: refreshSpore } = useSporeQuery(opened ? spore?.id : undefined, false);
-  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
-    opened ? address : undefined,
-    false,
-  );
+  const { refresh: refreshSpore } = useSporeQuery(spore?.id, false);
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    opened ? spore?.clusterId ?? undefined : undefined,
+    spore?.clusterId ?? undefined,
     false,
   );
   const nextCapacityMarginRef = useRef<string | undefined>();
