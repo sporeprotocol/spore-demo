@@ -24,8 +24,10 @@ export default function useSponsorSporeModal(sourceSpore: QuerySpore | undefined
   const { address, lock, signTransaction } = useConnect();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const { data: spore = sourceSpore } = useSporeQuery(sourceSpore?.id, false);
-  const { refresh: refreshSpore } = useSporeQuery(sourceSpore?.id, false);
+  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
+    sourceSpore?.id,
+    opened,
+  );
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     sourceSpore?.cluster?.id ?? undefined,
@@ -51,7 +53,8 @@ export default function useSponsorSporeModal(sourceSpore: QuerySpore | undefined
   const sponsorSporeMutation = useMutation({
     mutationFn: sponsorSpore,
     onSuccess: async () => {
-      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+      Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+      await refreshSpore();
     },
   });
   const loading = sponsorSporeMutation.isPending && !sponsorSporeMutation.isError;
@@ -113,7 +116,6 @@ export default function useSponsorSporeModal(sourceSpore: QuerySpore | undefined
     modalId,
     sourceSpore,
     modalStack,
-    refreshSpore,
     spore,
   ]);
 

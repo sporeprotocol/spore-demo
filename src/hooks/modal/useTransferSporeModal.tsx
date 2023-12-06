@@ -24,7 +24,7 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
   const { address, signTransaction } = useConnect();
   const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
     sourceSpore?.id,
-    false,
+    opened,
   );
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
@@ -50,7 +50,8 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
   const transferSporeMutation = useMutation({
     mutationFn: transferSpore,
     onSuccess: async () => {
-      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+      Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+      await refreshSpore();
     },
   });
   const loading = transferSporeMutation.isPending && !transferSporeMutation.isError;
@@ -77,7 +78,6 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
 
   useEffect(() => {
     if (opened) {
-      refreshSpore();
       modals.open({
         modalId,
         title: 'Transfer spore?',
@@ -111,7 +111,6 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
     setModalStack,
     open,
     capacityMargin,
-    refreshSpore,
   ]);
 
   return {

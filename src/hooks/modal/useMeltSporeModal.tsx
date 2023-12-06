@@ -14,13 +14,16 @@ import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
-export default function useMeltSporeModal(spore: QuerySpore | undefined) {
+export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { refresh: refreshSpore } = useSporeQuery(spore?.id, false);
+  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
+    sourceSpore?.id,
+    opened,
+  );
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
@@ -39,12 +42,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   );
 
   const onSuccess = useCallback(async () => {
-    await Promise.all([
-      refreshSporesByAddress(),
-      refreshClustersByAddress(),
-      refreshClusterSpores(),
-    ]);
-
+    refreshSpore();
     const sporesUpdater = (data: { spores: QuerySpore[] }) => {
       if (!data || !data.spores) return data;
       const spores = data.spores.filter((s) => s.id !== spore?.id);
@@ -66,17 +64,21 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
 
     queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
     queryClient.setQueryData(['clustersByAddress', address], clustersUpdater);
-    if (spore?.clusterId) {
-      queryClient.setQueryData(['clusterSpores', spore.clusterId], sporesUpdater);
-    }
+    queryClient.setQueryData(['clusterSpores', spore?.clusterId], sporesUpdater);
+
+    Promise.all([
+      refreshSporesByAddress(),
+      refreshClustersByAddress(),
+      refreshClusterSpores(),
+    ]);
   }, [
     address,
     queryClient,
     refreshClusterSpores,
     refreshClustersByAddress,
+    refreshSpore,
     refreshSporesByAddress,
-    spore?.clusterId,
-    spore?.id,
+    spore,
   ]);
 
   const meltSporeMutation = useMutation({
@@ -102,7 +104,6 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
 
   useEffect(() => {
     if (opened) {
-      refreshSpore();
       modals.open({
         modalId,
         title: 'Melt spore?',
@@ -121,7 +122,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
     } else {
       modals.close(modalId);
     }
-  }, [modalId, meltSporeMutation.isPending, handleSubmit, opened, close, spore, refreshSpore]);
+  }, [modalId, meltSporeMutation.isPending, handleSubmit, opened, close, spore]);
 
   return {
     open,

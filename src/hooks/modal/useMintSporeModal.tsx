@@ -23,12 +23,13 @@ export default function useMintSporeModal(id?: string) {
   const [opened, { open, close }] = useDisclosure(false);
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
-  const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
-  const { refresh: refreshClusterSpores } = useClusterSporesQuery(mindedSporeData?.clusterId, false);
+  const clusterId = router.pathname.startsWith('/cluster/')
+    ? (router.query.id as string)
+    : undefined;
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(clusterId, false);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
-  const { data: mintableClusters = [], refresh: refreshMintableClusters } =
-    useMintableClustersQuery(address);
+  const { data: mintableClusters = [] } = useMintableClustersQuery(address, opened);
 
   const addSpore = useCallback(
     async (...args: Parameters<typeof createSpore>) => {
@@ -44,13 +45,21 @@ export default function useMintSporeModal(id?: string) {
 
   const addSporeMutation = useMutation({
     mutationFn: addSpore,
-    onSuccess: async (_: Cell | undefined, variables) => {
-      setMindedSporeData(variables.data);
-      await Promise.all([
-        refreshClusterSpores(),
-        refreshSporesByAddress(),
-        refreshClustersByAddress(),
-      ]);
+    onSuccess: async (_: Cell | undefined) => {
+      await new Promise((resolve) => {
+        if (router.pathname.startsWith('/cluster/')) {
+          refreshClusterSpores().then(resolve);
+          refreshSporesByAddress();
+          refreshClustersByAddress();
+        } else if (
+          router.pathname === '/my' ||
+          (router.pathname === '/[address]' && router.query.address === address)
+        ) {
+          Promise.all([refreshSporesByAddress(), refreshClustersByAddress()]).then(resolve);
+        } else {
+          resolve(undefined);
+        }
+      });
     },
   });
 
@@ -84,7 +93,6 @@ export default function useMintSporeModal(id?: string) {
 
   useEffect(() => {
     if (opened) {
-      refreshMintableClusters();
       modals.open({
         modalId,
         title: 'Add New Spore',
@@ -118,7 +126,6 @@ export default function useMintSporeModal(id?: string) {
     opened,
     close,
     id,
-    refreshMintableClusters,
   ]);
 
   return {

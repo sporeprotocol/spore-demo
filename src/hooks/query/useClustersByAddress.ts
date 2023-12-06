@@ -44,7 +44,7 @@ export function useClustersByAddressQuery(address: string | undefined, enabled =
           { address: address!, contentTypes: SUPPORTED_MIME_TYPE },
           ctx.meta?.headers as Headers,
         ),
-      enabled: !!address,
+      enabled: !!address && enabled,
     },
     true,
   );

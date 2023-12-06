@@ -59,7 +59,7 @@ export function useRefreshableQuery<
 
   const refresh = useCallback(async () => {
     try {
-      await request(
+      const data = await request(
         {
           queryKey,
           signal: new AbortController().signal,
@@ -67,10 +67,12 @@ export function useRefreshableQuery<
         },
         getResponseCacheDisabledHeaders(),
       );
+      // @ts-ignore
+      queryClient.setQueryData(queryKey, data);
     } catch (error) {
       console.error(error);
     }
-  }, [queryKey, request]);
+  }, [queryClient, queryKey, request]);
 
   return {
     ...queryResult,

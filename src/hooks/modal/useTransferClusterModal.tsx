@@ -24,10 +24,7 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
   const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
     opened ? cluster?.id : undefined,
   );
-  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(
-    opened ? address : undefined,
-    false,
-  );
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);
 

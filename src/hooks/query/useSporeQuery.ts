@@ -9,6 +9,7 @@ const sporeQueryDocument = graphql(`
       id
       contentType
       capacityMargin
+      clusterId
       cluster {
         id
         name

@@ -24,7 +24,7 @@ import { useClipboard } from '@mantine/hooks';
 import { IconCopy } from '@tabler/icons-react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const useStyles = createStyles((theme) => ({
   banner: {
@@ -96,8 +96,12 @@ export default function MySpacePage() {
   const [showSpores, setShowSpores] = useState(true);
 
   const { data: capacity = '0x0' } = useCapacity(address as string);
-  const { data: spores, isLoading: isSporesLoading } = useSporesByAddressQuery(address);
-  const { data: clusters, isLoading: isClustersLoading } = useClustersByAddressQuery(address);
+  const { data: spores, isLoading: isSporesLoading } = useSporesByAddressQuery(
+    showSpores ? address : undefined,
+  );
+  const { data: clusters, isLoading: isClustersLoading } = useClustersByAddressQuery(
+    !showSpores ? address : undefined,
+  );
 
   const balance = useMemo(() => {
     if (!capacity) return 0;

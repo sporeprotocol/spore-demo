@@ -18,10 +18,7 @@ export default function useCreateClusterModal() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
-  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(
-    opened ? address : undefined,
-    false,
-  );
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const modalId = useId();
 
   const addCluster = useCallback(

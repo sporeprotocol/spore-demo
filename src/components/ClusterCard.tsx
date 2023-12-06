@@ -23,6 +23,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import DropMenu from './DropMenu';
 import SporeCoverRender from './SporeCoverRender';
 import { QueryCluster } from '@/hooks/query/type';
+import { useRouter } from 'next/router';
 
 export interface ClusterCardProps {
   cluster: QueryCluster;
@@ -76,27 +77,16 @@ export function ClusterSkeletonCard() {
     <Card p={0} className={classes.card}>
       <Card.Section px="md">
         <AspectRatio ratio={140 / 80}>
-          <Skeleton
-            className={classes.skeleton}
-            baseColor={theme.colors.background[1]}
-          />
+          <Skeleton className={classes.skeleton} baseColor={theme.colors.background[1]} />
         </AspectRatio>
       </Card.Section>
 
       <Box p="24px">
         <Text mb="8px">
-          <Skeleton
-            baseColor={theme.colors.background[1]}
-            height="25px"
-            borderRadius="16px"
-          />
+          <Skeleton baseColor={theme.colors.background[1]} height="25px" borderRadius="16px" />
         </Text>
         <Text mb="8px" size="sm">
-          <Skeleton
-            baseColor={theme.colors.background[1]}
-            height="20px"
-            borderRadius="16px"
-          />
+          <Skeleton baseColor={theme.colors.background[1]} height="20px" borderRadius="16px" />
         </Text>
         <Text color="text.0">
           <Skeleton
@@ -114,16 +104,25 @@ export function ClusterSkeletonCard() {
 export default function ClusterCard({ cluster }: ClusterCardProps) {
   const { classes } = useStyles();
   const theme = useMantineTheme();
-  const { lock } = useConnect();
+  const { lock, address } = useConnect();
+  const router = useRouter();
   const [hovered, { close, open }] = useDisclosure(false);
 
   const spores = cluster?.spores ?? [];
   const cols = spores.length >= 4 ? 2 : 1;
 
-  const isOwner = useMemo(
-    () => isSameScript(lock, cluster.cell?.cellOutput.lock),
-    [cluster, lock],
-  );
+  const showActions = useMemo(() => {
+    if (!cluster || !lock) {
+      return false;
+    }
+    if (
+      router.pathname === '/my' ||
+      (router.pathname === '/[address]' && router.query.address === address)
+    ) {
+      return isSameScript(cluster.cell?.cellOutput.lock, lock);
+    }
+    return false;
+  }, [cluster, lock, router.pathname, router.query.address, address]);
 
   const transferClusterModal = useTransferClusterModal(cluster);
   const sponsorClusterModal = useSponsorClusterModal(cluster);
@@ -138,23 +137,13 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
       onMouseEnter={() => open()}
       onMouseLeave={() => close()}
     >
-      <Link
-        href={`/cluster/${cluster.id}`}
-        style={{ textDecoration: 'none' }}
-        passHref
-      >
+      <Link href={`/cluster/${cluster.id}`} style={{ textDecoration: 'none' }} passHref>
         <Card p={0} className={classes.card}>
           <Card.Section px="md" className={classes.section}>
             {spores.length > 0 ? (
               <SimpleGrid cols={cols} spacing="1px" bg="text.0">
                 {spores.slice(0, cols * cols).map((spore) => {
-                  return (
-                    <SporeCoverRender
-                      key={spore.id}
-                      spore={spore}
-                      ratio={140 / 80}
-                    />
-                  );
+                  return <SporeCoverRender key={spore.id} spore={spore} ratio={140 / 80} />;
                 })}
               </SimpleGrid>
             ) : (
@@ -190,12 +179,7 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
                 {cluster.name}
               </Title>
             </Flex>
-            <Text
-              className={classes.description}
-              mb="8px"
-              size="sm"
-              color="text.1"
-            >
+            <Text className={classes.description} mb="8px" size="sm" color="text.1">
               {cluster.description}
             </Text>
             <Text color="text.0">{spores.length} Spores</Text>
@@ -203,7 +187,7 @@ export default function ClusterCard({ cluster }: ClusterCardProps) {
         </Card>
       </Link>
 
-      {hovered && isOwner && (
+      {hovered && showActions && (
         <Box className={classes.menu}>
           <Flex align="center" justify="flex-end">
             <DropMenu
