@@ -5,7 +5,6 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
-import { throttle } from 'lodash-es';
 import { useCallback } from 'react';
 
 export const RESPONSE_CACHE_ENABLED = process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true';
@@ -79,6 +78,6 @@ export function useRefreshableQuery<
 
   return {
     ...queryResult,
-    refresh: throttle(refresh, 300),
+    refresh,
   };
 }

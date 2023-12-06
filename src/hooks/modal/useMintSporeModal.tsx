@@ -23,7 +23,7 @@ export default function useMintSporeModal(id?: string) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
-  useClusterSporesQuery(opened ? mindedSporeData?.clusterId : undefined);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(mindedSporeData?.clusterId);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(
     opened ? address : undefined,
     false,
@@ -48,6 +48,7 @@ export default function useMintSporeModal(id?: string) {
     onSuccess: async (_: Cell | undefined, variables) => {
       setMindedSporeData(variables.data);
       await refreshSporesByAddress();
+      await refreshClusterSpores();
     },
   });
 

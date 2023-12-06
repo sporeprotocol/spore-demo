@@ -25,7 +25,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
     false,
   );
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    opened ? spore?.clusterId || undefined : undefined,
+    spore?.clusterId || undefined,
     false,
   );
 
