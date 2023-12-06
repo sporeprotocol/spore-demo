@@ -24,7 +24,7 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const queryClient = useQueryClient();
-  const { data: { capacityMargin } = {} } = useSporeQuery(spore?.id);
+  const { data: { capacityMargin } = {} } = useSporeQuery(opened ? spore?.id : undefined);
   const { refresh: refreshSpore } = useSporeQuery(spore?.id, false);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(

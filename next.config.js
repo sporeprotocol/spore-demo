@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -36,6 +37,12 @@ const nextConfig = {
       ...config.plugins,
       new webpack.ProvidePlugin({ Buffer: ['buffer', 'Buffer'] }),
     ];
+
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'cross-fetch': path.resolve(__dirname, './fetch.ponyfill.js'),
+    };
+
     return config;
   },
 };
