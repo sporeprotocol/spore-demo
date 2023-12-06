@@ -24,7 +24,7 @@ export default function useSponsorSporeModal(sourceSpore: QuerySpore | undefined
   const { address, lock, signTransaction } = useConnect();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const { data: spore = sourceSpore } = useSporeQuery(opened ? sourceSpore?.id : undefined);
+  const { data: spore = sourceSpore } = useSporeQuery(sourceSpore?.id, false);
   const { refresh: refreshSpore } = useSporeQuery(sourceSpore?.id, false);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(

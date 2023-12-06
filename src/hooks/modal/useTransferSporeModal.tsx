@@ -22,8 +22,9 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-  const { data: spore, refresh: refreshSpore } = useSporeQuery(
-    opened ? sourceSpore?.id : undefined,
+  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
+    sourceSpore?.id,
+    false,
   );
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(

@@ -54,8 +54,7 @@ const server = createApolloServer({
       cache,
       plugins: [
         ApolloServerPluginCacheControl({
-          defaultMaxAge: 60 * 60 * 24,
-          calculateHttpHeaders: false,
+          defaultMaxAge: 60 * 60 * 24 * 365,
         }),
         responseCachePlugin({
           generateCacheKey,
