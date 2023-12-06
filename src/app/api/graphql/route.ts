@@ -10,7 +10,7 @@ import { MD5 } from 'crypto-js';
 
 // export const dynamic = 'force-dynamic';
 // export const revalidate = false;
-export const fetchCache = 'force-no-store';
+// export const fetchCache = 'force-no-store';
 export const maxDuration = 300;
 
 const RESPONSE_CACHE_ENABLED =
