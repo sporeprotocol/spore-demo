@@ -1,8 +1,10 @@
 function customFetch(request, init) {
+  console.log('customFetch', request);
   return fetch(request, {
     ...init,
     next: {
       revalidate: false,
+      cache: 'no-store',
     },
   });
 }
