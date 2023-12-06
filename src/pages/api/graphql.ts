@@ -50,20 +50,20 @@ export const server = createApolloServer({
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {
-        cache,
-        plugins: [
-          ApolloServerPluginCacheControl({
-            defaultMaxAge: 60 * 60 * 24 * 365,
-            calculateHttpHeaders: false,
-          }),
-          responseCachePlugin({
-            generateCacheKey,
-            shouldReadFromCache: async (requestContext) => {
-              return requestContext.request.http?.headers.get('Cache-Control') !== 'no-store';
-            },
-          }),
-        ],
-      }
+      cache,
+      plugins: [
+        ApolloServerPluginCacheControl({
+          defaultMaxAge: 60 * 60 * 24 * 365,
+          calculateHttpHeaders: false,
+        }),
+        responseCachePlugin({
+          generateCacheKey,
+          shouldReadFromCache: async (requestContext) => {
+            return requestContext.request.http?.headers.get('Cache-Control') !== 'no-store';
+          },
+        }),
+      ],
+    }
     : {}),
 });
 
