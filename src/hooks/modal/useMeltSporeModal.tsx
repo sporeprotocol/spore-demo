@@ -8,10 +8,11 @@ import MeltSporeModal from '@/components/MeltSporeModal';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
-import { QuerySpore } from '../query/type';
+import { QueryCluster, QuerySpore } from '../query/type';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useSporeQuery } from '../query/useSporeQuery';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
 export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const modalId = useId();
@@ -21,6 +22,7 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   const queryClient = useQueryClient();
   const { refresh: refreshSpore } = useSporeQuery(spore?.id, false);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
     spore?.clusterId || undefined,
     false,
@@ -37,22 +39,45 @@ export default function useMeltSporeModal(spore: QuerySpore | undefined) {
   );
 
   const onSuccess = useCallback(async () => {
-    await Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+    await Promise.all([
+      refreshSporesByAddress(),
+      refreshClustersByAddress(),
+      refreshClusterSpores(),
+    ]);
 
     const sporesUpdater = (data: { spores: QuerySpore[] }) => {
-      if (!data || !data.spores) {
-        return data;
-      }
+      if (!data || !data.spores) return data;
       const spores = data.spores.filter((s) => s.id !== spore?.id);
-      return {
-        spores,
-      };
+      return { spores };
     };
+    const clustersUpdater = (data: { clusters: QueryCluster[] }) => {
+      if (!data || !data.clusters) return data;
+      const clusters = data.clusters.map((c: QueryCluster) => {
+        if (c.id === spore?.clusterId) {
+          return {
+            ...c,
+            spores: c.spores?.filter((s) => s.id !== spore.id),
+          };
+        }
+        return c;
+      });
+      return { clusters };
+    };
+
     queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
+    queryClient.setQueryData(['clustersByAddress', address], clustersUpdater);
     if (spore?.clusterId) {
       queryClient.setQueryData(['clusterSpores', spore.clusterId], sporesUpdater);
     }
-  }, [address, queryClient, refreshClusterSpores, refreshSporesByAddress, spore]);
+  }, [
+    address,
+    queryClient,
+    refreshClusterSpores,
+    refreshClustersByAddress,
+    refreshSporesByAddress,
+    spore?.clusterId,
+    spore?.id,
+  ]);
 
   const meltSporeMutation = useMutation({
     mutationFn: meltSpore,

@@ -1,12 +1,12 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { BI, OutPoint, Script, config, helpers } from '@ckb-lumos/lumos';
+import { BI, OutPoint, config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
 import useSponsorSporeModal from './useSponsorSporeModal';
@@ -16,22 +16,21 @@ import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
-import { cloneDeep, update } from 'lodash-es';
 
-export default function useTransferSporeModal(spore: QuerySpore | undefined) {
+export default function useTransferSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-  const queryClient = useQueryClient();
-  const { data: { capacityMargin } = {} } = useSporeQuery(opened ? spore?.id : undefined);
-  const { refresh: refreshSpore } = useSporeQuery(spore?.id, false);
+  const { data: spore, refresh: refreshSpore } = useSporeQuery(
+    opened ? sourceSpore?.id : undefined,
+  );
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    spore?.clusterId || undefined,
+    sourceSpore?.clusterId || undefined,
     false,
   );
-
+  const { capacityMargin } = spore ?? {};
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
   const transferSpore = useCallback(
@@ -47,54 +46,11 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
     [signTransaction],
   );
 
-  const onSuccess = useCallback(
-    async (outPoint: OutPoint, variables: { toLock: Script }) => {
-      if (!spore) return;
-      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
-      queryClient.setQueryData(['spore', spore.id], (data: { spore: QuerySpore }) => {
-        if (!data || !data.spore) {
-          return data;
-        }
-        const spore = cloneDeep(data.spore);
-        update(spore, 'spore.cell.cellOutput.lock', () => variables.toLock);
-        update(spore, 'spore.cell.outPoint', () => outPoint);
-        return { spore };
-      });
-      queryClient.setQueryData(['sporesByAddress', address], (data: { spores: QuerySpore[] }) => {
-        if (!data || !data.spores) {
-          return data;
-        }
-        const currentSpore = spore;
-        const toAddress = helpers.encodeToAddress(variables.toLock, {
-          config: config.predefined.AGGRON4,
-        });
-        if (toAddress !== address) {
-          const spores = data.spores.filter((spore) => spore.id !== currentSpore.id);
-          return { spores };
-        }
-        const spores = data.spores.map((spore) => {
-          if (spore.id !== spore.id) return spore;
-          return {
-            ...spore,
-            cell: {
-              ...spore.cell,
-              cellOutput: {
-                ...spore.cell?.cellOutput,
-                lock: variables.toLock,
-              },
-              outPoint,
-            },
-          };
-        });
-        return { spores };
-      });
-    },
-    [address, queryClient, refreshClusterSpores, refreshSpore, refreshSporesByAddress, spore],
-  );
-
   const transferSporeMutation = useMutation({
     mutationFn: transferSpore,
-    onSuccess,
+    onSuccess: async () => {
+      await Promise.all([refreshSpore(), refreshSporesByAddress(), refreshClusterSpores()]);
+    },
   });
   const loading = transferSporeMutation.isPending && !transferSporeMutation.isError;
 
@@ -115,7 +71,7 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
       showSuccess('Spore Transferred!');
       modals.close(modalId);
     },
-    [address, spore, transferSporeMutation, modalId],
+    [address, spore?.cell, transferSporeMutation, modalId],
   );
 
   useEffect(() => {
@@ -153,7 +109,6 @@ export default function useTransferSporeModal(spore: QuerySpore | undefined) {
     sponsorSporeModal,
     setModalStack,
     open,
-    spore,
     capacityMargin,
     refreshSpore,
   ]);

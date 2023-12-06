@@ -159,12 +159,7 @@ export default function ClusterPage() {
             <Flex direction="column">
               <Flex align="center" mb="8px">
                 <Box mr="8px">
-                  <Image
-                    src="/svg/cluster-icon.svg"
-                    alt="Cluster Icon"
-                    width="24"
-                    height="24"
-                  />
+                  <Image src="/svg/cluster-icon.svg" alt="Cluster Icon" width="24" height="24" />
                 </Box>
                 <Text size="xl" weight="bold" color="text.1">
                   Cluster
@@ -210,22 +205,14 @@ export default function ClusterPage() {
             <Flex direction="column">
               <Flex align="center" mb="8px">
                 <Box mr="8px">
-                  <Image
-                    src="/svg/cluster-icon.svg"
-                    alt="Cluster Icon"
-                    width="24"
-                    height="24"
-                  />
+                  <Image src="/svg/cluster-icon.svg" alt="Cluster Icon" width="24" height="24" />
                 </Box>
                 <Text size="xl" weight="bold" color="text.1">
                   Cluster
                 </Text>
               </Flex>
               <Flex mb="24px">
-                <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  gap={{ base: '8px', sx: '0px' }}
-                >
+                <Flex direction={{ base: 'column', sm: 'row' }} gap={{ base: '8px', sx: '0px' }}>
                   <Title order={2} mr="md" className={classes.name}>
                     {cluster?.name}
                   </Title>
@@ -247,11 +234,7 @@ export default function ClusterPage() {
                         px="md"
                         sx={{ borderRadius: '20px' }}
                       >
-                        <Title
-                          order={5}
-                          color="text.0"
-                          style={{ cursor: 'default' }}
-                        >
+                        <Title order={5} color="text.0" style={{ cursor: 'default' }}>
                           {isPublic ? 'Public' : 'Private'}
                         </Title>
                       </Flex>
@@ -284,10 +267,7 @@ export default function ClusterPage() {
                           </Text>
                         </>
                       ) : (
-                        <Link
-                          href={`/${owner}`}
-                          style={{ textDecoration: 'none' }}
-                        >
+                        <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
                           <Text size="lg" color="brand.1">
                             {owner.slice(0, 10)}...{owner.slice(-10)}
                           </Text>
@@ -304,10 +284,7 @@ export default function ClusterPage() {
                       h="22px"
                       ml="5px"
                     >
-                      <Tooltip
-                        label={clipboard.copied ? 'Copied' : 'Copy'}
-                        withArrow
-                      >
+                      <Tooltip label={clipboard.copied ? 'Copied' : 'Copy'} withArrow>
                         <IconCopy size="22px" color={theme.colors.text[0]} />
                       </Tooltip>
                     </Text>
@@ -320,10 +297,7 @@ export default function ClusterPage() {
             <Flex direction="column">
               <Flex direction="row" justify="end" gap="md">
                 {(isPublic || isOwned) && (
-                  <Button
-                    className={classes.button}
-                    onClick={mintSporeModal.open}
-                  >
+                  <Button className={classes.button} onClick={mintSporeModal.open}>
                     Mint Spore
                   </Button>
                 )}
@@ -391,7 +365,7 @@ export default function ClusterPage() {
       <Container py="48px" size="xl">
         <SporeGrid
           title={isSporesLoading ? '' : `${spores.length ?? '0'} Spores`}
-          spores={spores.map((spore) => ({ ...spore, cluster }))}
+          spores={spores.map((spore) => ({ ...spore, clusterId: cluster?.id, cluster }))}
           isLoading={isSporesLoading}
         />
       </Container>

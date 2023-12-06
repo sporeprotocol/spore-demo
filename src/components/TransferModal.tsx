@@ -97,6 +97,7 @@ export default function TransferModal(props: TransferModalProps) {
         await onSubmit(values);
         setLoading(false);
       } catch (err) {
+        console.error(err);
         setError(err as Error);
         setLoading(false);
       }

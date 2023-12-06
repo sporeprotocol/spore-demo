@@ -14,6 +14,7 @@ import { BI, Cell } from '@ckb-lumos/lumos';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useMintableClustersQuery } from '../query/useMintableClusters';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
 export default function useMintSporeModal(id?: string) {
   const theme = useMantineTheme();
@@ -23,8 +24,9 @@ export default function useMintSporeModal(id?: string) {
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, signTransaction } = useConnect();
   const [mindedSporeData, setMindedSporeData] = useState<SporeDataProps>();
-  const { refresh: refreshClusterSpores } = useClusterSporesQuery(mindedSporeData?.clusterId);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(mindedSporeData?.clusterId, false);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const { data: mintableClusters = [], refresh: refreshMintableClusters } =
     useMintableClustersQuery(address);
 
@@ -44,8 +46,11 @@ export default function useMintSporeModal(id?: string) {
     mutationFn: addSpore,
     onSuccess: async (_: Cell | undefined, variables) => {
       setMindedSporeData(variables.data);
-      await refreshSporesByAddress();
-      await refreshClusterSpores();
+      await Promise.all([
+        refreshClusterSpores(),
+        refreshSporesByAddress(),
+        refreshClustersByAddress(),
+      ]);
     },
   });
 
