@@ -1,3 +1,4 @@
+import { getResponseCacheDisabledHeaders } from '@/utils/graphql';
 import {
   DefaultError,
   QueryKey,
@@ -42,8 +43,7 @@ export function useRefreshableQuery<
     queryFn: async (ctx) => {
       const response = await request(ctx);
       if (RESPONSE_CACHE_ENABLED && refreshOnMount) {
-        const headers = new Headers();
-        headers.set('Cache-Control', 'no-store');
+        const headers = getResponseCacheDisabledHeaders();
         request(ctx, headers)
           .then((data) => {
             // @ts-ignore
@@ -59,17 +59,13 @@ export function useRefreshableQuery<
 
   const refresh = useCallback(async () => {
     try {
-      const headers = new Headers();
-      headers.set('Cache-Control', 'no-store');
       await request(
         {
           queryKey,
           signal: new AbortController().signal,
-          meta: {
-            headers,
-          },
+          meta: {},
         },
-        headers,
+        getResponseCacheDisabledHeaders(),
       );
     } catch (error) {
       console.error(error);

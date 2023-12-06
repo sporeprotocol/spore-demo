@@ -7,10 +7,11 @@ import KeyvRedis from '@keyv/redis';
 import Keyv, { Store } from 'keyv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
+import { isResponseCacheEnabled } from '@/utils/graphql';
 
 // export const dynamic = 'force-dynamic';
 // export const revalidate = false;
-// export const fetchCache = 'force-no-store';
+export const fetchCache = 'force-no-store';
 export const maxDuration = 300;
 
 const RESPONSE_CACHE_ENABLED =
@@ -59,10 +60,7 @@ const server = createApolloServer({
         responseCachePlugin({
           generateCacheKey,
           shouldReadFromCache: async (requestContext) => {
-            if (requestContext.request.http?.headers.get('Cache-Control') === 'no-store') {
-              return false;
-            }
-            return true;
+            return isResponseCacheEnabled(requestContext);
           },
         }),
       ],

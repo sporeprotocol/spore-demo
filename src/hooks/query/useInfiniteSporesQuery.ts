@@ -1,6 +1,6 @@
 import { graphql } from '@/gql';
 import { GetInfiniteSporesQueryQuery } from '@/gql/graphql';
-import { graphQLClient } from '@/utils/graphql';
+import { getResponseCacheDisabledHeaders, graphQLClient } from '@/utils/graphql';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { RESPONSE_CACHE_ENABLED } from './useRefreshableQuery';
 
@@ -41,11 +41,8 @@ export function useInfiniteSporesQuery(contentTypes?: string[]) {
         const params = { first: 12, after: pageParam, contentTypes };
         const response = await graphQLClient.request(infiniteSporesQueryDocument, params);
         if (RESPONSE_CACHE_ENABLED) {
-          const headers = new Headers();
-          headers.set('cache-control', 'no-store');
-          graphQLClient
-            .request(infiniteSporesQueryDocument, params, headers)
-            .finally(() => headers.delete('cache-control'));
+          const headers = getResponseCacheDisabledHeaders();
+          graphQLClient.request(infiniteSporesQueryDocument, params, headers);
         }
         return response;
       },

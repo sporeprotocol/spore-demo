@@ -1,6 +1,6 @@
 import { graphql } from '@/gql';
 import { GetInfiniteClustersQueryQuery } from '@/gql/graphql';
-import { graphQLClient } from '@/utils/graphql';
+import { getResponseCacheDisabledHeaders, graphQLClient } from '@/utils/graphql';
 import { SUPPORTED_MIME_TYPE } from '@/utils/mime';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { RESPONSE_CACHE_ENABLED } from './useRefreshableQuery';
@@ -52,11 +52,8 @@ export function useInfiniteClustersQuery(address?: string) {
       };
       const response = await graphQLClient.request(infiniteClustersQueryDocument, params);
       if (RESPONSE_CACHE_ENABLED) {
-        const headers = new Headers();
-        headers.set('cache-control', 'no-store');
-        graphQLClient
-          .request(infiniteClustersQueryDocument, params, headers)
-          .finally(() => headers.delete('cache-control'));
+        const headers = getResponseCacheDisabledHeaders();
+        graphQLClient.request(infiniteClustersQueryDocument, params, headers);
       }
       return response;
     },
