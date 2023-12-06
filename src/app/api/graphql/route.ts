@@ -8,12 +8,14 @@ import Keyv, { Store } from 'keyv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
 
-const RESPONSE_CACHE_ENABLED =
-  process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true' && process.env.KV_URL;
+export const dynamic = 'force-dynamic';
 
 export const config = {
   maxDuration: 300,
 };
+
+const RESPONSE_CACHE_ENABLED =
+  process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true' && process.env.KV_URL;
 
 const keyvRedis = new KeyvRedis(process.env.KV_URL!);
 
@@ -46,7 +48,7 @@ function generateCacheKey(requestContext: GraphQLRequestContext<Record<string, a
   return MD5(JSON.stringify({ query, variables })).toString();
 }
 
-export const server = createApolloServer({
+const server = createApolloServer({
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {
@@ -67,8 +69,10 @@ export const server = createApolloServer({
     : {}),
 });
 
-export const context = createContext();
+const context = createContext();
 
-export default startServerAndCreateNextHandler(server, {
+const handler = startServerAndCreateNextHandler(server, {
   context: async () => context,
 });
+
+export { handler as GET, handler as POST };

@@ -1,16 +1,12 @@
 import { BI, Indexer, helpers } from '@ckb-lumos/lumos';
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { createRouter } from 'next-connect';
 
-const router = createRouter<NextApiRequest, NextApiResponse>();
+export const dynamic = 'force-dynamic';
 
-router.get(async (req: NextApiRequest, res: NextApiResponse) => {
-  const { address } = req.query;
-
+export async function GET(_: Request, { params }: { params: { address: string } }) {
+  const { address } = params;
   if (!address) {
-    res.status(400).send('address is required');
-    return;
+    return new Response(null, { status: 400 });
   }
 
   const config = predefinedSporeConfigs.Aggron4;
@@ -25,7 +21,5 @@ router.get(async (req: NextApiRequest, res: NextApiResponse) => {
     capacities = capacities.add(cell.cellOutput.capacity);
   }
 
-  res.status(200).send(capacities.toHexString());
-});
-
-export default router.handler();
+  return new Response(capacities.toHexString(), { status: 200 });
+}
