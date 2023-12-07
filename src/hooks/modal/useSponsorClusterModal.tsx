@@ -23,7 +23,8 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction, lock } = useConnect();
   const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
-    opened ? cluster?.id : undefined,
+    cluster?.id,
+    opened,
   );
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const nextCapacityMarginRef = useRef<string | undefined>();
@@ -75,7 +76,6 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
 
   useEffect(() => {
     if (opened) {
-      refreshCluster();
       modals.open({
         modalId,
         title: `Sponsor Cluster`,
@@ -108,7 +108,6 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
     modalId,
     modalStack,
     isMobile,
-    refreshCluster,
   ]);
 
   return {

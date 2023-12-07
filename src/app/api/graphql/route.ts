@@ -9,8 +9,6 @@ import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
 import { isResponseCacheEnabled } from '@/utils/graphql';
 
-// export const dynamic = 'force-dynamic';
-// export const revalidate = false;
 export const fetchCache = 'force-no-store';
 export const maxDuration = 300;
 
@@ -21,12 +19,10 @@ const keyvRedis = new KeyvRedis(process.env.KV_URL!);
 
 const store: Store<string> = {
   async get(key: string): Promise<string | undefined> {
-    console.log('get', key);
     const val = await keyvRedis.get(key);
     return val as string | undefined;
   },
   async set(key: string, value: string, ttl?: number | undefined) {
-    console.log('set', key, ttl);
     if (ttl) {
       return keyvRedis.set(key, value, ttl);
     }
@@ -52,19 +48,19 @@ const server = createApolloServer({
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {
-      cache,
-      plugins: [
-        ApolloServerPluginCacheControl({
-          defaultMaxAge: 60 * 60 * 24 * 365,
-        }),
-        responseCachePlugin({
-          generateCacheKey,
-          shouldReadFromCache: async (requestContext) => {
-            return isResponseCacheEnabled(requestContext);
-          },
-        }),
-      ],
-    }
+        cache,
+        plugins: [
+          ApolloServerPluginCacheControl({
+            defaultMaxAge: 60 * 60 * 24 * 365,
+          }),
+          responseCachePlugin({
+            generateCacheKey,
+            shouldReadFromCache: async (requestContext) => {
+              return isResponseCacheEnabled(requestContext);
+            },
+          }),
+        ],
+      }
     : {}),
 });
 

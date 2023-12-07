@@ -22,7 +22,8 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
   const { address, signTransaction } = useConnect();
   const queryClient = useQueryClient();
   const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
-    opened ? cluster?.id : undefined,
+    cluster?.id,
+    opened,
   );
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
 
@@ -90,7 +91,6 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
 
   useEffect(() => {
     if (opened) {
-      refreshCluster();
       modals.open({
         modalId,
         title: `Transfer "${cluster!.name}"?`,
@@ -125,7 +125,6 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
     open,
     setModalStack,
     sponsorClusterModal,
-    refreshCluster,
   ]);
 
   return {
