@@ -46,20 +46,11 @@ export default function useMintSporeModal(id?: string) {
   const addSporeMutation = useMutation({
     mutationFn: addSpore,
     onSuccess: async (_: Cell | undefined) => {
-      await new Promise((resolve) => {
-        if (router.pathname.startsWith('/cluster/')) {
-          refreshClusterSpores().then(resolve);
-          refreshSporesByAddress();
-          refreshClustersByAddress();
-        } else if (
-          router.pathname === '/my' ||
-          (router.pathname === '/[address]' && router.query.address === address)
-        ) {
-          Promise.all([refreshSporesByAddress(), refreshClustersByAddress()]).then(resolve);
-        } else {
-          resolve(undefined);
-        }
-      });
+      await Promise.all([
+        refreshClusterSpores(),
+        refreshSporesByAddress(),
+        refreshClustersByAddress(),
+      ]);
     },
   });
 

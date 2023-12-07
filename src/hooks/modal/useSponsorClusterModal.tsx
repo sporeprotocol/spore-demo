@@ -5,7 +5,7 @@ import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { modalStackAtom } from '@/state/modal';
 import { useAtomValue } from 'jotai';
@@ -13,7 +13,7 @@ import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
 import { QueryCluster } from '../query/type';
 import { useClusterQuery } from '../query/useClusterQuery';
-import { cloneDeep, update } from 'lodash-es';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
 export default function useSponsorClusterModal(cluster: QueryCluster | undefined) {
   const modalId = useId();
@@ -22,10 +22,10 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction, lock } = useConnect();
-  const queryClient = useQueryClient();
   const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
     opened ? cluster?.id : undefined,
   );
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorCluster = useCallback(
@@ -41,30 +41,12 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
     [signTransaction],
   );
 
-  const onSuccess = useCallback(
-    async (outPoint: OutPoint) => {
-      if (!cluster) return;
-      await refreshCluster();
-      const capacityMargin = nextCapacityMarginRef.current;
-      const capacity = BI.from(cluster?.cell?.cellOutput.capacity ?? 0)
-        .add(BI.from(capacityMargin).sub(cluster?.capacityMargin ?? 0))
-        .toHexString();
-
-      queryClient.setQueryData(['cluster', cluster.id], (data: { cluster: QueryCluster }) => {
-        const { cluster } = data;
-        const newCluster = cloneDeep(cluster);
-        update(newCluster, 'capacityMargin', () => capacityMargin);
-        update(newCluster, 'cell.cellOutput.capacity', () => capacity);
-        update(newCluster, 'cell.outPoint', () => outPoint);
-        return { cluster: newCluster };
-      });
-    },
-    [cluster, queryClient, refreshCluster],
-  );
-
   const sponsorClusterMutation = useMutation({
     mutationFn: sponsorCluster,
-    onSuccess,
+    onSuccess: async () => {
+      refreshClustersByAddress();
+      await refreshCluster();
+    },
   });
   const loading = sponsorClusterMutation.isPending && !sponsorClusterMutation.isError;
 

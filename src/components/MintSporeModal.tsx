@@ -379,7 +379,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                 color="brand.1"
                 weight="bold"
                 sx={{ cursor: 'pointer' }}
-                onClick={() => dropzoneOpenRef.current?.()}
+                onClick={() => !loading && dropzoneOpenRef.current?.()}
               >
                 Change File
               </Text>
