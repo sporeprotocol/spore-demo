@@ -1,55 +1,55 @@
-import {
-  predefinedSporeConfigs,
-  transferCluster as _transferCluster,
-} from '@spore-sdk/core';
-import { BI } from '@ckb-lumos/lumos';
-import { useCallback, useEffect } from 'react';
+import { predefinedSporeConfigs, transferCluster as _transferCluster } from '@spore-sdk/core';
+import { BI, OutPoint } from '@ckb-lumos/lumos';
+import { useCallback, useEffect, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
-import { Cluster } from '@/cluster';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { modalStackAtom } from '@/state/modal';
 import { useAtomValue } from 'jotai';
 import SponsorModal from '@/components/SponsorModal';
 import { useMantineTheme } from '@mantine/core';
+import { QueryCluster } from '../query/type';
+import { useClusterQuery } from '../query/useClusterQuery';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
-export default function useSponsorClusterModal(cluster: Cluster | undefined) {
+export default function useSponsorClusterModal(cluster: QueryCluster | undefined) {
   const modalId = useId();
-  const [opened, { open, close }] = useDisclosure(false);
-  const { address, signTransaction, lock } = useConnect();
   const modalStack = useAtomValue(modalStackAtom);
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-
-  const { refetch } = trpc.cluster.get.useQuery(
-    { id: cluster?.id },
-    { enabled: false },
+  const [opened, { open, close }] = useDisclosure(false);
+  const { address, signTransaction, lock } = useConnect();
+  const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
+    cluster?.id,
+    opened,
   );
-
-  const { data: capacityMargin } = trpc.cluster.getCapacityMargin.useQuery(
-    { id: cluster?.id },
-    { enabled: !!cluster && opened },
-  );
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
+  const nextCapacityMarginRef = useRef<string | undefined>();
 
   const sponsorCluster = useCallback(
     async (...args: Parameters<typeof _transferCluster>) => {
-      const { txSkeleton } = await _transferCluster(...args);
+      const { txSkeleton, outputIndex } = await _transferCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
-  const sponsorClusterMutation = useMutation(sponsorCluster, {
-    onSuccess: () => refetch(),
+  const sponsorClusterMutation = useMutation({
+    mutationFn: sponsorCluster,
+    onSuccess: async () => {
+      refreshClustersByAddress();
+      await refreshCluster();
+    },
   });
-  const loading =
-    sponsorClusterMutation.isLoading && !sponsorClusterMutation.isError;
+  const loading = sponsorClusterMutation.isPending && !sponsorClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { amount: number }) => {
@@ -57,20 +57,18 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
         return;
       }
       const { amount } = values;
-      const newCapacity = BI.from(capacityMargin).add(
-        BI.from(amount).mul(100_000_000),
-      );
+      const nextCapacityMargin = BI.from(capacityMargin).add(BI.from(amount).mul(100_000_000));
+      nextCapacityMarginRef.current = nextCapacityMargin.toHexString();
+
       await sponsorClusterMutation.mutateAsync({
-        outPoint: cluster.cell.outPoint!,
+        outPoint: cluster.cell?.outPoint!,
         fromInfos: [address],
         toLock: lock!,
         config: predefinedSporeConfigs.Aggron4,
-        capacityMargin: newCapacity.toHexString(),
+        capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });
-      showSuccess(
-        `${amount.toLocaleString('en-US')} CKB sponsored to Cluster!`,
-      );
+      showSuccess(`${amount.toLocaleString('en-US')} CKByte sponsored to Cluster!`);
       modals.close(modalId);
     },
     [address, cluster, sponsorClusterMutation, modalId, capacityMargin, lock],
@@ -93,23 +91,17 @@ export default function useSponsorClusterModal(cluster: Cluster | undefined) {
             minWidth: isMobile ? 'auto' : '560px',
           },
         },
-        closeOnEscape: !sponsorClusterMutation.isLoading,
-        withCloseButton: !sponsorClusterMutation.isLoading,
-        closeOnClickOutside: !sponsorClusterMutation.isLoading,
-        children: (
-          <SponsorModal
-            type="cluster"
-            data={cluster!}
-            onSubmit={handleSubmit}
-          />
-        ),
+        closeOnEscape: !sponsorClusterMutation.isPending,
+        withCloseButton: !sponsorClusterMutation.isPending,
+        closeOnClickOutside: !sponsorClusterMutation.isPending,
+        children: <SponsorModal type="cluster" data={cluster!} onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);
     }
   }, [
     cluster,
-    sponsorClusterMutation.isLoading,
+    sponsorClusterMutation.isPending,
     handleSubmit,
     opened,
     close,

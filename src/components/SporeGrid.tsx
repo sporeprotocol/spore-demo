@@ -1,26 +1,13 @@
-import { Spore } from '@/spore';
-import {
-  Box,
-  Flex,
-  SimpleGrid,
-  Title,
-  useMantineTheme,
-} from '@mantine/core';
+import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import SporeCard, { SporeSkeletonCard } from './SporeCard';
-import { Cluster } from '@/cluster';
 import EmptyPlaceholder from './EmptyPlaceholder';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import { useRouter } from 'next/router';
-import { useMediaQuery } from '@mantine/hooks';
-import { useMemo } from 'react';
+import { QuerySpore } from '@/hooks/query/type';
 
 export interface SporeGridProps {
   title: string;
-  spores: Spore[];
-  cluster:
-    | ((clusterId: string | null) => Cluster | undefined)
-    | Cluster
-    | undefined;
+  spores: QuerySpore[];
   isLoading: boolean;
   filter?: React.ReactNode;
   disablePlaceholder?: boolean;
@@ -30,13 +17,6 @@ export default function SporeGrid(props: SporeGridProps) {
   const { title, spores, isLoading, disablePlaceholder } = props;
   const router = useRouter();
   const theme = useMantineTheme();
-  const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
-  const lg = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
-  const loadingCount = useMemo(() => {
-    if (!md && lg) return 3;
-    if (md) return 2;
-    return 4;
-  }, [md, lg]);
 
   const mintSporeModal = useMintSporeModal();
 
@@ -79,7 +59,7 @@ export default function SporeGrid(props: SporeGridProps) {
           ]}
           mt="24px"
         >
-          {Array(loadingCount)
+          {Array(12)
             .fill(0)
             .map((_, index) => {
               return <SporeSkeletonCard key={`spore_skeleton_${index}`} />;
@@ -97,11 +77,7 @@ export default function SporeGrid(props: SporeGridProps) {
           mt="24px"
         >
           {spores.map((spore) => {
-            const cluster =
-              typeof props.cluster === 'function'
-                ? props.cluster(spore.clusterId)
-                : props.cluster;
-            return <SporeCard key={spore.id} spore={spore} cluster={cluster} />;
+            return <SporeCard key={spore.id} spore={spore} />;
           })}
         </SimpleGrid>
       )}

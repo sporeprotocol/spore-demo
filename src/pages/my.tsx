@@ -1,8 +1,10 @@
 import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
+import { useCapacity } from '@/hooks/query/useCapacity';
+import { useClustersByAddressQuery } from '@/hooks/query/useClustersByAddress';
+import { useSporesByAddressQuery } from '@/hooks/query/useSporesByAddressQuery';
 import { useConnect } from '@/hooks/useConnect';
-import { trpc } from '@/server';
 import { showSuccess } from '@/utils/notifications';
 import { BI } from '@ckb-lumos/lumos';
 import {
@@ -27,7 +29,7 @@ import { useMemo, useState } from 'react';
 const useStyles = createStyles((theme) => ({
   banner: {
     height: '280px',
-    overflowY: 'hidden',
+    overflow: 'hidden',
     borderBottomWidth: '2px',
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
@@ -92,25 +94,14 @@ export default function MySpacePage() {
   const clipboard = useClipboard({ timeout: 500 });
   const { address } = useConnect();
   const [showSpores, setShowSpores] = useState(true);
-  const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
 
-  const { data: spores = [], isLoading: isSporesLoading } =
-    trpc.spore.list.useQuery({ owner: address });
-  const { data: clusters = [] } = trpc.cluster.list.useQuery();
-  const { data: ownedClusters = [], isLoading: isClusterLoading } =
-    trpc.cluster.list.useQuery({
-      owner: address,
-      withPublic: true,
-    });
-  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
-    trpc.spore.list.useQuery(
-      {
-        clusterIds: ownedClusters.map((c) => c.id),
-      },
-      {
-        enabled: !isClusterLoading,
-      },
-    );
+  const { data: capacity = '0x0' } = useCapacity(address as string);
+  const { data: spores, isLoading: isSporesLoading } = useSporesByAddressQuery(
+    showSpores ? address : undefined,
+  );
+  const { data: clusters, isLoading: isClustersLoading } = useClustersByAddressQuery(
+    !showSpores ? address : undefined,
+  );
 
   const balance = useMemo(() => {
     if (!capacity) return 0;
@@ -132,21 +123,11 @@ export default function MySpacePage() {
         <Flex direction="column" justify="center" align="center" gap="32px">
           <MediaQuery smallerThan="xs" styles={{ display: 'none' }}>
             <Box px="68px">
-              <Image
-                src="/images/my-space-title.png"
-                width="495"
-                height="60"
-                alt="My Space"
-              />
+              <Image src="/images/my-space-title.png" width="495" height="60" alt="My Space" />
             </Box>
           </MediaQuery>
           <MediaQuery largerThan="xs" styles={{ display: 'none' }}>
-            <Image
-              src="/images/my-space-title.png"
-              width="324"
-              height="40"
-              alt="My Space"
-            />
+            <Image src="/images/my-space-title.png" width="324" height="40" alt="My Space" />
           </MediaQuery>
           <Flex
             direction={{ base: 'column', xs: 'row' }}
@@ -156,13 +137,7 @@ export default function MySpacePage() {
             justify="space-around"
           >
             <Flex align="center">
-              <Text
-                component="span"
-                size="xl"
-                align="center"
-                color="text.0"
-                mr="sm"
-              >
+              <Text component="span" size="xl" align="center" color="text.0" mr="sm">
                 Address:
               </Text>
               <Link
@@ -170,13 +145,7 @@ export default function MySpacePage() {
                 target="_blank"
                 style={{ textDecoration: 'none' }}
               >
-                <Text
-                  component="span"
-                  size="xl"
-                  weight="bold"
-                  color="text.0"
-                  mr="5px"
-                >
+                <Text component="span" size="xl" weight="bold" color="text.0" mr="5px">
                   {address.slice(0, 10)}...{address.slice(-10)}
                 </Text>
               </Link>
@@ -235,23 +204,13 @@ export default function MySpacePage() {
           <SporeGrid
             title={isSporesLoading ? '' : `${spores.length} Spores`}
             spores={spores}
-            cluster={(id) => clusters.find((c) => c.id === id)}
             isLoading={isSporesLoading}
           />
         ) : (
           <ClusterGrid
-            title={
-              isClusterLoading || isClusterSporesLoading
-                ? ''
-                : `${ownedClusters.length} Clusters`
-            }
-            clusters={ownedClusters.map((cluster) => ({
-              ...cluster,
-              spores: clusterSpores.filter(
-                (spore) => spore.clusterId === cluster.id,
-              ),
-            }))}
-            isLoading={isClusterLoading || isClusterSporesLoading}
+            title={isClustersLoading ? '' : `${clusters.length} Clusters`}
+            clusters={clusters}
+            isLoading={isClustersLoading}
           />
         )}
       </Container>

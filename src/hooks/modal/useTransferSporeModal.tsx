@@ -1,57 +1,64 @@
 import { predefinedSporeConfigs } from '@spore-sdk/core';
-import { config, helpers } from '@ckb-lumos/lumos';
+import { BI, OutPoint, config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { transferSpore as _transferSpore } from '@spore-sdk/core';
 import { useConnect } from '../useConnect';
-import { Spore } from '@/spore';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
+import { useMutation } from '@tanstack/react-query';
 import TransferModal from '@/components/TransferModal';
 import { showSuccess } from '@/utils/notifications';
 import useSponsorSporeModal from './useSponsorSporeModal';
 import { useSetAtom } from 'jotai';
 import { modalStackAtom } from '@/state/modal';
+import { QuerySpore } from '../query/type';
+import { useSporeQuery } from '../query/useSporeQuery';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
+import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 
-export default function useTransferSporeModal(spore: Spore | undefined) {
+export default function useTransferSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-  const { refetch } = trpc.spore.get.useQuery(
-    { id: spore?.id },
-    { enabled: false },
+  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
+    sourceSpore?.id,
+    opened,
   );
-
-  const { data: capacityMargin, refetch: refetchCapacityMargin } =
-    trpc.spore.getCapacityMargin.useQuery(
-      { id: spore?.id },
-      { enabled: !!spore && opened },
-    );
-
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
+    sourceSpore?.clusterId || undefined,
+    false,
+  );
+  const { capacityMargin } = spore ?? {};
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
   const transferSpore = useCallback(
     async (...args: Parameters<typeof _transferSpore>) => {
-      const { txSkeleton } = await _transferSpore(...args);
+      const { txSkeleton, outputIndex } = await _transferSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
-  const transferSporeMutation = useMutation(transferSpore, {
-    onSuccess: () => refetch(),
+  const transferSporeMutation = useMutation({
+    mutationFn: transferSpore,
+    onSuccess: async () => {
+      Promise.all([refreshSporesByAddress(), refreshClusterSpores()]);
+      await refreshSpore();
+    },
   });
-  const loading =
-    transferSporeMutation.isLoading && !transferSporeMutation.isError;
+  const loading = transferSporeMutation.isPending && !transferSporeMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
-      if (!address || !values.to || !spore) {
+      if (!address || !values.to || !spore?.cell) {
         return;
       }
       await transferSporeMutation.mutateAsync({
@@ -66,23 +73,22 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       showSuccess('Spore Transferred!');
       modals.close(modalId);
     },
-    [address, spore, transferSporeMutation, modalId],
+    [address, spore?.cell, transferSporeMutation, modalId],
   );
 
   useEffect(() => {
     if (opened) {
-      refetchCapacityMargin();
       modals.open({
         modalId,
         title: 'Transfer spore?',
         onClose: close,
-        closeOnEscape: !transferSporeMutation.isLoading,
-        withCloseButton: !transferSporeMutation.isLoading,
-        closeOnClickOutside: !transferSporeMutation.isLoading,
+        closeOnEscape: !transferSporeMutation.isPending,
+        withCloseButton: !transferSporeMutation.isPending,
+        closeOnClickOutside: !transferSporeMutation.isPending,
         children: (
           <TransferModal
             type="spore"
-            capacityMargin={capacityMargin}
+            capacityMargin={capacityMargin || undefined}
             onSubmit={handleSubmit}
             onSponsor={() => {
               close();
@@ -96,16 +102,15 @@ export default function useTransferSporeModal(spore: Spore | undefined) {
       modals.close(modalId);
     }
   }, [
-    transferSporeMutation.isLoading,
+    transferSporeMutation.isPending,
     handleSubmit,
     opened,
     close,
     modalId,
-    capacityMargin,
     sponsorSporeModal,
     setModalStack,
     open,
-    refetchCapacityMargin,
+    capacityMargin,
   ]);
 
   return {

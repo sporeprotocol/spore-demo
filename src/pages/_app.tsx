@@ -2,32 +2,37 @@ import type { AppProps } from 'next/app';
 import { Provider as JotaiProvider } from 'jotai';
 import { MantineProvider, createStyles } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { Hydrate, QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ModalsProvider } from '@mantine/modals';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
-import { trpc } from '@/server';
 import theme from '@/theme';
 import JoyIdConnector from '@/connectors/joyId';
 import Head from 'next/head';
-import { cache } from '@/utils/cache';
+import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
 
 function StateProvider({
   children,
-  pageProps,
 }: React.PropsWithChildren<{
   pageProps: AppProps['pageProps'];
 }>) {
   const [queryClient] = useState(() => new QueryClient());
+
+  useEffect(() => {
+    queryClient.setDefaultOptions({
+      queries: {
+        gcTime: 0,
+      },
+    });
+  }, [queryClient]);
+
   return (
     <JotaiProvider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps.dehydratedState}>{children}</Hydrate>
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </JotaiProvider>
   );
 }
@@ -97,18 +102,10 @@ function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>Spore Demo</title>
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width"
-        />
+        <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
         <link rel="icon" href="/images/favicon.png" />
       </Head>
-      <MantineProvider
-        withNormalizeCSS
-        withGlobalStyles
-        theme={theme}
-        emotionCache={cache}
-      >
+      <MantineProvider withNormalizeCSS withGlobalStyles theme={theme} emotionCache={emotionCache}>
         <ConnectProvider value={config}>
           <StateProvider pageProps={pageProps}>
             <UIProvider>
@@ -123,4 +120,4 @@ function App({ Component, pageProps }: AppProps) {
   );
 }
 
-export default trpc.withTRPC(App);
+export default App;

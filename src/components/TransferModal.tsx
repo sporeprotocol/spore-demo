@@ -97,6 +97,7 @@ export default function TransferModal(props: TransferModalProps) {
         await onSubmit(values);
         setLoading(false);
       } catch (err) {
+        console.error(err);
         setError(err as Error);
         setLoading(false);
       }
@@ -108,8 +109,7 @@ export default function TransferModal(props: TransferModalProps) {
     <Stack>
       {type === 'cluster' && isMobile && (
         <Text color="text.1">
-          Transferring this Cluster won’t affect the ownership of the Spores
-          within it.
+          Transferring this Cluster won’t affect the ownership of the Spores within it.
         </Text>
       )}
       <form onSubmit={form.onSubmit(handleSubmit)} ref={focusTrapRef}>
@@ -122,6 +122,7 @@ export default function TransferModal(props: TransferModalProps) {
           }}
           label="Transfer to"
           placeholder="e.g. ckt1q7eiwlwk...3cv86p9wcmwejo32owejwp"
+          disabled={loading}
           autoFocus
           withAsterisk
           data-autofocus
@@ -161,7 +162,7 @@ export default function TransferModal(props: TransferModalProps) {
                 value="1"
                 classNames={{ label: classes.radio }}
                 label="Zero-Fee Transfer"
-                disabled={BI.from(capacityMargin).toNumber() === 0}
+                disabled={BI.from(capacityMargin).toNumber() === 0 || loading}
               />
             )}
 
@@ -169,6 +170,7 @@ export default function TransferModal(props: TransferModalProps) {
               value="0"
               classNames={{ label: classes.radio }}
               label="Pay from my wallet"
+              disabled={loading}
             />
           </Stack>
         </Radio.Group>
@@ -178,12 +180,7 @@ export default function TransferModal(props: TransferModalProps) {
           </Text>
         )}
         <Group position="right" mt={'32px'}>
-          <Button
-            className={classes.submit}
-            type="submit"
-            loading={loading}
-            fullWidth={isMobile}
-          >
+          <Button className={classes.submit} type="submit" loading={loading} fullWidth={isMobile}>
             Transfer
           </Button>
         </Group>

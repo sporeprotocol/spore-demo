@@ -1,4 +1,4 @@
-import { Spore } from '@/spore';
+import { QuerySpore } from '@/hooks/query/type';
 import {
   AspectRatio,
   Box,
@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { useRemark } from 'react-remark';
 
 export interface TextSporeRenderProps {
-  spore: Spore;
+  spore: QuerySpore;
   ratio?: number;
   size?: 'sm' | 'md' | 'lg';
 }
@@ -36,19 +36,15 @@ const useStyles = createStyles((theme, props: TextSporeRenderProps) => ({
 
 export function TextSporeCoverRender(props: TextSporeRenderProps) {
   const { spore, ratio = 1 } = props;
-  const [text, setText] = useState<string | ArrayBuffer | null>(null);
+  const [text, setText] = useState<string | ArrayBuffer>('');
   const { classes } = useStyles(props);
 
   useEffect(() => {
-    fetch(`/api/v1/media/${spore.id}`).then(async (res) => {
+    fetch(`/api/media/${spore.id}`).then(async (res) => {
       const text = await res.text();
       setText(text);
     });
   }, [spore]);
-
-  if (!text) {
-    return null;
-  }
 
   return (
     <AspectRatio ratio={ratio} bg="#F4F5F9">
@@ -66,7 +62,7 @@ export function TextSporeContentRender(props: TextSporeRenderProps) {
   const [reactContent, setMarkdownSource] = useRemark();
 
   useEffect(() => {
-    fetch(`/api/v1/media/${spore.id}`).then(async (res) => {
+    fetch(`/api/media/${spore.id}`).then(async (res) => {
       const text = await res.text();
       setMarkdownSource(text);
     });

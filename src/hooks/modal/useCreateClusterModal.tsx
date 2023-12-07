@@ -5,11 +5,12 @@ import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
 import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { BI } from '@ckb-lumos/lumos';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -17,6 +18,7 @@ export default function useCreateClusterModal() {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const { address, lock, getAnyoneCanPayLock, signTransaction } = useConnect();
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
   const modalId = useId();
 
   const addCluster = useCallback(
@@ -31,8 +33,12 @@ export default function useCreateClusterModal() {
     [signTransaction],
   );
 
-  const addClusterMutation = useMutation(addCluster);
-  const loading = addClusterMutation.isLoading && !addClusterMutation.isError;
+  const onSuccess = useCallback(async () => {
+    await refreshClustersByAddress();
+  }, [refreshClustersByAddress]);
+
+  const addClusterMutation = useMutation({ mutationFn: addCluster, onSuccess });
+  const loading = addClusterMutation.isPending && !addClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (
@@ -75,22 +81,15 @@ export default function useCreateClusterModal() {
             minWidth: isMobile ? 'auto' : '500px',
           },
         },
-        closeOnEscape: !addClusterMutation.isLoading,
-        closeOnClickOutside: !addClusterMutation.isLoading,
-        withCloseButton: !addClusterMutation.isLoading,
+        closeOnEscape: !addClusterMutation.isPending,
+        closeOnClickOutside: !addClusterMutation.isPending,
+        withCloseButton: !addClusterMutation.isPending,
         children: <CreateClusterModal onSubmit={handleSubmit} />,
       });
     } else {
       modals.close(modalId);
     }
-  }, [
-    modalId,
-    addClusterMutation.isLoading,
-    handleSubmit,
-    opened,
-    close,
-    isMobile,
-  ]);
+  }, [modalId, addClusterMutation.isPending, handleSubmit, opened, close, isMobile]);
 
   return {
     open,

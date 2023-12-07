@@ -1,30 +1,22 @@
-import { Cluster } from '@/cluster';
 import { Box, Flex, SimpleGrid, Title, useMantineTheme } from '@mantine/core';
 import ClusterCard, { ClusterSkeletonCard } from './ClusterCard';
 import EmptyPlaceholder from './EmptyPlaceholder';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
-import { useMediaQuery } from '@mantine/hooks';
+import { QueryCluster } from '@/hooks/query/type';
 
 export interface ClusterGridProps {
   title: string | JSX.Element;
-  clusters: Cluster[];
+  clusters: QueryCluster[];
   isLoading: boolean;
+  loadingCount?: number;
   disablePlaceholder?: boolean;
 }
 
 export default function ClusterGrid(props: ClusterGridProps) {
-  const { title, clusters, isLoading, disablePlaceholder } = props;
+  const { title, clusters, isLoading, loadingCount, disablePlaceholder } = props;
   const router = useRouter();
   const theme = useMantineTheme();
-  const md = useMediaQuery(`(max-width: ${theme.breakpoints.md})`);
-  const lg = useMediaQuery(`(max-width: ${theme.breakpoints.lg})`);
-  const loadingCount = useMemo(() => {
-    if (!md && lg) return 3;
-    if (md) return 2;
-    return 4;
-  }, [md, lg]);
 
   const createClusterModal = useCreateClusterModal();
 
@@ -70,7 +62,7 @@ export default function ClusterGrid(props: ClusterGridProps) {
           ]}
           mt="24px"
         >
-          {Array(loadingCount)
+          {Array(loadingCount ?? 12)
             .fill(0)
             .map((_, index) => {
               return <ClusterSkeletonCard key={`cluster_skeleton_${index}`} />;

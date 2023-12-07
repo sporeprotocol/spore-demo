@@ -4,7 +4,6 @@ import SporeGrid from '@/components/SporeGrid';
 import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import useTransferClusterModal from '@/hooks/modal/useTransferClusterModal';
 import { useConnect } from '@/hooks/useConnect';
-import { trpc } from '@/server';
 import { isAnyoneCanPay } from '@/utils/script';
 import { config, helpers } from '@ckb-lumos/lumos';
 import {
@@ -28,35 +27,13 @@ import { useRouter } from 'next/router';
 import { useMemo } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import { ClusterOpenGraph } from '@/components/OpenGraph';
-import { GetStaticPaths, GetStaticPropsContext } from 'next';
-import ClusterService from '@/cluster';
 import { showSuccess } from '@/utils/notifications';
 import DropMenu from '@/components/DropMenu';
 import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
+import { useClusterQuery } from '@/hooks/query/useClusterQuery';
+import { useClusterSporesQuery } from '@/hooks/query/useClusterSporesQuery';
 
-export async function getStaticProps(
-  context: GetStaticPropsContext<{ id: string }>,
-) {
-  const id = context.params?.id as string;
-  return {
-    props: {
-      id,
-    },
-  };
-}
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { items: clusters } = await ClusterService.shared.list();
-  return {
-    paths: clusters.map((cluster) => ({
-      params: {
-        id: cluster.id,
-      },
-    })),
-    fallback: 'blocking',
-  };
-};
-
-const useStyles = createStyles((theme) => ({
+export const useStyles = createStyles((theme) => ({
   header: {
     height: '280px',
     overflow: 'hidden',
@@ -135,15 +112,17 @@ export default function ClusterPage() {
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
 
-  const { data: cluster } = trpc.cluster.get.useQuery({ id } as { id: string });
-  const { data: spores } = trpc.spore.list.useQuery({ clusterIds: [id as string] });
+  const { data: cluster, isLoading } = useClusterQuery(id as string);
+  const { data: spores, isLoading: isSporesLoading } = useClusterSporesQuery(cluster?.id);
 
   const mintSporeModal = useMintSporeModal(id as string);
   const transferClusterModal = useTransferClusterModal(cluster);
   const sponsorClusterModal = useSponsorClusterModal(cluster);
 
   const owner = useMemo(() => {
-    if (!cluster) return '';
+    if (!cluster || !cluster.cell) {
+      return '';
+    }
     const address = helpers.encodeToAddress(cluster.cell.cellOutput.lock, {
       config: config.predefined.AGGRON4,
     });
@@ -151,10 +130,10 @@ export default function ClusterPage() {
   }, [cluster]);
 
   const isPublic = useMemo(() => {
-    if (!cluster) {
+    if (!cluster || !cluster.cell) {
       return false;
     }
-    return isAnyoneCanPay(cluster?.cell.cellOutput.lock);
+    return isAnyoneCanPay(cluster.cell.cellOutput.lock);
   }, [cluster]);
 
   const isOwned = useMemo(() => {
@@ -172,9 +151,6 @@ export default function ClusterPage() {
     }
   }, [address, owner, getAnyoneCanPayLock, connected]);
 
-  const isSporesLoading = !spores;
-  const isLoading = !cluster;
-
   const header = isLoading ? (
     <Flex align="center" className={classes.header}>
       <Container w="100%" size="xl">
@@ -183,12 +159,7 @@ export default function ClusterPage() {
             <Flex direction="column">
               <Flex align="center" mb="8px">
                 <Box mr="8px">
-                  <Image
-                    src="/svg/cluster-icon.svg"
-                    alt="Cluster Icon"
-                    width="24"
-                    height="24"
-                  />
+                  <Image src="/svg/cluster-icon.svg" alt="Cluster Icon" width="24" height="24" />
                 </Box>
                 <Text size="xl" weight="bold" color="text.1">
                   Cluster
@@ -234,22 +205,14 @@ export default function ClusterPage() {
             <Flex direction="column">
               <Flex align="center" mb="8px">
                 <Box mr="8px">
-                  <Image
-                    src="/svg/cluster-icon.svg"
-                    alt="Cluster Icon"
-                    width="24"
-                    height="24"
-                  />
+                  <Image src="/svg/cluster-icon.svg" alt="Cluster Icon" width="24" height="24" />
                 </Box>
                 <Text size="xl" weight="bold" color="text.1">
                   Cluster
                 </Text>
               </Flex>
               <Flex mb="24px">
-                <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  gap={{ base: '8px', sx: '0px' }}
-                >
+                <Flex direction={{ base: 'column', sm: 'row' }} gap={{ base: '8px', sx: '0px' }}>
                   <Title order={2} mr="md" className={classes.name}>
                     {cluster?.name}
                   </Title>
@@ -271,11 +234,7 @@ export default function ClusterPage() {
                         px="md"
                         sx={{ borderRadius: '20px' }}
                       >
-                        <Title
-                          order={5}
-                          color="text.0"
-                          style={{ cursor: 'default' }}
-                        >
+                        <Title order={5} color="text.0" style={{ cursor: 'default' }}>
                           {isPublic ? 'Public' : 'Private'}
                         </Title>
                       </Flex>
@@ -308,10 +267,7 @@ export default function ClusterPage() {
                           </Text>
                         </>
                       ) : (
-                        <Link
-                          href={`/${owner}`}
-                          style={{ textDecoration: 'none' }}
-                        >
+                        <Link href={`/${owner}`} style={{ textDecoration: 'none' }}>
                           <Text size="lg" color="brand.1">
                             {owner.slice(0, 10)}...{owner.slice(-10)}
                           </Text>
@@ -328,10 +284,7 @@ export default function ClusterPage() {
                       h="22px"
                       ml="5px"
                     >
-                      <Tooltip
-                        label={clipboard.copied ? 'Copied' : 'Copy'}
-                        withArrow
-                      >
+                      <Tooltip label={clipboard.copied ? 'Copied' : 'Copy'} withArrow>
                         <IconCopy size="22px" color={theme.colors.text[0]} />
                       </Tooltip>
                     </Text>
@@ -342,16 +295,9 @@ export default function ClusterPage() {
           </Grid.Col>
           <Grid.Col span={isMobile ? 12 : 4}>
             <Flex direction="column">
-              <Flex
-                direction="row"
-                justify="end"
-                gap="md"
-              >
+              <Flex direction="row" justify="end" gap="md">
                 {(isPublic || isOwned) && (
-                  <Button
-                    className={classes.button}
-                    onClick={mintSporeModal.open}
-                  >
+                  <Button className={classes.button} onClick={mintSporeModal.open}>
                     Mint Spore
                   </Button>
                 )}
@@ -418,9 +364,8 @@ export default function ClusterPage() {
       <ClusterOpenGraph id={id as string} />
       <Container py="48px" size="xl">
         <SporeGrid
-          title={isSporesLoading ? '' : `${spores.length} Spores`}
-          spores={spores ?? []}
-          cluster={cluster}
+          title={isSporesLoading ? '' : `${spores.length ?? '0'} Spores`}
+          spores={spores.map((spore) => ({ ...spore, clusterId: cluster?.id, cluster }))}
           isLoading={isSporesLoading}
         />
       </Container>

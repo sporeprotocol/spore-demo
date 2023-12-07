@@ -4,16 +4,15 @@ import {
   Text,
   Image,
   Container,
-  createStyles,
   Title,
   useMantineTheme,
   Box,
   Group,
   Stack,
   Tooltip,
+  createStyles,
 } from '@mantine/core';
 import { useRouter } from 'next/router';
-import { trpc } from '@/server';
 import Link from 'next/link';
 import { BI, config, helpers } from '@ckb-lumos/lumos';
 import { IconCopy } from '@tabler/icons-react';
@@ -25,36 +24,14 @@ import { useMemo } from 'react';
 import Head from 'next/head';
 import { useClipboard, useMediaQuery } from '@mantine/hooks';
 import { SporeOpenGraph } from '@/components/OpenGraph';
-import { GetStaticPaths, GetStaticPropsContext } from 'next';
-import SporeService from '@/spore';
 import { showSuccess } from '@/utils/notifications';
 import SporeContentRender from '@/components/SporeContentRender';
 import Popover from '@/components/Popover';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
+import { useSporeQuery } from '@/hooks/query/useSporeQuery';
+import { useClusterSporesQuery } from '@/hooks/query/useClusterSporesQuery';
 
-export async function getStaticProps(
-  context: GetStaticPropsContext<{ id: string }>,
-) {
-  const id = context.params?.id as string;
-  return {
-    props: {
-      id,
-    },
-  };
-}
-export const getStaticPaths: GetStaticPaths = async () => {
-  const { items: spores } = await SporeService.shared.list();
-  return {
-    paths: spores.map((spore) => ({
-      params: {
-        id: spore.id,
-      },
-    })),
-    fallback: 'blocking',
-  };
-};
-
-const useStyles = createStyles((theme) => ({
+export const useStyles = createStyles((theme) => ({
   image: {
     width: '100%',
     height: '100%',
@@ -87,29 +64,25 @@ export default function SporePage() {
   const { connected, address, getAnyoneCanPayLock } = useConnect();
   const clipboard = useClipboard({ timeout: 500 });
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-
-  const { data: spore, isLoading } = trpc.spore.get.useQuery({
-    id: id as string,
-  });
   const { classes } = useStyles();
 
-  const { data: cluster } = trpc.cluster.get.useQuery(
-    { id: spore?.clusterId ?? undefined },
-    { enabled: !!spore?.clusterId },
+  const { data: spore, isLoading: isSporeLoading } = useSporeQuery(
+    id as string,
   );
-  const { data: spores } = trpc.spore.list.useQuery(
-    { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
-    { enabled: !!spore?.clusterId },
+  const isLoading = isSporeLoading || !spore;
+
+  const { data: spores } = useClusterSporesQuery(
+    spore?.cluster?.id || undefined,
   );
 
   const transferSpore = useTransferSporeModal(spore);
   const meltSpore = useMeltSporeModal(spore);
   const sponsorSpore = useSponsorSporeModal(spore);
 
-  const amount = spore
-    ? Math.ceil(BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8)
+  const amount = spore?.cell
+    ? BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8
     : 0;
-  const owner = spore
+  const owner = spore?.cell
     ? helpers.encodeToAddress(spore.cell.cellOutput.lock, {
         config: config.predefined.AGGRON4,
       })
@@ -141,7 +114,9 @@ export default function SporePage() {
     return false;
   }, [connected, address, owner, getAnyoneCanPayLock]);
 
-  const pager = cluster && spores && spores.length > 1 && (
+  const txHash = spore?.cell?.outPoint?.txHash ?? '';
+
+  const pager = spore?.cluster && spores && spores.length > 1 && (
     <Group position="apart">
       {prevSporeIndex >= 0 && (
         <Link
@@ -179,14 +154,14 @@ export default function SporePage() {
       <Head>
         <title>Spore: {id} - Spore Demo</title>
       </Head>
-      <SporeOpenGraph id={id as string} />
+      <SporeOpenGraph spore={spore} />
       <Box bg="background.0">
         <Container size="md" pt="24px" pb="24px">
           <Stack spacing="24px">
-            {cluster && (
+            {spore?.cluster && (
               <Group position="apart">
                 <Link
-                  href={`/cluster/${cluster.id}`}
+                  href={`/cluster/${spore.cluster.id}`}
                   style={{ textDecoration: 'none' }}
                 >
                   <Group spacing="8px">
@@ -204,9 +179,9 @@ export default function SporePage() {
                         fontFamily: theme.headings.fontFamily,
                       }}
                     >
-                      {cluster.name}
+                      {spore.cluster.name}
                     </Text>
-                    {spores && (
+                    {spores.length > 0 && (
                       <Text color="text.0">
                         ({nextSporeIndex}/{spores.length})
                       </Text>
@@ -228,24 +203,24 @@ export default function SporePage() {
                 <Group>
                   <Box className={classes.title}>
                     <Tooltip label={`Unique ID of Spore`} withArrow>
-                      <Text
-                        size="32px"
-                        weight="bold"
-                        color="text.0"
-                        sx={{
-                          fontFamily: theme.headings.fontFamily,
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {spore!.id.slice(0, 10)}...{spore!.id.slice(-10)}
-                      </Text>
+                      {id && (
+                        <Text
+                          size="32px"
+                          weight="bold"
+                          color="text.0"
+                          sx={{
+                            fontFamily: theme.headings.fontFamily,
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {id.slice(0, 10)}...{id.slice(-10)}
+                        </Text>
+                      )}
                     </Tooltip>
                   </Box>
                   <Tooltip label={'View on explorer'} withArrow>
                     <Link
-                      href={`https://pudge.explorer.nervos.org/transaction/${
-                        spore!.cell.outPoint?.txHash
-                      }`}
+                      href={`https://pudge.explorer.nervos.org/transaction/${txHash}`}
                       target="_blank"
                     >
                       <Image
@@ -313,7 +288,7 @@ export default function SporePage() {
                 />
               ) : (
                 <Popover
-                  label={`The amount of CKB locked up on-chain, redeemable upon destruction`}
+                  label={`The amount of CKByte occupied on-chain, redeemable upon melt`}
                   width={320}
                   position="bottom-start"
                 >
@@ -325,7 +300,7 @@ export default function SporePage() {
                       display: 'inline',
                     }}
                   >
-                    {amount.toLocaleString('en-US')} CKB
+                    {amount.toLocaleString('en-US')} CKByte
                   </Title>
                 </Popover>
               )}

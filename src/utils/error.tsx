@@ -6,7 +6,7 @@ export function getFriendlyErrorMessage(message: string) {
     case 'Not enough capacity in from infos!': {
       return (
         <>
-          Not enough CKB in your wallet. You can get some CKB from{' '}
+          Not enough CKByte in your wallet. You can get some CKByte from{' '}
           <Link href="https://faucet.nervos.org" target="_blank">
             Nervos Pudge Faucet
           </Link>

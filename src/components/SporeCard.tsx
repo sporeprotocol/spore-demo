@@ -1,5 +1,3 @@
-import { Cluster } from '@/cluster';
-import { Spore } from '@/spore';
 import { BI } from '@ckb-lumos/lumos';
 import {
   Text,
@@ -25,10 +23,12 @@ import { useMemo } from 'react';
 import { isSameScript } from '@/utils/script';
 import SporeCoverRender from './SporeCoverRender';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
+import { QuerySpore } from '@/hooks/query/type';
+import { useSporeQuery } from '@/hooks/query/useSporeQuery';
+import { useRouter } from 'next/router';
 
 export interface SporeCardProps {
-  cluster: Cluster | undefined;
-  spore: Spore;
+  spore: QuerySpore;
 }
 
 const useStyles = createStyles((theme) => ({
@@ -44,6 +44,12 @@ const useStyles = createStyles((theme) => ({
     '&:hover': {
       borderRadius: '16px',
     },
+  },
+  title: {
+    textOverflow: 'ellipsis',
+    maxWidth: '100%',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
   },
   skeleton: {
     height: '100%',
@@ -66,27 +72,16 @@ export function SporeSkeletonCard() {
     <Card p={0} className={classes.card}>
       <Card.Section px="md" pt="md">
         <AspectRatio ratio={1} bg="#F4F5F9">
-          <Skeleton
-            className={classes.skeleton}
-            baseColor={theme.colors.background[1]}
-          />
+          <Skeleton className={classes.skeleton} baseColor={theme.colors.background[1]} />
         </AspectRatio>
       </Card.Section>
       <Box p="24px">
         <Flex direction="column">
           <Text color="rgba(255, 255, 255, 0.8)" size="sm" mb="8px">
-            <Skeleton
-              baseColor={theme.colors.background[1]}
-              height="25px"
-              borderRadius="16px"
-            />
+            <Skeleton baseColor={theme.colors.background[1]} height="25px" borderRadius="16px" />
           </Text>
           <Text size="lg" color="white" weight="bold" mb="8px">
-            <Skeleton
-              baseColor={theme.colors.background[1]}
-              height="25px"
-              borderRadius="16px"
-            />
+            <Skeleton baseColor={theme.colors.background[1]} height="25px" borderRadius="16px" />
           </Text>
           <Text size="md" color="white">
             <Skeleton
@@ -102,21 +97,37 @@ export function SporeSkeletonCard() {
   );
 }
 
-export default function SporeCard({ cluster, spore }: SporeCardProps) {
+export default function SporeCard(props: SporeCardProps) {
+  const { spore: sourceSpore } = props;
   const { classes } = useStyles();
   const [hovered, { close, open }] = useDisclosure(false);
-  const { lock } = useConnect();
+  const router = useRouter();
+  const { address, lock } = useConnect();
+  const { data: spore = sourceSpore } = useSporeQuery(sourceSpore?.id, false);
 
-  const isOwner = useMemo(
-    () => isSameScript(lock, spore.cell.cellOutput.lock),
-    [spore, lock],
-  );
+  const showActions = useMemo(() => {
+    if (!spore || !lock) {
+      return false;
+    }
+    if (
+      router.pathname.startsWith('/cluster') ||
+      router.pathname === '/my' ||
+      (router.pathname === '/[address]' && router.query.address === address)
+    ) {
+      return isSameScript(spore.cell?.cellOutput.lock, lock);
+    }
+    return false;
+  }, [spore, lock, router.pathname, router.query.address, address]);
 
   const transferSporeModal = useTransferSporeModal(spore);
   const meltSporeModal = useMeltSporeModal(spore);
   const sponsorSporeModal = useSponsorSporeModal(spore);
 
-  const amount = BI.from(spore.cell.cellOutput.capacity).toNumber() / 10 ** 8;
+  const amount = BI.from(spore.cell?.cellOutput.capacity ?? 0).toNumber() / 10 ** 8;
+
+  if (!spore) {
+    return <SporeSkeletonCard />;
+  }
 
   return (
     <Box
@@ -124,33 +135,29 @@ export default function SporeCard({ cluster, spore }: SporeCardProps) {
       onMouseEnter={() => open()}
       onMouseLeave={() => close()}
     >
-      <Link
-        href={`/spore/${spore.id}`}
-        style={{ textDecoration: 'none' }}
-        passHref
-      >
+      <Link href={`/spore/${spore.id}`} style={{ textDecoration: 'none' }} passHref>
         <Card p={0} className={classes.card}>
           <Card.Section px="md" pt="md">
             <SporeCoverRender spore={spore} />
           </Card.Section>
           <Box p="24px">
             <Flex direction="column">
-              <Text color="rgba(255, 255, 255, 0.8)" size="sm" mb="8px">
-                {cluster?.name ?? '<No Cluster>'}
+              <Text color="rgba(255, 255, 255, 0.8)" className={classes.title} size="sm" mb="8px">
+                {spore.cluster?.name ?? '<No Cluster>'}
               </Text>
               <Title color="white" order={5} mb="8px">
                 {`${spore.id.slice(0, 10)}...${spore.id.slice(-10)}`}
               </Title>
               <Flex>
                 <Text size="md" color="white">
-                  {amount.toLocaleString('en-US')} CKB
+                  {amount.toLocaleString('en-US')} CKByte
                 </Text>
               </Flex>
             </Flex>
           </Box>
         </Card>
       </Link>
-      {hovered && isOwner && (
+      {hovered && showActions && (
         <Box className={classes.menu}>
           <Flex align="center" justify="flex-end">
             <DropMenu

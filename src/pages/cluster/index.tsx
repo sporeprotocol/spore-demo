@@ -1,30 +1,31 @@
+import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
-import { trpc } from '@/server';
-import Image from 'next/image';
 import {
-  Text,
   Box,
+  Button,
   Container,
   Flex,
-  createStyles,
+  Group,
+  Loader,
   MediaQuery,
-  Title,
   Switch,
+  Text,
+  Title,
+  createStyles,
 } from '@mantine/core';
-import ClusterGrid from '@/components/ClusterGrid';
 import Head from 'next/head';
-import { useMemo, useState } from 'react';
-import { isAnyoneCanPay, isSameScript } from '@/utils/script';
+import Image from 'next/image';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useInfiniteClustersQuery } from '@/hooks/query/useInfiniteClustersQuery';
+import { QueryCluster } from '@/hooks/query/type';
 import { useConnect } from '@/hooks/useConnect';
-import groupBy from 'lodash-es/groupBy';
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import { appRouter } from '@/server/routers';
+import { useMintableClustersQuery } from '@/hooks/query/useMintableClusters';
 
-const useStyles = createStyles(
+export const useStyles = createStyles(
   (theme, params: { showMintableOnly: boolean }) => ({
     banner: {
       height: '280px',
-      overflowY: 'hidden',
+      overflow: 'hidden',
       borderBottomWidth: '2px',
       borderBottomColor: theme.colors.text[0],
       borderBottomStyle: 'solid',
@@ -59,63 +60,52 @@ const useStyles = createStyles(
           ? theme.colors.brand[1]
           : theme.colors.text[2]) + '!important',
     },
+    more: {
+      color: theme.colors.brand[1],
+      backgroundColor: 'transparent',
+      borderWidth: '2px',
+      borderColor: theme.colors.brand[1],
+      borderStyle: 'solid',
+      boxShadow: 'none !important',
+
+      '&:hover': {
+        backgroundColor: theme.colors.brand[1],
+        color: theme.white,
+      },
+    },
   }),
 );
 
-export async function getStaticProps() {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-  });
-  await Promise.all([
-    helpers.cluster.list.prefetch(),
-    helpers.spore.list.prefetch(),
-  ]);
-
-  return {
-    props: {
-      trpcState: helpers.dehydrate(),
-    },
-    revalidate: 1,
-  };
-}
-
 export default function ClustersPage() {
-  const { lock } = useConnect();
+  const { address } = useConnect();
   const [showMintableOnly, setShowMintableOnly] = useState(false);
   const { classes } = useStyles({ showMintableOnly });
+  const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { data: clusters = [], isLoading: isClusterLoading } =
-    trpc.cluster.list.useQuery();
-  const { data: spores = [], isLoading: isSporesLoading } =
-    trpc.spore.list.useQuery();
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, status } =
+    useInfiniteClustersQuery(showMintableOnly ? address : undefined);
 
-  const isLoading = isClusterLoading || isSporesLoading;
-
-  const sortedClusters = useMemo(() => {
-    const sporesByCluster = groupBy(spores, (spore) => spore.clusterId);
-    const ordererClustersId = Object.entries(sporesByCluster)
-      .sort(([, aSpores], [_, bSpores]) => aSpores.length - bSpores.length)
-      .map(([clusterId]) => clusterId);
-
-    return clusters.sort((a, b) => {
-      const aIndex = ordererClustersId.indexOf(a.id) ?? 0;
-      const bIndex = ordererClustersId.indexOf(b.id) ?? 0;
-      return bIndex - aIndex;
+  useEffect(() => {
+    if (isFetchingNextPage || !hasNextPage) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        fetchNextPage();
+      }
     });
-  }, [clusters, spores]);
-
-  const displayClusters = useMemo(() => {
-    if (showMintableOnly) {
-      return sortedClusters.filter(({ cell }) => {
-        return (
-          isAnyoneCanPay(cell.cellOutput.lock) ||
-          isSameScript(lock, cell.cellOutput.lock)
-        );
-      });
+    if (loadMoreButtonRef.current) {
+      observer.observe(loadMoreButtonRef.current);
     }
-    return sortedClusters;
-  }, [sortedClusters, showMintableOnly, lock]);
+    return () => observer.disconnect();
+  }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
+
+  const clusters = useMemo(() => {
+    if (!data) {
+      return [] as QueryCluster[];
+    }
+    const { pages } = data;
+    const clusters = pages?.flatMap((page) => page?.clusters ?? []);
+    return clusters as QueryCluster[];
+  }, [data]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -182,17 +172,23 @@ export default function ClustersPage() {
                 />
               </Flex>
             }
-            clusters={displayClusters.map((cluster) => {
-              const clusterSpores = spores.filter(
-                (spore) => spore.clusterId === cluster.id,
-              );
-              return {
-                ...cluster,
-                spores: clusterSpores,
-              };
-            })}
-            isLoading={isLoading}
+            clusters={clusters}
+            isLoading={status === 'pending'}
           />
+          <Group position="center" mt="48px">
+            {hasNextPage &&
+              (isFetchingNextPage ? (
+                <Loader color="brand.1" />
+              ) : (
+                <Button
+                  ref={loadMoreButtonRef}
+                  className={classes.more}
+                  onClick={() => fetchNextPage()}
+                >
+                  Load More
+                </Button>
+              ))}
+          </Group>
         </Box>
       </Container>
     </Layout>

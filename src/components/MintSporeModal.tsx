@@ -1,4 +1,3 @@
-import { Cluster } from '@/cluster';
 import useCreateClusterModal from '@/hooks/modal/useCreateClusterModal';
 import { useConnect } from '@/hooks/useConnect';
 import useEstimatedOnChainSize from '@/hooks/useEstimatedOnChainSize';
@@ -7,7 +6,6 @@ import {
   TEXT_MIME_TYPE,
   getMIMETypeByName,
 } from '@/utils/mime';
-import { trpc } from '@/server';
 import { getFriendlyErrorMessage } from '@/utils/error';
 import { showError, showSuccess } from '@/utils/notifications';
 import { BI, config, helpers } from '@ckb-lumos/lumos';
@@ -41,6 +39,8 @@ import {
 import PreviewRender from './PreviewRender';
 import { isAnyoneCanPay } from '@/utils/script';
 import Popover from './Popover';
+import { QueryCluster } from '@/hooks/query/type';
+import { useCapacity } from '@/hooks/query/useCapacity';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -49,7 +49,7 @@ const MAX_SIZE_LIMIT = parseInt(
 
 export interface MintSporeModalProps {
   defaultClusterId?: string;
-  clusters: Cluster[];
+  clusters: QueryCluster[];
   onSubmit: (
     content: Blob | null,
     clusterId: string | undefined,
@@ -203,8 +203,8 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     useCapacityMargin,
   );
   const { classes } = useStyles();
+  const { data: capacity = '0x0' } = useCapacity(address);
 
-  const { data: capacity = '0' } = trpc.accout.balance.useQuery({ address });
   const balance = useMemo(() => {
     if (!capacity) return 0;
     return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
@@ -252,7 +252,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   const selectableClusters = useMemo(() => {
     const ownerClusters = clusters.filter((cluster) => {
-      if (!address) {
+      if (!address || !cluster.cell) {
         return false;
       }
 
@@ -271,7 +271,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     });
 
     const publicClusters = clusters.filter((cluster) => {
-      const lock = cluster.cell.cellOutput.lock;
+      const lock = cluster.cell?.cellOutput.lock;
       return (
         isAnyoneCanPay(lock) && !ownerClusters.some((c) => c.id === cluster.id)
       );
@@ -365,7 +365,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               )}
               <Stack spacing={0}>
                 <Text weight="bold" color="text.0">
-                  {content.name}
+                  {content.name.length > 20
+                    ? `${content.name.slice(0, 10)}...${content.name.slice(-10)}`
+                    : content.name}
                 </Text>
                 <Text size="sm" color="text.1">
                   {content.size.toLocaleString('en-US')} CKB
@@ -377,7 +379,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                 color="brand.1"
                 weight="bold"
                 sx={{ cursor: 'pointer' }}
-                onClick={() => dropzoneOpenRef.current?.()}
+                onClick={() => !loading && dropzoneOpenRef.current?.()}
               >
                 Change File
               </Text>
@@ -447,7 +449,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               <Text weight="bold" color="text.0" mr="5px">
                 ≈ {onChainSize.toLocaleString('en-US')} CKB
               </Text>
-              <Popover label="By creating a spore, you are reserving this amount of CKB for on-chain storage. You can always melt spores to redeem your reserved CKB.">
+              <Popover label="By creating a spore, you are reserving this amount of CKByte for on-chain storage. You can always melt spores to redeem your reserved CKByte.">
                 <Image
                   src="/svg/icon-info.svg"
                   alt="info"
@@ -488,7 +490,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
             <label style={{ cursor: 'pointer' }} htmlFor="zero-fee">
               Enable Zero-Fee Transfers
             </label>
-            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+            <Popover label="By checking this option, you allocate 1 CKByte to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
               <Image
                 src="/svg/icon-info.svg"
                 alt="info"
@@ -514,7 +516,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
               onChange={(e) => setUseCapacityMargin(e.target.checked)}
             />
             <Text>Enable Zero-Fee Transfers</Text>
-            <Popover label="By checking this option, you allocate 1 CKB to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
+            <Popover label="By checking this option, you allocate 1 CKByte to sponsor future transfers, covering around 100,000 transfers. You can manage this feature on this Spore's info page.">
               <Image
                 src="/svg/icon-info.svg"
                 alt="info"

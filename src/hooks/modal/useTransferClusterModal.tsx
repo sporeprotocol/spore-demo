@@ -1,53 +1,73 @@
-import {
-  predefinedSporeConfigs,
-  transferCluster as _transferCluster,
-} from '@spore-sdk/core';
-import { config, helpers } from '@ckb-lumos/lumos';
-import { useCallback, useEffect } from 'react';
+import TransferModal from '@/components/TransferModal';
+import { modalStackAtom } from '@/state/modal';
+import { showSuccess } from '@/utils/notifications';
+import { sendTransaction } from '@/utils/transaction';
+import { BI, OutPoint, Script, config, helpers } from '@ckb-lumos/lumos';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { useConnect } from '../useConnect';
-import { Cluster } from '@/cluster';
-import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
-import TransferModal from '@/components/TransferModal';
-import { showSuccess } from '@/utils/notifications';
-import useSponsorClusterModal from './useSponsorClusterModal';
-import { modalStackAtom } from '@/state/modal';
+import { transferCluster as _transferCluster, predefinedSporeConfigs } from '@spore-sdk/core';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
+import { useCallback, useEffect } from 'react';
+import { useConnect } from '../useConnect';
+import useSponsorClusterModal from './useSponsorClusterModal';
+import { QueryCluster } from '../query/type';
+import { useClusterQuery } from '../query/useClusterQuery';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
-export default function useTransferClusterModal(cluster: Cluster | undefined) {
+export default function useTransferClusterModal(cluster: QueryCluster | undefined) {
   const modalId = useId();
   const setModalStack = useSetAtom(modalStackAtom);
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
-
-  const { refetch } = trpc.cluster.list.useQuery(undefined, { enabled: false });
-
-  const { data: capacityMargin, refetch: refetchCapacityMargin } =
-    trpc.cluster.getCapacityMargin.useQuery(
-      { id: cluster?.id },
-      { enabled: !!cluster && opened },
-    );
+  const queryClient = useQueryClient();
+  const { data: { capacityMargin } = {}, refresh: refreshCluster } = useClusterQuery(
+    cluster?.id,
+    opened,
+  );
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
 
   const sponsorClusterModal = useSponsorClusterModal(cluster);
 
   const transferCluster = useCallback(
     async (...args: Parameters<typeof _transferCluster>) => {
-      const { txSkeleton } = await _transferCluster(...args);
+      const { txSkeleton, outputIndex } = await _transferCluster(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return {
+        txHash,
+        index: BI.from(outputIndex).toHexString(),
+      } as OutPoint;
     },
     [signTransaction],
   );
 
-  const transferClusterMutation = useMutation(transferCluster, {
-    onSuccess: () => refetch(),
+  const onSuccess = useCallback(
+    async (outPoint: OutPoint, variables: { toLock: Script }) => {
+      await Promise.all([refreshCluster(), refreshClustersByAddress()]);
+      queryClient.setQueryData(['cluster', cluster?.id], (data: { cluster: QueryCluster }) => {
+        const cluster = {
+          ...data.cluster,
+          cell: {
+            ...data.cluster.cell,
+            cellOutput: {
+              ...data.cluster.cell?.cellOutput,
+              lock: variables.toLock,
+            },
+            outPoint,
+          },
+        };
+        return { cluster };
+      });
+    },
+    [cluster, queryClient, refreshCluster, refreshClustersByAddress],
+  );
+
+  const transferClusterMutation = useMutation({
+    mutationFn: transferCluster,
+    onSuccess,
   });
-  const loading =
-    transferClusterMutation.isLoading && !transferClusterMutation.isError;
+  const loading = transferClusterMutation.isPending && !transferClusterMutation.isError;
 
   const handleSubmit = useCallback(
     async (values: { to: string }) => {
@@ -55,7 +75,7 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
         return;
       }
       await transferClusterMutation.mutateAsync({
-        outPoint: cluster.cell.outPoint!,
+        outPoint: cluster.cell?.outPoint!,
         useCapacityMarginAsFee: false,
         fromInfos: [address],
         toLock: helpers.parseAddress(values.to, {
@@ -71,18 +91,17 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
 
   useEffect(() => {
     if (opened) {
-      refetchCapacityMargin();
       modals.open({
         modalId,
         title: `Transfer "${cluster!.name}"?`,
         onClose: close,
-        closeOnEscape: !transferClusterMutation.isLoading,
-        withCloseButton: !transferClusterMutation.isLoading,
-        closeOnClickOutside: !transferClusterMutation.isLoading,
+        closeOnEscape: !transferClusterMutation.isPending,
+        withCloseButton: !transferClusterMutation.isPending,
+        closeOnClickOutside: !transferClusterMutation.isPending,
         children: (
           <TransferModal
             type="cluster"
-            capacityMargin={capacityMargin}
+            capacityMargin={capacityMargin || undefined}
             onSubmit={handleSubmit}
             onSponsor={() => {
               close();
@@ -97,13 +116,12 @@ export default function useTransferClusterModal(cluster: Cluster | undefined) {
     }
   }, [
     cluster,
-    transferClusterMutation.isLoading,
+    transferClusterMutation.isPending,
     handleSubmit,
     opened,
     close,
     modalId,
     capacityMargin,
-    refetchCapacityMargin,
     open,
     setModalStack,
     sponsorClusterModal,

@@ -23,10 +23,10 @@ import useMintSporeModal from '@/hooks/modal/useMintSporeModal';
 import DropMenu, { DropMenuProps } from './DropMenu';
 import { IconCopy, IconPlus } from '@tabler/icons-react';
 import { NAVS } from '@/constants';
-import { trpc } from '@/server';
 import { BI } from '@ckb-lumos/lumos';
 import { useClipboard } from '@mantine/hooks';
 import { showSuccess } from '@/utils/notifications';
+import { useCapacity } from '@/hooks/query/useCapacity';
 
 const useStyles = createStyles((theme) => ({
   connect: {
@@ -110,10 +110,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     });
   }, [address]);
 
-  const { data: capacity = 0 } = trpc.accout.balance.useQuery(
-    { address },
-    { enabled: !!address },
-  );
+  const { data: capacity = '0x0' } = useCapacity(address);
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 
@@ -150,12 +147,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
         title: (
           <Flex align="center" justify="space-between">
             <Flex align="center" gap="xs">
-              <Image
-                src={connector!.icon}
-                alt={connector!.type}
-                width="24"
-                height="24"
-              />
+              <Image src={connector!.icon} alt={connector!.type} width="24" height="24" />
               <Text size="md">
                 {address.slice(0, 10)}...{address.slice(-10)}
               </Text>
@@ -187,12 +179,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
         key: 'disconnect',
         title: (
           <Flex align="center" gap="xs">
-            <Image
-              src="/svg/icon-log-out.svg"
-              alt="disconnect"
-              width="24"
-              height="24"
-            />
+            <Image src="/svg/icon-log-out.svg" alt="disconnect" width="24" height="24" />
             <Text size="md">Disconnect</Text>
           </Flex>
         ),
@@ -207,12 +194,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     <AppShell
       padding="none"
       header={
-        <MantineHeader
-          height={80}
-          p="md"
-          className={classes.header}
-          withBorder={false}
-        >
+        <MantineHeader height={80} p="md" className={classes.header} withBorder={false}>
           <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
             <Container size="xl">
               <Center>
@@ -232,11 +214,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                           style={{ textDecoration: 'none' }}
                         >
                           <Text
-                            className={
-                              nav.href === router.pathname
-                                ? classes.active
-                                : classes.nav
-                            }
+                            className={nav.href === router.pathname ? classes.active : classes.nav}
                           >
                             {nav.name}
                           </Text>
@@ -271,10 +249,7 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
                             </Box>
                             <Text>{balance.toLocaleString('en-US')} CKB</Text>
                             <Divider mx="md" size="sm" orientation="vertical" />
-                            <Box
-                              className={classes.avatar}
-                              id="wallet-avatar"
-                            />
+                            <Box className={classes.avatar} id="wallet-avatar" />
                           </Button>
                         </DropMenu>
                       )}

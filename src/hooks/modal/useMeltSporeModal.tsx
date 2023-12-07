@@ -1,44 +1,89 @@
-import {
-  predefinedSporeConfigs,
-  meltSpore as _meltSpore,
-} from '@spore-sdk/core';
+import { predefinedSporeConfigs, meltSpore as _meltSpore } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useRouter } from 'next/router';
 import { useConnect } from '../useConnect';
-import { Spore } from '@/spore';
 import MeltSporeModal from '@/components/MeltSporeModal';
 import { sendTransaction } from '@/utils/transaction';
-import { useMutation } from 'react-query';
-import { trpc } from '@/server';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
+import { QueryCluster, QuerySpore } from '../query/type';
+import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
+import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
+import { useSporeQuery } from '../query/useSporeQuery';
+import { useClustersByAddressQuery } from '../query/useClustersByAddress';
 
-export default function useMeltSporeModal(spore: Spore | undefined) {
+export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
   const [opened, { open, close }] = useDisclosure(false);
   const { address, signTransaction } = useConnect();
   const router = useRouter();
-
-  const { refetch } = trpc.spore.list.useQuery(
-    { clusterIds: spore?.clusterId ? [spore.clusterId] : undefined },
-    { enabled: false },
+  const queryClient = useQueryClient();
+  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
+    sourceSpore?.id,
+    opened,
+  );
+  const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
+  const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
+    spore?.clusterId || undefined,
+    false,
   );
 
   const meltSpore = useCallback(
     async (...args: Parameters<typeof _meltSpore>) => {
       const { txSkeleton } = await _meltSpore(...args);
       const signedTx = await signTransaction(txSkeleton);
-      const hash = await sendTransaction(signedTx);
-      return hash;
+      const txHash = await sendTransaction(signedTx);
+      return txHash;
     },
     [signTransaction],
   );
 
-  const meltSporeMutation = useMutation(meltSpore, {
-    onSuccess: () => {
-      refetch();
-    },
+  const onSuccess = useCallback(async () => {
+    refreshSpore();
+    const sporesUpdater = (data: { spores: QuerySpore[] }) => {
+      if (!data || !data.spores) return data;
+      const spores = data.spores.filter((s) => s.id !== spore?.id);
+      return { spores };
+    };
+    const clustersUpdater = (data: { clusters: QueryCluster[] }) => {
+      if (!data || !data.clusters) return data;
+      const clusters = data.clusters.map((c: QueryCluster) => {
+        if (c.id === spore?.clusterId) {
+          return {
+            ...c,
+            spores: c.spores?.filter((s) => s.id !== spore.id),
+          };
+        }
+        return c;
+      });
+      return { clusters };
+    };
+
+    queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
+    queryClient.setQueryData(['clustersByAddress', address], clustersUpdater);
+    queryClient.setQueryData(['clusterSpores', spore?.clusterId], sporesUpdater);
+
+    Promise.all([
+      refreshSporesByAddress(),
+      refreshClustersByAddress(),
+      refreshClusterSpores(),
+    ]);
+  }, [
+    address,
+    queryClient,
+    refreshClusterSpores,
+    refreshClustersByAddress,
+    refreshSpore,
+    refreshSporesByAddress,
+    spore,
+  ]);
+
+  const meltSporeMutation = useMutation({
+    mutationFn: meltSpore,
+    onSuccess,
   });
 
   const handleSubmit = useCallback(async () => {
@@ -46,11 +91,11 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
       return;
     }
     await meltSporeMutation.mutateAsync({
-      outPoint: spore.cell.outPoint!,
+      outPoint: spore!.cell!.outPoint!,
       fromInfos: [address],
       config: predefinedSporeConfigs.Aggron4,
     });
-    showSuccess('Spore melted!')
+    showSuccess('Spore melted!');
     modals.close(modalId);
     if (router.pathname.startsWith('/spore')) {
       router.back();
@@ -63,12 +108,12 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
         modalId,
         title: 'Melt spore?',
         onClose: close,
-        closeOnEscape: !meltSporeMutation.isLoading,
-        withCloseButton: !meltSporeMutation.isLoading,
-        closeOnClickOutside: !meltSporeMutation.isLoading,
+        closeOnEscape: !meltSporeMutation.isPending,
+        withCloseButton: !meltSporeMutation.isPending,
+        closeOnClickOutside: !meltSporeMutation.isPending,
         children: (
           <MeltSporeModal
-            spore={spore}
+            spore={spore!}
             onSubmit={handleSubmit}
             onClose={() => modals.close(modalId)}
           />
@@ -77,14 +122,7 @@ export default function useMeltSporeModal(spore: Spore | undefined) {
     } else {
       modals.close(modalId);
     }
-  }, [
-    modalId,
-    meltSporeMutation.isLoading,
-    handleSubmit,
-    opened,
-    close,
-    spore,
-  ]);
+  }, [modalId, meltSporeMutation.isPending, handleSubmit, opened, close, spore]);
 
   return {
     open,

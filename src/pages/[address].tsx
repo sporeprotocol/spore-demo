@@ -1,7 +1,8 @@
 import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
 import SporeGrid from '@/components/SporeGrid';
-import { trpc } from '@/server';
+import { useClustersByAddressQuery } from '@/hooks/query/useClustersByAddress';
+import { useSporesByAddressQuery } from '@/hooks/query/useSporesByAddressQuery';
 import { showSuccess } from '@/utils/notifications';
 import {
   Text,
@@ -26,7 +27,7 @@ import { useState } from 'react';
 const useStyles = createStyles((theme) => ({
   banner: {
     height: '280px',
-    overflowY: 'hidden',
+    overflow: 'hidden',
     borderBottomWidth: '2px',
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
@@ -89,24 +90,11 @@ export default function AccountPage() {
   const [showSpores, setShowSpores] = useState(true);
   const clipboard = useClipboard({ timeout: 500 });
 
-  const { data: spores = [], isLoading: isSporesLoading } =
-    trpc.spore.list.useQuery({ owner: address as string });
-  const { data: allClusters = [] } = trpc.cluster.list.useQuery();
-  const { data: clusters = [], isLoading: isClusterLoading } =
-    trpc.cluster.list.useQuery({
-      owner: address as string,
-      withPublic: true,
-    });
-
-  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
-    trpc.spore.list.useQuery(
-      {
-        clusterIds: clusters.map((c) => c.id),
-      },
-      {
-        enabled: !isClusterLoading,
-      },
-    );
+  const { data: spores, isLoading: isSporesLoading } = useSporesByAddressQuery(
+    address as string,
+  );
+  const { data: clusters, isLoading: isClustersLoading } =
+    useClustersByAddressQuery(address as string);
 
   if (!address) {
     return null;
@@ -207,23 +195,13 @@ export default function AccountPage() {
           <SporeGrid
             title={isSporesLoading ? '' : `${spores.length} Spores`}
             spores={spores}
-            cluster={(id) => allClusters.find((c) => c.id === id)}
             isLoading={isSporesLoading}
           />
         ) : (
           <ClusterGrid
-            title={
-              isClusterLoading || isClusterSporesLoading
-                ? ''
-                : `${clusters.length} Clusters`
-            }
-            clusters={clusters.map((cluster) => ({
-              ...cluster,
-              spores: clusterSpores.filter(
-                (spore) => spore.clusterId === cluster.id,
-              ),
-            }))}
-            isLoading={isClusterLoading || isClusterSporesLoading}
+            title={isClustersLoading ? '' : `${clusters.length} Clusters`}
+            clusters={clusters}
+            isLoading={isClustersLoading}
           />
         )}
       </Container>

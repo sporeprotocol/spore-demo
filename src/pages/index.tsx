@@ -1,29 +1,31 @@
+import ClusterGrid from '@/components/ClusterGrid';
 import Layout from '@/components/Layout';
-import { createServerSideHelpers } from '@trpc/react-query/server';
-import { trpc } from '@/server';
+import SporeGrid from '@/components/SporeGrid';
+import { QuerySpore } from '@/hooks/query/type';
+import { useInfiniteSporesQuery } from '@/hooks/query/useInfiniteSporesQuery';
+import { useTopClustersQuery } from '@/hooks/query/useTopClustersQuery';
 import {
-  Text,
+  IMAGE_MIME_TYPE,
+  SUPPORTED_MIME_TYPE,
+  TEXT_MIME_TYPE,
+} from '@/utils/mime';
+import {
   Box,
+  Button,
   Container,
   Flex,
-  Title,
-  Image,
-  createStyles,
-  MediaQuery,
-  useMantineTheme,
   Group,
-  Button,
+  Image,
   Loader,
+  MediaQuery,
+  Text,
+  Title,
+  useMantineTheme,
+  createStyles,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import SporeGrid from '@/components/SporeGrid';
-import ClusterGrid from '@/components/ClusterGrid';
-import { useMediaQuery } from '@mantine/hooks';
-import { IMAGE_MIME_TYPE } from '@mantine/dropzone';
-import { TEXT_MIME_TYPE, isImageMIMEType, isTextMIMEType } from '@/utils/mime';
-import { uniqBy } from 'lodash-es';
-import { appRouter } from '@/server/routers';
 
 enum SporeContentType {
   All = 'All',
@@ -31,10 +33,10 @@ enum SporeContentType {
   Text = 'Text',
 }
 
-const useStyles = createStyles((theme) => ({
+export const useStyles = createStyles((theme) => ({
   banner: {
     minHeight: '280px',
-    overflowY: 'hidden',
+    overflow: 'hidden',
     borderBottomWidth: '2px',
     borderBottomColor: theme.colors.text[0],
     borderBottomStyle: 'solid',
@@ -68,6 +70,10 @@ const useStyles = createStyles((theme) => ({
   active: {
     backgroundColor: theme.colors.brand[1],
     color: '#FFF',
+
+    '&:hover': {
+      color: theme.colors.text[0],
+    },
   },
   more: {
     color: theme.colors.brand[1],
@@ -84,44 +90,12 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-export async function getStaticProps() {
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-  });
-  await Promise.all([
-    helpers.cluster.recent.prefetch({ limit: 4 }),
-    helpers.spore.infiniteList.prefetch({
-      limit: 12,
-    }),
-  ]);
-
-  return {
-    props: {
-      trpcState: helpers.dehydrate(),
-    },
-    revalidate: 1,
-  };
-}
-
 export default function HomePage() {
   const { classes, cx } = useStyles();
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const [contentType, setContentType] = useState(SporeContentType.All);
   const loadMoreButtonRef = useRef<HTMLButtonElement>(null);
-
-  const { data: clusters = [], isLoading: isClusterLoading } =
-    trpc.cluster.recent.useQuery({ limit: 4 });
-  const { data: clusterSpores = [], isLoading: isClusterSporesLoading } =
-    trpc.spore.list.useQuery(
-      {
-        clusterIds: clusters.map((c) => c.id),
-      },
-      {
-        enabled: !isClusterLoading,
-      },
-    );
 
   const contentTypes = useMemo(() => {
     if (contentType === SporeContentType.Image) {
@@ -130,45 +104,18 @@ export default function HomePage() {
     if (contentType === SporeContentType.Text) {
       return TEXT_MIME_TYPE;
     }
-    return undefined;
+    return SUPPORTED_MIME_TYPE;
   }, [contentType]);
 
+  const { data: topClusters, isLoading: isTopClustersLoading } =
+    useTopClustersQuery();
   const {
-    data,
-    isLoading: isSporesLoading,
-    isFetchingNextPage,
+    data: sporesData,
     hasNextPage,
+    isFetchingNextPage,
+    status,
     fetchNextPage,
-  } = trpc.spore.infiniteList.useInfiniteQuery(
-    {
-      limit: 12,
-      contentTypes,
-    },
-    {
-      getNextPageParam: (lastPage) => lastPage.nextCursor,
-      initialCursor: 0,
-    },
-  );
-
-  const spores = useMemo(
-    () => uniqBy(data?.pages.map(({ items }) => items).flat(), 'id') ?? [],
-    [data],
-  );
-
-  const filteredSpores = useMemo(() => {
-    if (contentType === SporeContentType.All) {
-      return spores;
-    }
-    if (contentType === SporeContentType.Image) {
-      return spores.filter((spore) =>
-        isImageMIMEType(spore.contentType as any),
-      );
-    }
-    if (contentType === SporeContentType.Text) {
-      return spores.filter((spore) => isTextMIMEType(spore.contentType as any));
-    }
-    return spores;
-  }, [spores, contentType]);
+  } = useInfiniteSporesQuery(contentTypes);
 
   useEffect(() => {
     if (isFetchingNextPage || !hasNextPage) return;
@@ -182,6 +129,15 @@ export default function HomePage() {
     }
     return () => observer.disconnect();
   }, [fetchNextPage, isFetchingNextPage, hasNextPage]);
+
+  const spores = useMemo(() => {
+    if (!sporesData) {
+      return [] as QuerySpore[];
+    }
+    const { pages } = sporesData;
+    const spores = pages?.flatMap((page) => page?.spores ?? []);
+    return spores as QuerySpore[];
+  }, [sporesData]);
 
   const header = (
     <Flex align="center" className={classes.banner}>
@@ -242,13 +198,9 @@ export default function HomePage() {
                 </Link>
               </Flex>
             }
-            clusters={clusters.map((cluster) => ({
-              ...cluster,
-              spores: clusterSpores.filter(
-                (spore) => spore.clusterId === cluster.id,
-              ),
-            }))}
-            isLoading={isClusterLoading || isClusterSporesLoading}
+            clusters={topClusters}
+            isLoading={isTopClustersLoading}
+            loadingCount={4}
             disablePlaceholder
           />
         </Container>
@@ -256,10 +208,7 @@ export default function HomePage() {
       <Container py="48px" size="xl">
         <SporeGrid
           title="Explore All Spores"
-          spores={filteredSpores}
-          cluster={(id) =>
-            filteredSpores.find((s) => s.clusterId === id)?.cluster ?? undefined
-          }
+          spores={spores}
           filter={
             <Group mt="16px">
               {[
@@ -282,7 +231,7 @@ export default function HomePage() {
               })}
             </Group>
           }
-          isLoading={isSporesLoading}
+          isLoading={status === 'pending'}
           disablePlaceholder
         />
         <Group position="center" mt="48px">
