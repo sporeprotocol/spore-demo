@@ -4,7 +4,7 @@ import { MantineProvider, createStyles } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ModalsProvider } from '@mantine/modals';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import store from '@/state/store';
 import { ConnectProvider } from '@/hooks/useConnect';
 import MetaMaskConnector from '@/connectors/metamask';
@@ -22,13 +22,13 @@ function StateProvider({
 }>) {
   const [queryClient] = useState(() => new QueryClient());
 
-  useEffect(() => {
-    queryClient.setDefaultOptions({
-      queries: {
-        gcTime: 0,
-      },
-    });
-  }, [queryClient]);
+  // useEffect(() => {
+  //   queryClient.setDefaultOptions({
+  //     queries: {
+  //       gcTime: 0,
+  //     },
+  //   });
+  // }, [queryClient]);
 
   return (
     <JotaiProvider store={store}>
