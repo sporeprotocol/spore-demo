@@ -3,8 +3,8 @@ import { createContext, createApolloServer } from 'spore-graphql';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl';
 import { KeyvAdapter } from '@apollo/utils.keyvadapter';
-import KeyvRedis from '@keyv/redis';
 import Keyv, { Store } from 'keyv';
+import { kv } from '@vercel/kv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
 import { isResponseCacheEnabled } from '@/utils/graphql';
@@ -15,24 +15,23 @@ export const maxDuration = 300;
 const RESPONSE_CACHE_ENABLED =
   process.env.NEXT_PUBLIC_RESPONSE_CACHE_ENABLED === 'true' && process.env.KV_URL;
 
-const keyvRedis = new KeyvRedis(process.env.KV_URL!);
-
 const store: Store<string> = {
   async get(key: string): Promise<string | undefined> {
-    const val = await keyvRedis.get(key);
+    const val = await kv.get(key);
     return val as string | undefined;
   },
   async set(key: string, value: string, ttl?: number | undefined) {
     if (ttl) {
-      return keyvRedis.set(key, value, ttl);
+      return kv.set(key, value, { px: ttl });
     }
-    return keyvRedis.set(key, value);
+    return kv.set(key, value);
   },
   async delete(key: string): Promise<boolean> {
-    return keyvRedis.delete(key);
+    const count = await kv.del(key);
+    return count > 0;
   },
   async clear(): Promise<void> {
-    await keyvRedis.clear();
+    await kv.flushall();
   },
 };
 
@@ -48,19 +47,19 @@ const server = createApolloServer({
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {
-        cache,
-        plugins: [
-          ApolloServerPluginCacheControl({
-            defaultMaxAge: 60 * 60 * 24 * 365,
-          }),
-          responseCachePlugin({
-            generateCacheKey,
-            shouldReadFromCache: async (requestContext) => {
-              return isResponseCacheEnabled(requestContext);
-            },
-          }),
-        ],
-      }
+      cache,
+      plugins: [
+        ApolloServerPluginCacheControl({
+          defaultMaxAge: 60 * 60 * 24 * 365,
+        }),
+        responseCachePlugin({
+          generateCacheKey,
+          shouldReadFromCache: async (requestContext) => {
+            return isResponseCacheEnabled(requestContext);
+          },
+        }),
+      ],
+    }
     : {}),
 });
 
