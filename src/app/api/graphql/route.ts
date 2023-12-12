@@ -1,5 +1,5 @@
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
-import { createContext, createApolloServer } from 'spore-graphql';
+import { startSporeServerNextHandler } from 'spore-graphql/next';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl';
 import { KeyvAdapter } from '@apollo/utils.keyvadapter';
@@ -8,6 +8,7 @@ import { kv } from '@vercel/kv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
 import { isResponseCacheEnabled } from '@/utils/graphql';
+import { predefinedSporeConfigs } from '@spore-sdk/core';
 
 export const fetchCache = 'force-no-store';
 export const maxDuration = 300;
@@ -43,30 +44,24 @@ function generateCacheKey(requestContext: GraphQLRequestContext<Record<string, a
   return MD5(JSON.stringify({ query, variables })).toString();
 }
 
-const server = createApolloServer({
+const handler = startSporeServerNextHandler(predefinedSporeConfigs.Aggron4, {
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {
-      cache,
-      plugins: [
-        ApolloServerPluginCacheControl({
-          defaultMaxAge: 60 * 60 * 24 * 365,
-        }),
-        responseCachePlugin({
-          generateCacheKey,
-          shouldReadFromCache: async (requestContext) => {
-            return isResponseCacheEnabled(requestContext);
-          },
-        }),
-      ],
-    }
+        cache,
+        plugins: [
+          ApolloServerPluginCacheControl({
+            defaultMaxAge: 60 * 60 * 24 * 365,
+          }),
+          responseCachePlugin({
+            generateCacheKey,
+            shouldReadFromCache: async (requestContext) => {
+              return isResponseCacheEnabled(requestContext);
+            },
+          }),
+        ],
+      }
     : {}),
-});
-
-const context = createContext();
-
-const handler = startServerAndCreateNextHandler(server, {
-  context: async () => context,
 });
 
 export { handler as GET, handler as POST };
