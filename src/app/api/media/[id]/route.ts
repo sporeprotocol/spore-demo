@@ -1,5 +1,6 @@
 import { Indexer } from '@ckb-lumos/lumos';
-import { predefinedSporeConfigs, unpackToRawSporeData } from '@spore-sdk/core';
+import { unpackToRawSporeData } from '@spore-sdk/core';
+import { sporeConfig } from "@/config";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const { id } = params;
@@ -7,10 +8,10 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return new Response(null, { status: 400 });
   }
 
-  const indexer = new Indexer(predefinedSporeConfigs.Aggron4.ckbIndexerUrl);
+  const indexer = new Indexer(sporeConfig.ckbIndexerUrl);
   const collector = indexer.collector({
     type: {
-      ...predefinedSporeConfigs.Aggron4.scripts.Spore.script,
+      ...sporeConfig.scripts.Spore.script,
       args: id as string,
     },
   });

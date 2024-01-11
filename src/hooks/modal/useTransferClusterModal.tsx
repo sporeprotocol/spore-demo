@@ -5,7 +5,7 @@ import { sendTransaction } from '@/utils/transaction';
 import { BI, OutPoint, Script, config, helpers } from '@ckb-lumos/lumos';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
-import { transferCluster as _transferCluster, predefinedSporeConfigs } from '@spore-sdk/core';
+import { transferCluster as _transferCluster } from '@spore-sdk/core';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSetAtom } from 'jotai';
 import { useCallback, useEffect } from 'react';
@@ -81,7 +81,6 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
         toLock: helpers.parseAddress(values.to, {
           config: config.predefined.AGGRON4,
         }),
-        config: predefinedSporeConfigs.Aggron4,
       });
       showSuccess('Cluster Transferred!');
       modals.close(modalId);

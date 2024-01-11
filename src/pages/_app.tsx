@@ -14,6 +14,10 @@ import Head from 'next/head';
 import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
+import { setSporeConfig } from "@spore-sdk/core";
+import { sporeConfig } from "@/config";
+
+setSporeConfig(sporeConfig);
 
 function StateProvider({
   children,
