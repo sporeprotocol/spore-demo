@@ -1,7 +1,7 @@
-import { predefinedSporeConfigs, SporeConfig } from '@spore-sdk/core';
+import { predefinedSporeConfigs, setSporeConfig, SporeConfig } from '@spore-sdk/core';
 import { predefined } from "@ckb-lumos/config-manager";
 
-export const sporeConfig: SporeConfig = {
+const sporeConfig: SporeConfig = {
   ...predefinedSporeConfigs.Aggron4,
   lumos: {
     ...predefined.AGGRON4,
@@ -18,4 +18,10 @@ export const sporeConfig: SporeConfig = {
       },
     },
   },
+};
+
+setSporeConfig(sporeConfig);
+
+export {
+  sporeConfig,
 };

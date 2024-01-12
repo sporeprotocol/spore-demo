@@ -1,5 +1,5 @@
 import { Indexer } from '@ckb-lumos/lumos';
-import { unpackToRawSporeData } from '@spore-sdk/core';
+import { getSporeScript, unpackToRawSporeData } from '@spore-sdk/core';
 import { sporeConfig } from "@/config";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
@@ -8,10 +8,11 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return new Response(null, { status: 400 });
   }
 
+  const sporeScript = getSporeScript(sporeConfig, 'Spore');
   const indexer = new Indexer(sporeConfig.ckbIndexerUrl);
   const collector = indexer.collector({
     type: {
-      ...sporeConfig.scripts.Spore.script,
+      ...sporeScript.script,
       args: id as string,
     },
   });
