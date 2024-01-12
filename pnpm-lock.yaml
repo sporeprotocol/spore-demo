@@ -5,6 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  '@spore-sdk/core': 0.1.1-beta.0
   '@ckb-lumos/bi': ^0.22.0-next.2
   '@ckb-lumos/rpc': ^0.22.0-next.2
   '@ckb-lumos/base': ^0.22.0-next.2
@@ -180,8 +181,8 @@ dependencies:
     specifier: ^17.4.2
     version: 17.4.2(react-dom@18.2.0)(react@18.2.0)
   spore-graphql:
-    specifier: ^0.1.2
-    version: 0.1.2(next@13.5.6)
+    specifier: ^0.1.3
+    version: 0.1.3(next@13.5.6)
   superjson:
     specifier: ^1.13.3
     version: 1.13.3
@@ -2988,22 +2989,6 @@ packages:
       - bufferutil
       - encoding
       - utf-8-validate
-    dev: false
-
-  /@spore-sdk/core@0.1.0-beta.14:
-    resolution: {integrity: sha512-pwD20Ft134aTUzJ3xZDEGtSNqJfuO5CoUGKqIbd/o+oQp1a7UpwdNKiqYxUKUBWEBF/JyBPPD2qvoBID/PycRw==}
-    dependencies:
-      '@ckb-lumos/base': 0.22.0-next.2
-      '@ckb-lumos/bi': 0.22.0-next.2
-      '@ckb-lumos/codec': 0.22.0-next.2
-      '@ckb-lumos/common-scripts': 0.22.0-next.2
-      '@ckb-lumos/config-manager': 0.22.0-next.2
-      '@ckb-lumos/lumos': 0.22.0-next.2
-      '@ckb-lumos/rpc': 0.22.0-next.2
-      lodash: 4.17.21
-      whatwg-mimetype: 3.0.0
-    transitivePeerDependencies:
-      - encoding
     dev: false
 
   /@spore-sdk/core@0.1.1-beta.0:
@@ -8830,18 +8815,19 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /spore-graphql@0.1.2(next@13.5.6):
-    resolution: {integrity: sha512-c1rmLs4VoYOO3MF/qlQemvb6Me/mTMWXSvXtw1jaI4v9e5AmssjOcgOdk+weIQifD5MK/9VBV3rJ+cDxbDk6yw==}
+  /spore-graphql@0.1.3(next@13.5.6):
+    resolution: {integrity: sha512-y5XROr2CJol0+4qtrDaAx0Br7m+QEYJH17iwCYPjMkHVqRPD7xRrFALCq5iVqfnxkx6qlAScrCeo6HvzL2mDcA==}
     dependencies:
       '@apollo/server': 4.9.5(graphql@16.8.1)
       '@as-integrations/next': 3.0.0(@apollo/server@4.9.5)(next@13.5.6)
       '@ckb-lumos/config-manager': 0.22.0-next.2
       '@ckb-lumos/lumos': 0.22.0-next.2
-      '@spore-sdk/core': 0.1.0-beta.14
+      '@spore-sdk/core': 0.1.1-beta.0
       dataloader: 2.2.2
       graphql: 16.8.1
       graphql-tag: 2.12.6(graphql@16.8.1)
       lodash-es: 4.17.21
+      typescript: 5.3.3
     transitivePeerDependencies:
       - encoding
       - next
@@ -9302,6 +9288,12 @@ packages:
     resolution: {integrity: sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  /typescript@5.3.3:
+    resolution: {integrity: sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: false
 
   /ua-parser-js@1.0.37:
     resolution: {integrity: sha512-bhTyI94tZofjo+Dn8SN6Zv8nBDvyXTymAdM3LDI/0IboIUwTu1rEhW7v2TfiVsoYWgkQ4kOVqnI8APUFbIQIFQ==}
