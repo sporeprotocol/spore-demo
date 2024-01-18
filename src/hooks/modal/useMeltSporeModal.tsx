@@ -92,7 +92,6 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
     }
     await meltSporeMutation.mutateAsync({
       outPoint: spore!.cell!.outPoint!,
-      fromInfos: [address],
       config: predefinedSporeConfigs.Aggron4,
     });
     showSuccess('Spore melted!');

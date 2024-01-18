@@ -10,7 +10,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   const indexer = new Indexer(predefinedSporeConfigs.Aggron4.ckbIndexerUrl);
   const collector = indexer.collector({
     type: {
-      ...predefinedSporeConfigs.Aggron4.scripts.Spore.script,
+      ...predefinedSporeConfigs.Aggron4.scripts.Spore.versions[0].script,
       args: id as string,
     },
   });

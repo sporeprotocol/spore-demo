@@ -44,6 +44,7 @@ function generateCacheKey(requestContext: GraphQLRequestContext<Record<string, a
   return MD5(JSON.stringify({ query, variables })).toString();
 }
 
+// @ts-ignore TODO: fix spore-graphql types
 const handler = startSporeServerNextHandler(predefinedSporeConfigs.Aggron4, {
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
