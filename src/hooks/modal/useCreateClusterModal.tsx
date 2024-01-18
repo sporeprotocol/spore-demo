@@ -3,7 +3,7 @@ import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
 import { useConnect } from '../useConnect';
 import CreateClusterModal from '@/components/CreateClusterModal';
-import { createCluster, predefinedSporeConfigs } from '@spore-sdk/core';
+import { createCluster } from '@spore-sdk/core';
 import { sendTransaction } from '@/utils/transaction';
 import { useMutation } from '@tanstack/react-query';
 import { showSuccess } from '@/utils/notifications';
@@ -57,7 +57,6 @@ export default function useCreateClusterModal() {
         },
         fromInfos: [address],
         toLock,
-        config: predefinedSporeConfigs.Aggron4,
         // @ts-ignore
         capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });

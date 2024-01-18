@@ -1,5 +1,5 @@
-import { Indexer } from '@ckb-lumos/lumos';
-import { predefinedSporeConfigs, unpackToRawSporeData } from '@spore-sdk/core';
+import { getSporeById, unpackToRawSporeData } from '@spore-sdk/core';
+import { sporeConfig } from "@/config";
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const { id } = params;
@@ -7,15 +7,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return new Response(null, { status: 400 });
   }
 
-  const indexer = new Indexer(predefinedSporeConfigs.Aggron4.ckbIndexerUrl);
-  const collector = indexer.collector({
-    type: {
-      ...predefinedSporeConfigs.Aggron4.scripts.Spore.script,
-      args: id as string,
-    },
-  });
-
-  for await (const cell of collector.collect()) {
+  try {
+    const cell = await getSporeById(id, sporeConfig);
     const spore = unpackToRawSporeData(cell.data);
     const buffer = Buffer.from(spore.content.toString().slice(2), 'hex');
     return new Response(buffer, {
@@ -25,7 +18,7 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
         'Cache-Control': 'public, max-age=31536000',
       },
     });
+  } catch {
+    return new Response(null, { status: 404 });
   }
-
-  return new Response(null, { status: 404 });
 }
