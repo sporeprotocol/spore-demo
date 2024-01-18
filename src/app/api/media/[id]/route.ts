@@ -8,23 +8,26 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
   }
 
   const indexer = new Indexer(predefinedSporeConfigs.Aggron4.ckbIndexerUrl);
-  const collector = indexer.collector({
-    type: {
-      ...predefinedSporeConfigs.Aggron4.scripts.Spore.versions[0].script,
-      args: id as string,
-    },
-  });
 
-  for await (const cell of collector.collect()) {
-    const spore = unpackToRawSporeData(cell.data);
-    const buffer = Buffer.from(spore.content.toString().slice(2), 'hex');
-    return new Response(buffer, {
-      status: 200,
-      headers: {
-        'Content-Type': spore.contentType,
-        'Cache-Control': 'public, max-age=31536000',
+  for (const scripts of predefinedSporeConfigs.Aggron4.scripts.Spore.versions) {
+    const collector = indexer.collector({
+      type: {
+        ...scripts.script,
+        args: id as string,
       },
     });
+
+    for await (const cell of collector.collect()) {
+      const spore = unpackToRawSporeData(cell.data);
+      const buffer = Buffer.from(spore.content.toString().slice(2), 'hex');
+      return new Response(buffer, {
+        status: 200,
+        headers: {
+          'Content-Type': spore.contentType,
+          'Cache-Control': 'public, max-age=31536000',
+        },
+      });
+    }
   }
 
   return new Response(null, { status: 404 });
