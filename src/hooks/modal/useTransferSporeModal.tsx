@@ -56,7 +56,10 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
   const loading = transferSporeMutation.isPending && !transferSporeMutation.isError;
 
   const handleSubmit = useCallback(
-    async (values: { to: string }) => {
+    async (values: {
+      to: string,
+      useCapacityMarginAsFee: '1' | '0'
+    }) => {
       if (!address || !values.to || !spore?.cell) {
         return;
       }
@@ -66,7 +69,7 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
         toLock: helpers.parseAddress(values.to, {
           config: config.predefined.AGGRON4,
         }),
-        useCapacityMarginAsFee: true,
+        useCapacityMarginAsFee: values.useCapacityMarginAsFee === '1',
       });
       showSuccess('Spore Transferred!');
       modals.close(modalId);

@@ -70,17 +70,20 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
   const loading = transferClusterMutation.isPending && !transferClusterMutation.isError;
 
   const handleSubmit = useCallback(
-    async (values: { to: string }) => {
+    async (values: {
+      to: string,
+      useCapacityMarginAsFee: '1' | '0'
+    }) => {
       if (!address || !values.to || !cluster) {
         return;
       }
       await transferClusterMutation.mutateAsync({
         outPoint: cluster.cell?.outPoint!,
-        useCapacityMarginAsFee: false,
         fromInfos: [address],
         toLock: helpers.parseAddress(values.to, {
           config: config.predefined.AGGRON4,
         }),
+        useCapacityMarginAsFee: values.useCapacityMarginAsFee === '1',
       });
       showSuccess('Cluster Transferred!');
       modals.close(modalId);
