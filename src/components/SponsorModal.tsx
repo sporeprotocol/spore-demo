@@ -133,24 +133,8 @@ export default function SponsorModal(props: TransferModalProps) {
             data-autofocus
             disabled={loading}
             precision={0}
-            formatter={(val) => {
-              const num = parseInt(val);
-              if (isNaN(num)) {
-                return '0';
-              }
-              return num.toString();
-            }}
-            parser={(val) => {
-              const num = parseInt(val);
-              setError(null);
-              if (isNaN(num)) {
-                return '0';
-              }
-              if (num < 0) {
-                setError(new Error('Please enter a positive number'));
-              }
-              return Math.max(num, 0).toString();
-            }}
+            min={1}
+            max={100_000_000_000}
             rightSection={
               <Group spacing="0px" w="40px" h="100%">
                 <Stack
@@ -160,7 +144,7 @@ export default function SponsorModal(props: TransferModalProps) {
                   onClick={() => {
                     setError(null);
                     form.setValues({
-                      amount: Math.max(form.values.amount - 1, 0),
+                      amount: Math.max(form.values.amount - 1, 1),
                     });
                   }}
                 >
@@ -177,7 +161,9 @@ export default function SponsorModal(props: TransferModalProps) {
                   sx={{ cursor: 'pointer' }}
                   onClick={() => {
                     setError(null);
-                    form.setValues({ amount: form.values.amount + 1 });
+                    form.setValues({
+                      amount: Math.min(form.values.amount + 1, 100_000_000_000)
+                    });
                   }}
                 >
                   <Image
