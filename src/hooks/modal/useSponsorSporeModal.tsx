@@ -1,4 +1,3 @@
-import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -72,7 +71,6 @@ export default function useSponsorSporeModal(sourceSpore: QuerySpore | undefined
         outPoint: spore.cell!.outPoint!,
         fromInfos: [address],
         toLock: lock!,
-        config: predefinedSporeConfigs.Aggron4,
         capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });

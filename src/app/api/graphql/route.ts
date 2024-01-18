@@ -8,7 +8,7 @@ import { kv } from '@vercel/kv';
 import { GraphQLRequestContext } from '@apollo/server';
 import { MD5 } from 'crypto-js';
 import { isResponseCacheEnabled } from '@/utils/graphql';
-import { predefinedSporeConfigs } from '@spore-sdk/core';
+import { sporeConfig } from "@/config";
 
 export const fetchCache = 'force-no-store';
 export const maxDuration = 300;
@@ -44,7 +44,7 @@ function generateCacheKey(requestContext: GraphQLRequestContext<Record<string, a
   return MD5(JSON.stringify({ query, variables })).toString();
 }
 
-const handler = startSporeServerNextHandler(predefinedSporeConfigs.Aggron4, {
+const handler = startSporeServerNextHandler(sporeConfig, {
   introspection: true,
   ...(RESPONSE_CACHE_ENABLED
     ? {

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useConnect } from './useConnect';
-import { createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
+import { createSpore, getSporeScript } from '@spore-sdk/core';
 import { BI } from '@ckb-lumos/lumos';
 import { isSameScript } from '@/utils/script';
+import { sporeConfig } from "@/config";
 
 export default function useEstimatedOnChainSize(
   clusterId: string | undefined,
@@ -29,7 +30,6 @@ export default function useEstimatedOnChainSize(
           },
           fromInfos: [address],
           toLock: lock,
-          config: predefinedSporeConfigs.Aggron4,
           // @ts-ignore
           capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
         });
@@ -39,8 +39,7 @@ export default function useEstimatedOnChainSize(
           .filter((output) => isSameScript(output.cellOutput.lock, lock))
           .find((output) => {
             const { type } = output.cellOutput;
-            const { script: sporeScript } =
-              predefinedSporeConfigs.Aggron4.scripts.Spore;
+            const sporeScript = getSporeScript(sporeConfig, 'Spore').script;
             return (
               type?.codeHash === sporeScript.codeHash &&
               type.hashType === sporeScript.hashType

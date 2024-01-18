@@ -1,4 +1,4 @@
-import { SporeDataProps, createSpore, predefinedSporeConfigs } from '@spore-sdk/core';
+import { SporeDataProps, createSpore } from '@spore-sdk/core';
 import { useCallback, useEffect, useState } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -70,7 +70,6 @@ export default function useMintSporeModal(id?: string) {
         },
         fromInfos: [address],
         toLock: lock,
-        config: predefinedSporeConfigs.Aggron4,
         // @ts-ignore
         capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });
