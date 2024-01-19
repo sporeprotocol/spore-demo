@@ -188,7 +188,10 @@ export default function DefaultAppShell(props: React.PropsWithChildren<{}>) {
     ] as DropMenuProps['menu'];
   }, [router, disconnect, address, connected, connector, clipboard]);
 
-  const balance = Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
+  const balance = useMemo(() => {
+    if (!capacity) return 0;
+    return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
+  }, [capacity]);
 
   return (
     <AppShell

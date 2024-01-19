@@ -150,6 +150,11 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
   const { connect, connected, address, connector, disconnect } = useConnect();
 
   const { data: capacity = '0x0' } = useCapacity(address);
+  const balance = useMemo(() => {
+    if (!capacity) return 0;
+    return Math.floor(BI.from(capacity).toNumber() / 10 ** 8);
+  }, [capacity]);
+
   const createClusterModal = useCreateClusterModal();
   const mintSporeModal = useMintSporeModal();
 
@@ -251,7 +256,7 @@ export default function MobileAppShell(props: React.PropsWithChildren<{}>) {
                 <Flex justify="space-between" py="12px">
                   <Text weight="bold">My Wallet</Text>
                   <Text weight="bold">
-                    {Math.floor(BI.from(capacity).toNumber() / 10 ** 8)} CKB
+                    {balance} CKB
                   </Text>
                 </Flex>
                 <Flex justify="space-between" mb="32px">
