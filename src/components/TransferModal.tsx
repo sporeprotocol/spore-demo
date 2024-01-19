@@ -19,7 +19,10 @@ import Popover from './Popover';
 
 export interface TransferModalProps {
   type: 'cluster' | 'spore';
-  onSubmit: (values: { to: string }) => Promise<void>;
+  onSubmit: (values: {
+    to: string,
+    useCapacityMarginAsFee: '1' | '0',
+  }) => Promise<void>;
   capacityMargin?: string | undefined;
   onSponsor?: () => void;
 }
@@ -77,7 +80,10 @@ export default function TransferModal(props: TransferModalProps) {
   const [error, setError] = useState<Error | null>(null);
   const focusTrapRef = useFocusTrap();
 
-  const form = useForm({
+  const form = useForm<{
+    to: string,
+    useCapacityMarginAsFee: '1' | '0',
+  }>({
     initialValues: {
       to: '',
       useCapacityMarginAsFee: capacityMargin.toNumber() > 10000 ? '1' : '0',
@@ -85,7 +91,10 @@ export default function TransferModal(props: TransferModalProps) {
   });
 
   const handleSubmit = useCallback(
-    async (values: { to: string }) => {
+    async (values: {
+      to: string,
+      useCapacityMarginAsFee: '1' | '0'
+    }) => {
       try {
         if (!isValidAddress(values.to)) {
           form.setFieldError('to', '* Invalid Address');

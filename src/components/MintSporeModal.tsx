@@ -501,9 +501,9 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           </Group>
           <Button
             className={classes.submit}
-            disabled={!content || !!error}
-            onClick={handleSubmit}
+            disabled={!content}
             loading={loading}
+            onClick={handleSubmit}
           >
             Mint
           </Button>

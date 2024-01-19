@@ -91,7 +91,7 @@ export default function MeltSporeModal(props: MeltSporeModalProps) {
               onClick={handleSubmit}
               loading={loading}
             >
-              Destory
+              Melt
             </Button>
           </Group>
         ) : (
