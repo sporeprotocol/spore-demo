@@ -1,4 +1,4 @@
-import { predefinedSporeConfigs, transferCluster as _transferCluster } from '@spore-sdk/core';
+import { transferCluster as _transferCluster } from '@spore-sdk/core';
 import { BI, OutPoint } from '@ckb-lumos/lumos';
 import { useCallback, useEffect, useRef } from 'react';
 import { useDisclosure, useId, useMediaQuery } from '@mantine/hooks';
@@ -64,7 +64,6 @@ export default function useSponsorClusterModal(cluster: QueryCluster | undefined
         outPoint: cluster.cell?.outPoint!,
         fromInfos: [address],
         toLock: lock!,
-        config: predefinedSporeConfigs.Aggron4,
         capacityMargin: nextCapacityMargin.toHexString(),
         useCapacityMarginAsFee: false,
       });

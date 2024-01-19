@@ -1,4 +1,3 @@
-import { predefinedSporeConfigs } from '@spore-sdk/core';
 import { BI, OutPoint, config, helpers } from '@ckb-lumos/lumos';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
@@ -67,7 +66,6 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
         toLock: helpers.parseAddress(values.to, {
           config: config.predefined.AGGRON4,
         }),
-        config: predefinedSporeConfigs.Aggron4,
         useCapacityMarginAsFee: true,
       });
       showSuccess('Spore Transferred!');

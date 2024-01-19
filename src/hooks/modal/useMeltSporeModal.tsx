@@ -1,4 +1,4 @@
-import { predefinedSporeConfigs, meltSpore as _meltSpore } from '@spore-sdk/core';
+import { meltSpore as _meltSpore } from '@spore-sdk/core';
 import { useCallback, useEffect } from 'react';
 import { useDisclosure, useId } from '@mantine/hooks';
 import { modals } from '@mantine/modals';
@@ -92,8 +92,6 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
     }
     await meltSporeMutation.mutateAsync({
       outPoint: spore!.cell!.outPoint!,
-      fromInfos: [address],
-      config: predefinedSporeConfigs.Aggron4,
     });
     showSuccess('Spore melted!');
     modals.close(modalId);

@@ -1,5 +1,5 @@
 import { BI, Indexer, helpers } from '@ckb-lumos/lumos';
-import { predefinedSporeConfigs } from '@spore-sdk/core';
+import { sporeConfig } from "@/config";
 
 export const dynamic = 'force-dynamic';
 
@@ -9,10 +9,9 @@ export async function GET(_: Request, { params }: { params: { address: string } 
     return new Response(null, { status: 400 });
   }
 
-  const config = predefinedSporeConfigs.Aggron4;
-  const indexer = new Indexer(config.ckbIndexerUrl);
+  const indexer = new Indexer(sporeConfig.ckbIndexerUrl);
   const collector = indexer.collector({
-    lock: helpers.parseAddress(address as string, { config: config.lumos }),
+    lock: helpers.parseAddress(address as string, { config: sporeConfig.lumos }),
     data: '0x',
   });
 
