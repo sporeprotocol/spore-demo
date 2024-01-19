@@ -1,4 +1,3 @@
-import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import { startSporeServerNextHandler } from 'spore-graphql/next';
 import responseCachePlugin from '@apollo/server-plugin-response-cache';
 import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl';
@@ -41,7 +40,7 @@ const cache = new KeyvAdapter(new Keyv({ store }));
 function generateCacheKey(requestContext: GraphQLRequestContext<Record<string, any>>) {
   const { request } = requestContext;
   const { query, variables } = request;
-  return MD5(JSON.stringify({ query, variables })).toString();
+  return MD5(JSON.stringify({ query, variables, sporeConfig })).toString();
 }
 
 const handler = startSporeServerNextHandler(sporeConfig, {
