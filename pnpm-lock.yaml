@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@spore-sdk/core': 0.2.0-beta.0
+  '@spore-sdk/core': 0.2.0-beta.1
   '@ckb-lumos/bi': ^0.22.0-next.3
   '@ckb-lumos/rpc': ^0.22.0-next.3
   '@ckb-lumos/base': ^0.22.0-next.3
@@ -2999,8 +2999,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@spore-sdk/core@0.2.0-beta.0:
-    resolution: {integrity: sha512-XGUw1knNhL+dqa1VCnOakDlBl1vr0PgyziuU8GExokqtr1ed+P9sZDL+2QqlXu5azzCGRp+84j1jom/AdE1f+A==}
+  /@spore-sdk/core@0.2.0-beta.1:
+    resolution: {integrity: sha512-i0oG0dzXwSaS2kGxKNK5cbgjZpwii9b9vPuZXby2fumYWO0Hw0EuwRtMo3CensuxRlTOSkmdizBBYT79guuN3A==}
     dependencies:
       '@ckb-lumos/base': 0.22.0-next.3
       '@ckb-lumos/bi': 0.22.0-next.3
@@ -3009,22 +3009,6 @@ packages:
       '@ckb-lumos/config-manager': 0.22.0-next.3
       '@ckb-lumos/lumos': 0.22.0-next.3
       '@ckb-lumos/rpc': 0.22.0-next.3
-      '@exact-realty/multipart-parser': 1.0.10
-      lodash: 4.17.21
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
-  /@spore-sdk/core@0.2.0-beta.1:
-    resolution: {integrity: sha512-i0oG0dzXwSaS2kGxKNK5cbgjZpwii9b9vPuZXby2fumYWO0Hw0EuwRtMo3CensuxRlTOSkmdizBBYT79guuN3A==}
-    dependencies:
-      '@ckb-lumos/base': 0.22.0-next.2
-      '@ckb-lumos/bi': 0.22.0-next.2
-      '@ckb-lumos/codec': 0.22.0-next.2
-      '@ckb-lumos/common-scripts': 0.22.0-next.2
-      '@ckb-lumos/config-manager': 0.22.0-next.2
-      '@ckb-lumos/lumos': 0.22.0-next.2
-      '@ckb-lumos/rpc': 0.22.0-next.2
       '@exact-realty/multipart-parser': 1.0.10
       lodash: 4.17.21
     transitivePeerDependencies:
@@ -8846,7 +8830,7 @@ packages:
       '@as-integrations/next': 3.0.0(@apollo/server@4.9.5)(next@13.5.6)
       '@ckb-lumos/config-manager': 0.22.0-next.3
       '@ckb-lumos/lumos': 0.22.0-next.3
-      '@spore-sdk/core': 0.2.0-beta.0
+      '@spore-sdk/core': 0.2.0-beta.1
       dataloader: 2.2.2
       graphql: 16.8.1
       graphql-tag: 2.12.6(graphql@16.8.1)
