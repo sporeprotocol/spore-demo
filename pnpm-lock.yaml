@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@spore-sdk/core': 0.2.0-beta.1
+  '@spore-sdk/core': 0.2.0-beta.2
   '@ckb-lumos/bi': ^0.22.0-next.3
   '@ckb-lumos/rpc': ^0.22.0-next.3
   '@ckb-lumos/base': ^0.22.0-next.3
@@ -94,8 +94,8 @@ dependencies:
     specifier: ^6.0.21
     version: 6.0.21(@mantine/core@6.0.21)(@mantine/hooks@6.0.21)(react-dom@18.2.0)(react@18.2.0)
   '@spore-sdk/core':
-    specifier: 0.2.0-beta.1
-    version: 0.2.0-beta.1
+    specifier: 0.2.0-beta.2
+    version: 0.2.0-beta.2
   '@tabler/icons-react':
     specifier: ^2.40.0
     version: 2.40.0(react@18.2.0)
@@ -185,7 +185,7 @@ dependencies:
     version: 17.4.2(react-dom@18.2.0)(react@18.2.0)
   spore-graphql:
     specifier: ^0.1.6
-    version: 0.1.6(@spore-sdk/core@0.2.0-beta.1)(next@13.5.6)
+    version: 0.1.6(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6)
   superjson:
     specifier: ^1.13.3
     version: 1.13.3
@@ -3202,8 +3202,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@spore-sdk/core@0.2.0-beta.1:
-    resolution: {integrity: sha512-i0oG0dzXwSaS2kGxKNK5cbgjZpwii9b9vPuZXby2fumYWO0Hw0EuwRtMo3CensuxRlTOSkmdizBBYT79guuN3A==}
+  /@spore-sdk/core@0.2.0-beta.2:
+    resolution: {integrity: sha512-XseuRVOWddVn8UDqHbFqRSV8copflIm3jfaelapv9JlnIZZh74bWcfZsk+CQ9PJta+KiLF1+Yj8ixpMrmdvfqQ==}
     dependencies:
       '@ckb-lumos/base': 0.22.0-next.3
       '@ckb-lumos/bi': 0.22.0-next.3
@@ -9430,10 +9430,10 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /spore-graphql@0.1.6(@spore-sdk/core@0.2.0-beta.1)(next@13.5.6):
+  /spore-graphql@0.1.6(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6):
     resolution: {integrity: sha512-d0UtZDqHX2z3wY15FdyNNoIpghxSrkPa3XeUT2qLFIqeblZAKa1nOJRyGURg8YlxOpCT5e6c/f8vZ0O6CtP03g==}
     peerDependencies:
-      '@spore-sdk/core': 0.2.0-beta.1
+      '@spore-sdk/core': 0.2.0-beta.2
     dependencies:
       '@apollo/server': 4.9.5(graphql@16.8.1)
       '@as-integrations/next': 3.0.0(@apollo/server@4.9.5)(next@13.5.6)
@@ -9441,7 +9441,7 @@ packages:
       '@ckb-lumos/codec': 0.22.0-next.3
       '@ckb-lumos/config-manager': 0.22.0-next.3
       '@ckb-lumos/lumos': 0.22.0-next.3
-      '@spore-sdk/core': 0.2.0-beta.1
+      '@spore-sdk/core': 0.2.0-beta.2
       dataloader: 2.2.2
       graphql: 16.8.1
       graphql-tag: 2.12.6(graphql@16.8.1)
