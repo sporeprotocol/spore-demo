@@ -66,7 +66,10 @@ export default function ConnectModal(props: ConnectModalProps) {
       {connectors.map((connector) => (
         <Button
           key={connector.type}
-          className={`${classes.button} ${!connector.enabled ? 'disabled' : ''}`}
+          className={classes.button}
+          style={{
+            cursor: connector.enabled ? 'pointer' : 'not-allowed',
+          }}
           onClick={() => connect(connector)}
           loading={connectingConnector === connector.type}
           disabled={!connector.enabled}
