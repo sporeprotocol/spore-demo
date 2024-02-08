@@ -47,9 +47,11 @@ export default function ConnectModal(props: ConnectModalProps) {
     }
   };
 
+  const visibleConnectors = connectors.filter((connector) => connector.visible !== false);
+
   return (
     <Flex direction="column" gap="md">
-      {connectors.map((connector) => (
+      {visibleConnectors.map((connector) => (
         <Button
           key={connector.type}
           className={classes.button}

@@ -12,6 +12,7 @@ import { bytes } from '@ckb-lumos/codec';
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
   public icon = '/images/joyid-icon.png';
+  public visible = false;
 
   constructor() {
     super();
