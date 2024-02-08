@@ -51,8 +51,7 @@ export default function ConnectModal(props: ConnectModalProps) {
   return (
     <Flex direction="column" gap="md">
       <Alert variant="filled" color="brand.1" title="JoyID deprecated">
-        We are deprecate the JoyID (Omnilock) option because it is more recommended to connect to
-        JoyID using the JoyId lock instead of Omnilock.
+        {`We've deprecate the JoyID (Omnilock) option because it is more recommended to connect to JoyID using the JoyId lock instead of Omnilock.`}
         <Link
           href="https://github.com/sporeprotocol/spore-demo/issues/69"
           target="_blank"
