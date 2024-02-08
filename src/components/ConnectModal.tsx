@@ -1,7 +1,8 @@
 import CKBConnector from '@/connectors/base';
 import { showError } from '@/utils/notifications';
-import { Button, Flex, createStyles } from '@mantine/core';
+import { Text, Alert, Button, Flex, createStyles } from '@mantine/core';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 export interface ConnectModalProps {
@@ -27,8 +28,8 @@ const useStyles = createStyles((theme) => ({
 
     '&.joyid': {
       borderRadius: '12px',
-      border: `0.5px solid ${theme.colors.background[0]}`
-    }
+      border: `0.5px solid ${theme.colors.background[0]}`,
+    },
   },
 }));
 
@@ -49,13 +50,28 @@ export default function ConnectModal(props: ConnectModalProps) {
 
   return (
     <Flex direction="column" gap="md">
+      <Alert variant="filled" color="brand.1" title="JoyID deprecated">
+        {`We've deprecate the JoyID (Omnilock) option because it is more recommended to connect to JoyID using the JoyId lock instead of Omnilock.`}
+        <Link
+          href="https://github.com/sporeprotocol/spore-demo/issues/69"
+          target="_blank"
+          style={{
+            textDecoration: 'none',
+          }}
+        >
+          <Text color="brand.0">See spore-demo issue #69</Text>
+        </Link>
+      </Alert>
       {connectors.map((connector) => (
         <Button
           key={connector.type}
           className={classes.button}
+          style={{
+            cursor: connector.enabled ? 'pointer' : 'not-allowed',
+          }}
           onClick={() => connect(connector)}
           loading={connectingConnector === connector.type}
-          disabled={!connector.enable}
+          disabled={!connector.enabled}
         >
           <Flex align="center" gap="xs">
             <Image
@@ -65,7 +81,7 @@ export default function ConnectModal(props: ConnectModalProps) {
               width="24"
               height="24"
             />
-            {connector.type} {connector.enable ? '' : '(Coming Soon)'}
+            {connector.type}
           </Flex>
         </Button>
       ))}

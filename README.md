@@ -18,9 +18,9 @@ the creation and transfer of clusters, as well as minting, transferring, and mel
 This project currently supports the following wallets:
 
 - [MetaMask](https://metamask.io) - A crypto wallet & gateway to blockchain apps.
-- [JoyID](https://joy.id) - Universal Account Protocol for Web3 Mass-adoption.
+- ~~[JoyID](https://joy.id) - Universal Account Protocol for Web3 Mass-adoption.~~ (We temporarily disable JoyID in the demo to avoid confusion. It will be re-added when we can fully support JoyID. See [issue#69](https://github.com/sporeprotocol/spore-demo/issues/69))
 
-> This project integrates MetaMask and JoyID through the use of [Omnilock](https://blog.cryptape.com/omnilock-a-universal-lock-that-powers-interoperability-1) for now.
+> This project integrates MetaMask ~~and JoyID~~ through the use of [Omnilock](https://blog.cryptape.com/omnilock-a-universal-lock-that-powers-interoperability-1) for now.
 
 ## Installation
 
