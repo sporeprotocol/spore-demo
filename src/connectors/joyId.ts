@@ -12,7 +12,6 @@ import { bytes } from '@ckb-lumos/codec';
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
   public icon = '/images/joyid-icon.png';
-  public visible = false;
 
   constructor() {
     super();
@@ -21,6 +20,7 @@ export default class JoyIdConnector extends CKBConnector {
       name: 'Spore Demo',
       joyidAppURL: 'https://testnet.joyid.dev',
     });
+    this.enabled = false;
   }
 
   private setAddress(ethAddress: `0x${string}` | undefined) {

@@ -4,11 +4,10 @@ import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
 
 export default abstract class CKBConnector {
   private _isConnected: boolean = false;
-  private _enable: boolean = true;
+  private _enabled: boolean = true;
   protected store = store;
   abstract type: string;
   abstract icon: string;
-  public visible: boolean = true;
 
   protected set isConnected(val: boolean) {
     this._isConnected = val;
@@ -18,12 +17,12 @@ export default abstract class CKBConnector {
     return this._isConnected;
   }
 
-  protected set enable(val: boolean) {
-    this._enable = val;
+  protected set enabled(val: boolean) {
+    this._enabled = val;
   }
 
-  public get enable() {
-    return this._enable;
+  public get enabled() {
+    return this._enabled;
   }
 
   public get lock(): Script | undefined {
