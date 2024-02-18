@@ -184,8 +184,8 @@ dependencies:
     specifier: ^17.4.2
     version: 17.4.2(react-dom@18.2.0)(react@18.2.0)
   spore-graphql:
-    specifier: ^0.1.6
-    version: 0.1.6(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6)
+    specifier: ^0.1.7
+    version: 0.1.7(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6)
   superjson:
     specifier: ^1.13.3
     version: 1.13.3
@@ -5041,6 +5041,11 @@ packages:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
     dev: true
 
+  /combine-async-iterators@2.1.0:
+    resolution: {integrity: sha512-Dgz38XQEMQ/AolKftyBFWuxeSdgEyNdURkbJsr47eTc4iQqCWbgAvh8EuXf5W/qyc8ONqZRAGrs17/i0XCzLTQ==}
+    engines: {node: '>=16'}
+    dev: false
+
   /combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
@@ -9430,8 +9435,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /spore-graphql@0.1.6(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6):
-    resolution: {integrity: sha512-d0UtZDqHX2z3wY15FdyNNoIpghxSrkPa3XeUT2qLFIqeblZAKa1nOJRyGURg8YlxOpCT5e6c/f8vZ0O6CtP03g==}
+  /spore-graphql@0.1.7(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6):
+    resolution: {integrity: sha512-Kua4CbZNxJsdHPEOGNDnQLP6kUdahY8ijZSHHI0S+byn0NFNmzNawyC5sg4nPI2008DiO5cecP7EEzfZnDOtYg==}
     peerDependencies:
       '@spore-sdk/core': 0.2.0-beta.2
     dependencies:
@@ -9442,6 +9447,7 @@ packages:
       '@ckb-lumos/config-manager': 0.22.0-next.3
       '@ckb-lumos/lumos': 0.22.0-next.3
       '@spore-sdk/core': 0.2.0-beta.2
+      combine-async-iterators: 2.1.0
       dataloader: 2.2.2
       graphql: 16.8.1
       graphql-tag: 2.12.6(graphql@16.8.1)
