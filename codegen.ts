@@ -1,7 +1,8 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
-  schema: './node_modules/spore-graphql/schema.graphql',
+  schema: './node_modules/spore-graphql/src/type-defs.ts',
+  require: ['ts-node/register'],
   documents: ['src/**/*.tsx', 'src/**/*.ts'],
   ignoreNoDocuments: true,
   generates: {
