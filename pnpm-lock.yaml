@@ -184,8 +184,8 @@ dependencies:
     specifier: ^17.4.2
     version: 17.4.2(react-dom@18.2.0)(react@18.2.0)
   spore-graphql:
-    specifier: ^0.1.7
-    version: 0.1.7(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6)
+    specifier: ^0.1.8
+    version: 0.1.8(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6)
   superjson:
     specifier: ^1.13.3
     version: 1.13.3
@@ -9435,8 +9435,8 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /spore-graphql@0.1.7(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6):
-    resolution: {integrity: sha512-Kua4CbZNxJsdHPEOGNDnQLP6kUdahY8ijZSHHI0S+byn0NFNmzNawyC5sg4nPI2008DiO5cecP7EEzfZnDOtYg==}
+  /spore-graphql@0.1.8(@spore-sdk/core@0.2.0-beta.2)(next@13.5.6):
+    resolution: {integrity: sha512-TJvIDBmCNLlkGYws2Yo1qtY7laVOEKRjozs/rnV84lWnLOIpBSHBTtJGlxjC8aBsbiuizg6AulmKY6YiICglKQ==}
     peerDependencies:
       '@spore-sdk/core': 0.2.0-beta.2
     dependencies:
