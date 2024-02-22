@@ -68,7 +68,7 @@
     "react-qr-code": "^2.0.12",
     "react-remark": "^2.1.0",
     "react-use": "^17.4.2",
-    "spore-graphql": "^0.1.7",
+    "spore-graphql": "^0.1.8",
     "superjson": "^1.13.3",
     "zod": "^3.22.4"
   },
