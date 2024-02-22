@@ -40,6 +40,7 @@ export function useMintableClustersQuery(address: string | undefined, enabled = 
       },
       enabled: !!address && enabled,
     },
+    true,
   );
   const clusters = data?.clusters as QueryCluster[] | undefined;
   const isLoading = rest.isLoading || rest.isPending;
