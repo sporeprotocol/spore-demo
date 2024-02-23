@@ -1,9 +1,9 @@
 function customFetch(request, init) {
   return fetch(request, {
     ...init,
+    cache: 'no-store',
     next: {
-      revalidate: false,
-      cache: 'no-store',
+      revalidate: 300,
     },
   });
 }
