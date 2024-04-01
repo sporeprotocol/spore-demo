@@ -5,8 +5,7 @@ import {utils} from "@ckb-lumos/base";
 import {bytify} from "@ckb-lumos/codec/lib/bytes";
 
 // FIXME Demo solution only
-const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE: string = "video/mp4+spore";
-const SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED: string = "plain/text"
+const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX: string = "+spore";
 const BindingLifecycleLockTypeHash: Hash = '0x20f1117a520a066fa9bf99ace508226b8706d559270c35c81403e057ccdc583d';
 
 export async function GET(_: Request, {params}: { params: { id: string } }) {
@@ -19,23 +18,24 @@ export async function GET(_: Request, {params}: { params: { id: string } }) {
         const cell = await getSporeById(id, sporeConfig);
         const spore = unpackToRawSporeData(cell.data);
 
-        console.error(`Spore content type: ${spore.contentType}`);
-        console.info(`VIDEO_SPORE_PROTOCOL_CONTENT_TYPE: ${VIDEO_SPORE_PROTOCOL_CONTENT_TYPE}`);
-        console.log(`SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED: ${SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED}`);
+        console.error(`DEBUG Spore content type: ${spore.contentType}`);
 
-        if (spore.contentType.startsWith(VIDEO_SPORE_PROTOCOL_CONTENT_TYPE)) {
-            console.log(`Complete Spore content`);
+        // TODO It should handle content-type more gracefully
+        if (spore.contentType.endsWith(VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX)) {
+            console.error(`DEBUG Enter VIDEO Spore`);
             const buffer = await completeSporeContent(cell);
             return new Response(buffer, {
                 status: 200,
                 headers: {
-                    'Content-Type': SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED,
+                    // TODO It should handle content-type more gracefully
+                    'Content-Type': spore.contentType.replace(VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX, ''),
                     // TODO FIXME uncomment this line
                     // 'Cache-Control': 'public, max-age=31536000',
                 },
             });
         }
 
+        console.error(`DEBUG Enter normal Spore`);
         const buffer = Buffer.from(spore.content.toString().slice(2), 'hex');
         return new Response(buffer, {
             status: 200,
@@ -115,14 +115,19 @@ function jointSegmentCells(segmentCells: Cell[]): Buffer {
 
 
 async function getCellsByLock(props: { lock: Script; indexer: Indexer }) {
-    const collector = props.indexer.collector({
-        type: props.lock,
-    });
 
+    console.error(`DEBUG BEGIN getCellsByLock lock: ${JSON.stringify(props.lock, null, 2)}`);
+    const collector = props.indexer.collector({
+        lock: props.lock,
+    });
+    console.error(`DEBUG END   getCellsByLock lock`);
+
+    console.error(`DEBUG BEGIN collector.collect`);
     let cells: Cell[] = [];
     for await (const cell of collector.collect()) {
         cells.push(cell);
     }
+    console.error(`DEBUG END   collector.collect: ${cells.length}`);
 
     return cells;
 }
