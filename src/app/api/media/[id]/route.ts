@@ -5,8 +5,8 @@ import {utils} from "@ckb-lumos/base";
 import {bytify} from "@ckb-lumos/codec/lib/bytes";
 
 // FIXME Demo solution only
-const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE: string = "application/spore+video";
-const SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED: string = "video/mp4"
+const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE: string = "video/mp4+spore";
+const SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED: string = "plain/text"
 const BindingLifecycleLockTypeHash: Hash = '0x20f1117a520a066fa9bf99ace508226b8706d559270c35c81403e057ccdc583d';
 
 export async function GET(_: Request, {params}: { params: { id: string } }) {
@@ -19,13 +19,19 @@ export async function GET(_: Request, {params}: { params: { id: string } }) {
         const cell = await getSporeById(id, sporeConfig);
         const spore = unpackToRawSporeData(cell.data);
 
-        if (!spore.contentType.startsWith(VIDEO_SPORE_PROTOCOL_CONTENT_TYPE)) {
+        console.error(`Spore content type: ${spore.contentType}`);
+        console.info(`VIDEO_SPORE_PROTOCOL_CONTENT_TYPE: ${VIDEO_SPORE_PROTOCOL_CONTENT_TYPE}`);
+        console.log(`SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED: ${SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED}`);
+
+        if (spore.contentType.startsWith(VIDEO_SPORE_PROTOCOL_CONTENT_TYPE)) {
+            console.log(`Complete Spore content`);
             const buffer = await completeSporeContent(cell);
             return new Response(buffer, {
                 status: 200,
                 headers: {
                     'Content-Type': SPORE_PROTOCOL_CONTENT_TYPE_TRANSFORMED,
-                    'Cache-Control': 'public, max-age=31536000',
+                    // TODO FIXME uncomment this line
+                    // 'Cache-Control': 'public, max-age=31536000',
                 },
             });
         }
@@ -35,7 +41,8 @@ export async function GET(_: Request, {params}: { params: { id: string } }) {
             status: 200,
             headers: {
                 'Content-Type': spore.contentType,
-                'Cache-Control': 'public, max-age=31536000',
+                // TODO FIXME uncomment this line
+                // 'Cache-Control': 'public, max-age=31536000',
             },
         });
     } catch {
