@@ -1,7 +1,7 @@
 import useCreateClusterModal from "@/hooks/modal/useCreateClusterModal";
 import { useConnect } from "@/hooks/useConnect";
 import useEstimatedOnChainSize from "@/hooks/useEstimatedOnChainSize";
-import { SUPPORTED_MIME_TYPE, TEXT_MIME_TYPE, getMIMETypeByName } from "@/utils/mime";
+import { SUPPORTED_MIME_TYPE, TEXT_MIME_TYPE, getMIMETypeByName, VIDEO_MIME_TYPE } from "@/utils/mime";
 import { getFriendlyErrorMessage } from "@/utils/error";
 import { showError, showSuccess } from "@/utils/notifications";
 import { BI, config, helpers } from "@ckb-lumos/lumos";
@@ -32,8 +32,8 @@ import { QueryCluster } from "@/hooks/query/type";
 import { useCapacity } from "@/hooks/query/useCapacity";
 
 const MAX_SIZE_LIMIT = parseInt(
-  process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? "300",
-  // process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? "10240",
+  // process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
+  process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? "5120",
   10
 );
 
@@ -166,7 +166,7 @@ const DropdownContainer: React.ForwardRefRenderFunction<any, React.PropsWithChil
 };
 const DropdownContainerRef = forwardRef(DropdownContainer);
 
-export default function MintSporeModal(props: MintSporeModalProps) {
+export default function MintVideoSporeModal(props: MintSporeModalProps) {
   const { defaultClusterId, clusters, onSubmit } = props;
   const theme = useMantineTheme();
   const { address, getAnyoneCanPayLock } = useConnect();
@@ -191,6 +191,12 @@ export default function MintSporeModal(props: MintSporeModalProps) {
     if (!content) return false;
     const mimeType = content.type || getMIMETypeByName(content.name);
     return IMAGE_MIME_TYPE.includes(mimeType as any);
+  }, [content]);
+
+  const isVideoType = useMemo(() => {
+    if (!content) return false;
+    const mimeType = content.type || getMIMETypeByName(content.name);
+    return VIDEO_MIME_TYPE.includes(mimeType as any);
   }, [content]);
 
   const isTextType = useMemo(() => {
@@ -320,6 +326,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
           <Group position="apart">
             <Group spacing="8px">
               {isImageType && <Image src="/images/image.png" alt="image" width="40" height="48" />}
+              {isVideoType && <Image src="/images/video.jpeg" alt="image" width="40" height="48" />}
               {isTextType && <Image src="/images/text.png" alt="image" width="40" height="48" />}
               <Stack spacing={0}>
                 <Text weight="bold" color="text.0">
@@ -371,15 +378,15 @@ export default function MintSporeModal(props: MintSporeModalProps) {
                   <Text component="span" size="xl" color="brand.1" sx={{ textDecoration: "underline" }} mx="5px" inline>
                     upload
                   </Text>
-                  an image here
+                  an video here
                 </Text>
               </MediaQuery>
             </Flex>
             <Text size="sm" color="text.1">
-              Supported formats: JPG, PNG, GIF, SVG, TXT, MD
+              Supported formats: MP4, WEBM, OGG, QUICKTIME
             </Text>
             <Text size="sm" color="text.1">
-              The file cannot exceed {MAX_SIZE_LIMIT} KB
+              The file cannot exceed {MAX_SIZE_LIMIT / 1024} MB
             </Text>
           </Flex>
         </Dropzone>

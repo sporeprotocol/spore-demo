@@ -1,14 +1,10 @@
-import ClusterGrid from '@/components/ClusterGrid';
-import Layout from '@/components/Layout';
-import SporeGrid from '@/components/SporeGrid';
-import { QuerySpore } from '@/hooks/query/type';
-import { useInfiniteSporesQuery } from '@/hooks/query/useInfiniteSporesQuery';
-import { useTopClustersQuery } from '@/hooks/query/useTopClustersQuery';
-import {
-  IMAGE_MIME_TYPE,
-  SUPPORTED_MIME_TYPE,
-  TEXT_MIME_TYPE,
-} from '@/utils/mime';
+import ClusterGrid from "@/components/ClusterGrid";
+import Layout from "@/components/Layout";
+import SporeGrid from "@/components/SporeGrid";
+import { QuerySpore } from "@/hooks/query/type";
+import { useInfiniteSporesQuery } from "@/hooks/query/useInfiniteSporesQuery";
+import { useTopClustersQuery } from "@/hooks/query/useTopClustersQuery";
+import { IMAGE_MIME_TYPE, SUPPORTED_MIME_TYPE, TEXT_MIME_TYPE, VIDEO_MIME_TYPE } from "@/utils/mime";
 import {
   Box,
   Button,
@@ -22,68 +18,69 @@ import {
   Title,
   useMantineTheme,
   createStyles,
-} from '@mantine/core';
-import { useMediaQuery } from '@mantine/hooks';
-import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState } from 'react';
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 enum SporeContentType {
-  All = 'All',
-  Image = 'Image',
-  Text = 'Text',
+  All = "All",
+  Image = "Image",
+  Text = "Text",
+  Video = "Video",
 }
 
 export const useStyles = createStyles((theme) => ({
   banner: {
-    minHeight: '280px',
-    overflow: 'hidden',
-    borderBottomWidth: '2px',
+    minHeight: "280px",
+    overflow: "hidden",
+    borderBottomWidth: "2px",
     borderBottomColor: theme.colors.text[0],
-    borderBottomStyle: 'solid',
-    backgroundImage: 'url(/images/noise-on-yellow.png)',
+    borderBottomStyle: "solid",
+    backgroundImage: "url(/images/noise-on-yellow.png)",
 
-    [theme.fn.smallerThan('sm')]: {
-      minHeight: '232px',
+    [theme.fn.smallerThan("sm")]: {
+      minHeight: "232px",
     },
   },
   container: {
-    position: 'relative',
+    position: "relative",
   },
   illus: {
-    position: 'absolute',
-    left: '-387px',
-    top: '-25px',
+    position: "absolute",
+    left: "-387px",
+    top: "-25px",
   },
   type: {
-    height: '32px',
-    border: '1px solid #CDCFD5',
-    backgroundColor: '#FFF',
-    borderRadius: '20px',
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    cursor: 'pointer',
+    height: "32px",
+    border: "1px solid #CDCFD5",
+    backgroundColor: "#FFF",
+    borderRadius: "20px",
+    paddingLeft: "16px",
+    paddingRight: "16px",
+    cursor: "pointer",
 
-    '&:hover': {
-      backgroundColor: 'rgba(26, 32, 44, 0.08)',
+    "&:hover": {
+      backgroundColor: "rgba(26, 32, 44, 0.08)",
     },
   },
   active: {
     backgroundColor: theme.colors.brand[1],
-    color: '#FFF',
+    color: "#FFF",
 
-    '&:hover': {
+    "&:hover": {
       color: theme.colors.text[0],
     },
   },
   more: {
     color: theme.colors.brand[1],
-    backgroundColor: 'transparent',
-    borderWidth: '2px',
+    backgroundColor: "transparent",
+    borderWidth: "2px",
     borderColor: theme.colors.brand[1],
-    borderStyle: 'solid',
-    boxShadow: 'none !important',
+    borderStyle: "solid",
+    boxShadow: "none !important",
 
-    '&:hover': {
+    "&:hover": {
       backgroundColor: theme.colors.brand[1],
       color: theme.white,
     },
@@ -104,11 +101,13 @@ export default function HomePage() {
     if (contentType === SporeContentType.Text) {
       return TEXT_MIME_TYPE;
     }
+    if (contentType === SporeContentType.Video) {
+      return VIDEO_MIME_TYPE;
+    }
     return SUPPORTED_MIME_TYPE;
   }, [contentType]);
 
-  const { data: topClusters, isLoading: isTopClustersLoading } =
-    useTopClustersQuery();
+  const { data: topClusters, isLoading: isTopClustersLoading } = useTopClustersQuery();
   const {
     data: sporesData,
     hasNextPage,
@@ -142,10 +141,7 @@ export default function HomePage() {
   const header = (
     <Flex align="center" className={classes.banner}>
       <Container size="xl" className={classes.container}>
-        <MediaQuery
-          query={`(max-width: ${theme.breakpoints.lg})`}
-          styles={{ display: 'none' }}
-        >
+        <MediaQuery query={`(max-width: ${theme.breakpoints.lg})`} styles={{ display: "none" }}>
           <Image
             className={classes.illus}
             src="/svg/spore-demo-illus.svg"
@@ -156,27 +152,21 @@ export default function HomePage() {
         </MediaQuery>
         <Flex direction="column" justify="center" align="center" gap="32px">
           <Box>
-            <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-              <Image
-                src={'/images/demo-title.png'}
-                width="630"
-                height="60"
-                alt="Spore Demo"
-              />
+            <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+              <Image src={"/images/demo-title.png"} width="630" height="60" alt="Spore Demo" />
             </MediaQuery>
-            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
               <Image
-                src={'/images/demo-title.mobile.png'}
-                width={isMobile ? '213' : '331'}
-                height={isMobile ? '96' : '136'}
+                src={"/images/demo-title.mobile.png"}
+                width={isMobile ? "213" : "331"}
+                height={isMobile ? "96" : "136"}
                 alt="Spore Demo"
               />
             </MediaQuery>
           </Box>
 
           <Text size="xl" align="center">
-            Connect your wallet, mint a spore, start your cluster – all
-            on-chain!
+            Connect your wallet, mint a spore, start your cluster – all on-chain!
           </Text>
         </Flex>
       </Container>
@@ -191,7 +181,7 @@ export default function HomePage() {
             title={
               <Flex justify="space-between">
                 <Title order={3}>Discover Clusters</Title>
-                <Link href="/cluster" style={{ textDecoration: 'none' }}>
+                <Link href="/cluster" style={{ textDecoration: "none" }}>
                   <Text color="brand.1" weight="600">
                     See all
                   </Text>
@@ -211,27 +201,25 @@ export default function HomePage() {
           spores={spores}
           filter={
             <Group mt="16px">
-              {[
-                SporeContentType.All,
-                SporeContentType.Image,
-                SporeContentType.Text,
-              ].map((type) => {
-                return (
-                  <Flex
-                    key={type}
-                    align="center"
-                    className={cx(classes.type, {
-                      [classes.active]: type === contentType,
-                    })}
-                    onClick={() => setContentType(type)}
-                  >
-                    <Text>{type}</Text>
-                  </Flex>
-                );
-              })}
+              {[SporeContentType.All, SporeContentType.Image, SporeContentType.Text, SporeContentType.Video].map(
+                (type) => {
+                  return (
+                    <Flex
+                      key={type}
+                      align="center"
+                      className={cx(classes.type, {
+                        [classes.active]: type === contentType,
+                      })}
+                      onClick={() => setContentType(type)}
+                    >
+                      <Text>{type}</Text>
+                    </Flex>
+                  );
+                }
+              )}
             </Group>
           }
-          isLoading={status === 'pending'}
+          isLoading={status === "pending"}
           disablePlaceholder
         />
         <Group position="center" mt="48px">
@@ -239,11 +227,7 @@ export default function HomePage() {
             (isFetchingNextPage ? (
               <Loader color="brand.1" />
             ) : (
-              <Button
-                ref={loadMoreButtonRef}
-                className={classes.more}
-                onClick={() => fetchNextPage()}
-              >
+              <Button ref={loadMoreButtonRef} className={classes.more} onClick={() => fetchNextPage()}>
                 Load More
               </Button>
             ))}

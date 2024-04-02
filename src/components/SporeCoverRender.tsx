@@ -1,22 +1,22 @@
-import { QuerySpore } from '@/hooks/query/type';
-import { ImageSporeCoverRender } from './renders/image';
-import { TextSporeCoverRender } from './renders/text';
-import { isImageMIMEType, isTextMIMEType } from '@/utils/mime';
-import { AspectRatio } from '@mantine/core';
+import { QuerySpore } from "@/hooks/query/type";
+import { ImageSporeCoverRender } from "./renders/image";
+import { TextSporeCoverRender } from "./renders/text";
+import { VideoSporeCoverRender } from "./renders/video";
+import { isImageMIMEType, isTextMIMEType, isVideoMIMEType } from "@/utils/mime";
+import { AspectRatio } from "@mantine/core";
 
 export interface SporeRenderProps {
   spore: QuerySpore;
   ratio?: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
-export default function SporeCoverRender({
-  spore,
-  ratio,
-  size,
-}: SporeRenderProps) {
+export default function SporeCoverRender({ spore, ratio, size }: SporeRenderProps) {
   if (isImageMIMEType(spore.contentType)) {
     return <ImageSporeCoverRender spore={spore} ratio={ratio} />;
+  }
+  if (isVideoMIMEType(spore.contentType)) {
+    return <VideoSporeCoverRender spore={spore} ratio={ratio} />;
   }
 
   if (isTextMIMEType(spore.contentType)) {
