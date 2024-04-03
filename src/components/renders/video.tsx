@@ -3,6 +3,7 @@ import { BI } from "@ckb-lumos/lumos";
 import { AspectRatio, Box, Image, createStyles, useMantineTheme } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, useState } from "react";
+import { object } from "zod";
 
 export interface ImageSporeRenderProps {
   spore: QuerySpore;
@@ -99,7 +100,7 @@ export function VideoPreviewRender(props: ImagePreviewRenderProps) {
           alt="preview"
           fit="contain"
         /> */}
-        <video className="w-content h-[260px]" autoPlay loop muted>
+        <video className="w-content h-[260px] !object-none" style={{ objectFit: "contain" }} autoPlay loop muted>
           <source src={`${dataUrl.toString()}`} type="video/mp4" />
           Your browser does not support the video tag.
         </video>

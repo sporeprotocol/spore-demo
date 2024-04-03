@@ -1,18 +1,30 @@
-import { meltSpore as _meltSpore } from '@spore-sdk/core';
-import { useCallback, useEffect } from 'react';
-import { useDisclosure, useId } from '@mantine/hooks';
-import { modals } from '@mantine/modals';
-import { useRouter } from 'next/router';
-import { useConnect } from '../useConnect';
-import MeltSporeModal from '@/components/MeltSporeModal';
-import { sendTransaction } from '@/utils/transaction';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { showSuccess } from '@/utils/notifications';
-import { QueryCluster, QuerySpore } from '../query/type';
-import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
-import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
-import { useSporeQuery } from '../query/useSporeQuery';
-import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import {
+  getCellWithStatusByOutPoint,
+  getSporeByOutPoint,
+  getSporeConfig,
+  meltSpore as _meltSpore,
+  payFeeByOutput,
+  unpackToRawSporeData,
+} from "@spore-sdk/core";
+import { useCallback, useEffect } from "react";
+import { useDisclosure, useId } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
+import { useRouter } from "next/router";
+import { useConnect } from "../useConnect";
+import MeltSporeModal from "@/components/MeltSporeModal";
+import { sendTransaction } from "@/utils/transaction";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { showSuccess } from "@/utils/notifications";
+import { QueryCluster, QuerySpore } from "../query/type";
+import { useSporesByAddressQuery } from "../query/useSporesByAddressQuery";
+import { useClusterSporesQuery } from "../query/useClusterSporesQuery";
+import { useSporeQuery } from "../query/useSporeQuery";
+import { useClustersByAddressQuery } from "../query/useClustersByAddress";
+// import {indexSegmentCells} from "@/app/api/media/[id]/route";
+import { indexSegmentCells } from "@/utils/segmentCellIndexer";
+import { RPC } from "@ckb-lumos/lumos";
+import { number } from "@ckb-lumos/codec";
+import { CellDep } from "@ckb-lumos/base";
 
 export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
@@ -20,25 +32,67 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
   const { address, signTransaction } = useConnect();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(
-    sourceSpore?.id,
-    opened,
-  );
+  const { data: spore = sourceSpore, refresh: refreshSpore } = useSporeQuery(sourceSpore?.id, opened);
   const { refresh: refreshSporesByAddress } = useSporesByAddressQuery(address, false);
   const { refresh: refreshClustersByAddress } = useClustersByAddressQuery(address, false);
-  const { refresh: refreshClusterSpores } = useClusterSporesQuery(
-    spore?.clusterId || undefined,
-    false,
-  );
+  const { refresh: refreshClusterSpores } = useClusterSporesQuery(spore?.clusterId || undefined, false);
+
+  const BindingLifecycleCellDep: CellDep = {
+    outPoint: {
+      txHash: "0x538d2c816004ff23b0b74d00069dec7630d5878660c8137a4a846b469467b0b1",
+      index: "0x0",
+    },
+    depType: "code",
+  };
 
   const meltSpore = useCallback(
     async (...args: Parameters<typeof _meltSpore>) => {
-      const { txSkeleton } = await _meltSpore(...args);
+      let { txSkeleton } = await _meltSpore(...args);
+
+      const props = args[0];
+      const sporeCell = await getSporeByOutPoint(props.outPoint, props.config);
+      const spore = unpackToRawSporeData(sporeCell.data);
+      if (spore.contentType.includes("+spore")) {
+        // For video spore, attach segment cells as inputs
+        const config = props.config ?? getSporeConfig();
+
+        const segmentCells = await indexSegmentCells(sporeCell);
+
+        // Add segment cells as inputs
+        for (const segmentCell of segmentCells) {
+          txSkeleton = txSkeleton.update("inputs", (inputs) => inputs.push(segmentCell));
+        }
+
+        // Add BindingLifecycleCellDep as cellDep
+        txSkeleton = txSkeleton.update("cellDeps", (cellDeps) => cellDeps.push(BindingLifecycleCellDep));
+
+        // Segment cells are going to be melted too,
+        // aggregate their capacity to the first output.
+        let meltSegmentCapacity = 0;
+        for (const segmentCell of segmentCells) {
+          meltSegmentCapacity += parseInt(segmentCell.cellOutput.capacity, 16);
+        }
+        txSkeleton = txSkeleton.update("outputs", (outputs) => {
+          let firstOutput = outputs.get(0)!;
+          firstOutput.cellOutput.capacity =
+            "0x" + (parseInt(firstOutput.cellOutput.capacity) + meltSegmentCapacity).toString(16);
+          outputs.set(0, firstOutput);
+          return outputs;
+        });
+
+        // Pay fee by the spore cell's capacity margin
+        txSkeleton = await payFeeByOutput({
+          outputIndex: 0,
+          txSkeleton,
+          config: props.config,
+        });
+      }
+
       const signedTx = await signTransaction(txSkeleton);
       const txHash = await sendTransaction(signedTx);
       return txHash;
     },
-    [signTransaction],
+    [signTransaction]
   );
 
   const onSuccess = useCallback(async () => {
@@ -62,15 +116,11 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
       return { clusters };
     };
 
-    queryClient.setQueryData(['sporesByAddress', address], sporesUpdater);
-    queryClient.setQueryData(['clustersByAddress', address], clustersUpdater);
-    queryClient.setQueryData(['clusterSpores', spore?.clusterId], sporesUpdater);
+    queryClient.setQueryData(["sporesByAddress", address], sporesUpdater);
+    queryClient.setQueryData(["clustersByAddress", address], clustersUpdater);
+    queryClient.setQueryData(["clusterSpores", spore?.clusterId], sporesUpdater);
 
-    Promise.all([
-      refreshSporesByAddress(),
-      refreshClustersByAddress(),
-      refreshClusterSpores(),
-    ]);
+    Promise.all([refreshSporesByAddress(), refreshClustersByAddress(), refreshClusterSpores()]);
   }, [
     address,
     queryClient,
@@ -93,9 +143,9 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
     await meltSporeMutation.mutateAsync({
       outPoint: spore!.cell!.outPoint!,
     });
-    showSuccess('Spore melted!');
+    showSuccess("Spore melted!");
     modals.close(modalId);
-    if (router.pathname.startsWith('/spore')) {
+    if (router.pathname.startsWith("/spore")) {
       router.back();
     }
   }, [address, spore, meltSporeMutation, router, modalId]);
@@ -104,18 +154,12 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
     if (opened) {
       modals.open({
         modalId,
-        title: 'Melt spore?',
+        title: "Melt spore?",
         onClose: close,
         closeOnEscape: !meltSporeMutation.isPending,
         withCloseButton: !meltSporeMutation.isPending,
         closeOnClickOutside: !meltSporeMutation.isPending,
-        children: (
-          <MeltSporeModal
-            spore={spore!}
-            onSubmit={handleSubmit}
-            onClose={() => modals.close(modalId)}
-          />
-        ),
+        children: <MeltSporeModal spore={spore!} onSubmit={handleSubmit} onClose={() => modals.close(modalId)} />,
       });
     } else {
       modals.close(modalId);
