@@ -24,12 +24,12 @@ import { helpers, HexString, Indexer, RPC } from "@ckb-lumos/lumos";
 import { bytify, hexify } from "@ckb-lumos/codec/lib/bytes";
 
 // TODO Demo only
-const defaultSegmentSize: number = 10 * 1024; // 10kb
-const BindingLifecycleTypeHash: Hash = "0x20f1117a520a066fa9bf99ace508226b8706d559270c35c81403e057ccdc583d";
+const defaultSegmentSize: number = parseInt(process.env.NEXT_PUBLIC_DEFAULT_SEGMENT_SIZE!, 10) * 1024;
+const BindingLifecycleTypeHash: Hash = process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_LOCK_TYPE_HASH!;
 const BindingLifecycleCellDep: CellDep = {
   outPoint: {
-    txHash: "0x1d1dd7e545de483e098c818d61d9a6a711b7e8a028c196908daee2bbcafa34a8",
-    index: "0x0",
+    txHash: process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_CELL_DEP_OUTPOINT_TXHASH!,
+    index: process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_CELL_DEP_OUTPOINT_INDEX!,
   },
   depType: "code",
 };

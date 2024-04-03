@@ -38,9 +38,13 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
   const { refresh: refreshClusterSpores } = useClusterSporesQuery(spore?.clusterId || undefined, false);
 
   const BindingLifecycleCellDep: CellDep = {
+    // outPoint: {
+    //   txHash: "0x538d2c816004ff23b0b74d00069dec7630d5878660c8137a4a846b469467b0b1",
+    //   index: "0x0",
+    // },
     outPoint: {
-      txHash: "0x538d2c816004ff23b0b74d00069dec7630d5878660c8137a4a846b469467b0b1",
-      index: "0x0",
+      txHash: process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_CELL_DEP_OUTPOINT_TXHASH!,
+      index: process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_CELL_DEP_OUTPOINT_INDEX!,
     },
     depType: "code",
   };
@@ -130,6 +134,14 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
     refreshSporesByAddress,
     spore,
   ]);
+
+  console.log(process.env, "process env");
+  console.log(
+    process,
+    "jjjj",
+    process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_CELL_DEP_OUTPOINT_TXHASH!,
+    process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_LOCK_TYPE_HASH
+  );
 
   const meltSporeMutation = useMutation({
     mutationFn: meltSpore,

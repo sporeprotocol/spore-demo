@@ -5,8 +5,11 @@ import { utils } from "@ckb-lumos/base";
 import { bytify } from "@ckb-lumos/codec/lib/bytes";
 
 // FIXME Demo solution only
-const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX: string = "+spore";
-const BindingLifecycleLockTypeHash: Hash = "0x20f1117a520a066fa9bf99ace508226b8706d559270c35c81403e057ccdc583d";
+// const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX: string = "+spore";
+// const BindingLifecycleLockTypeHash: Hash = "0x20f1117a520a066fa9bf99ace508226b8706d559270c35c81403e057ccdc583d";
+const VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX: string =
+  process.env.NEXT_PUBLIC_VIDEO_SPORE_PROTOCOL_CONTENT_TYPE_SUFFIX!;
+const BindingLifecycleLockTypeHash: Hash = process.env.NEXT_PUBLIC_BINDING_LIFECYCLE_LOCK_TYPE_HASH!;
 
 export async function GET(_: Request, { params }: { params: { id: string } }) {
   const { id } = params;
