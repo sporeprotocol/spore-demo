@@ -28,15 +28,16 @@ export default class MetaMaskConnector extends CKBConnector {
 
   constructor() {
     super();
-    const { publicClient, webSocketPublicClient } = configureChains(
-      [mainnet],
-      [publicProvider()],
-    );
-    this.config = createConfig({
-      autoConnect: true,
-      publicClient,
-      webSocketPublicClient,
-    });
+    // const { publicClient, webSocketPublicClient } = configureChains(
+    //   [mainnet],
+    //   [publicProvider()],
+    // );
+    // this.config = createConfig({
+    //   autoConnect: true,
+    //   publicClient,
+    //   webSocketPublicClient,
+    // });
+    this.enabled = false;
   }
 
   private setAddress(ethAddress: `0x${string}` | undefined) {

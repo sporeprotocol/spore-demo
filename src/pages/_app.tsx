@@ -14,6 +14,7 @@ import Head from 'next/head';
 import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
+import '@/utils/joyid';
 
 function StateProvider({
   children,
@@ -94,7 +95,7 @@ function UIProvider({ children }: React.PropsWithChildren<{}>) {
 
 const config = {
   autoConnect: true,
-  connectors: [new MetaMaskConnector(), new JoyIdConnector()],
+  connectors: [new MetaMaskConnector, new JoyIdConnector()],
 };
 
 function App({ Component, pageProps }: AppProps) {
