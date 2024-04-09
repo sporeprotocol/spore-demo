@@ -51,6 +51,7 @@ export default class MetaMaskConnector extends CKBConnector {
     const address = helpers.encodeToAddress(lock, {
       config: sporeConfig.lumos,
     });
+    console.log(address, ethAddress)
     this.setData({
       address,
       connectorType: this.type.toLowerCase(),
