@@ -19,6 +19,7 @@ import {
 } from '@ckb-lumos/lumos';
 import { defaultWalletValue } from '@/state/wallet';
 import * as omnilock from './lock/omnilock';
+import { sporeConfig } from '@/config';
 
 export default class MetaMaskConnector extends CKBConnector {
   public type = 'MetaMask';
@@ -44,12 +45,11 @@ export default class MetaMaskConnector extends CKBConnector {
       this.setData(defaultWalletValue);
       return;
     }
-    config.initializeConfig(config.predefined.AGGRON4);
     const lock = commons.omnilock.createOmnilockScript({
       auth: { flag: 'ETHEREUM', content: ethAddress ?? '0x' },
     });
     const address = helpers.encodeToAddress(lock, {
-      config: config.predefined.AGGRON4,
+      config: sporeConfig.lumos,
     });
     this.setData({
       address,

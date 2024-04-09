@@ -14,6 +14,8 @@ import Head from 'next/head';
 import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
+import { config as _lumosConfig, RPC } from '@ckb-lumos/lumos';
+import { sporeConfig } from '@/config';
 
 function StateProvider({
   children,
@@ -75,6 +77,14 @@ const useStyles = createStyles((theme) => ({
     color: theme.colors.text[0],
   },
 }));
+
+const rpc = new RPC(sporeConfig.ckbNodeUrl);
+
+const constantConfig = process.env.NODE_ENV === 'development' ? _lumosConfig.TESTNET.SCRIPTS : _lumosConfig.MAINNET.SCRIPTS;
+//@ts-ignore
+_lumosConfig.refreshScriptConfigs(constantConfig, {
+  resolve: _lumosConfig.createRpcResolver(rpc)
+})
 
 function UIProvider({ children }: React.PropsWithChildren<{}>) {
   const { classes } = useStyles();

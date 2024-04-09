@@ -43,6 +43,7 @@ const infiniteClustersQueryDocument = graphql(`
 export function useInfiniteClustersQuery(address?: string) {
   const queryResult = useInfiniteQuery({
     queryKey: ['infiniteClusters', address],
+    //@ts-ignore
     queryFn: async ({ pageParam }) => {
       const params = {
         first: 12,

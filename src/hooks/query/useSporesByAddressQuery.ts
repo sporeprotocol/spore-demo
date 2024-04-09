@@ -36,11 +36,10 @@ export function useSporesByAddressQuery(address: string | undefined, enabled = t
   const { data, ...rest } = useRefreshableQuery(
     {
       queryKey: ['sporesByAddress', address],
-      queryFn: async (ctx) => {
+      queryFn: async () => {
         return graphQLClient.request(
           sporesByAddressQueryDocument,
           { address: address! },
-          ctx.meta?.headers as Headers,
         );
       },
       enabled: !!address && enabled,

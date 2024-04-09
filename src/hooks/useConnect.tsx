@@ -1,4 +1,5 @@
 import ConnectModal from '@/components/ConnectModal';
+import { sporeConfig } from '@/config';
 import CKBConnector from '@/connectors/base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import { showError } from '@/utils/notifications';
@@ -32,7 +33,7 @@ export const useConnect = () => {
 
   const lock = useMemo(() => {
     if (!address) return undefined;
-    return helpers.parseAddress(address, { config: config.predefined.AGGRON4 });
+    return helpers.parseAddress(address, { config: sporeConfig.lumos});
   }, [address]);
 
   const connector = useMemo(
