@@ -14,7 +14,9 @@ import Head from 'next/head';
 import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
+import { config as _lumosConfig } from '@ckb-lumos/lumos';
 import '@/utils/joyid';
+import { sporeConfig } from '@/config';
 
 function StateProvider({
   children,

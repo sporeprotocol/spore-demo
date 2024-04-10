@@ -52,7 +52,7 @@ export function createJoyIDScriptInfo(): commons.LockScriptInfo {
     lockScriptInfo: {
       // @ts-ignore  
       CellCollector: JoyIDCellCollector,
-           // @ts-ignore data2 is not defined in joyid sdk
+      // @ts-ignore data2 is not defined in joyid sdk
       prepareSigningEntries: null,
       async setupInputCell(txSkeleton, inputCell, _, options = {}) {
         const template = getJoyIDLockScript();
