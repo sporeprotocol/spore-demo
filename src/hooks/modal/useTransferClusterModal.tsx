@@ -14,6 +14,7 @@ import useSponsorClusterModal from './useSponsorClusterModal';
 import { QueryCluster } from '../query/type';
 import { useClusterQuery } from '../query/useClusterQuery';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import { sporeConfig } from '@/config';
 
 export default function useTransferClusterModal(cluster: QueryCluster | undefined) {
   const modalId = useId();
@@ -81,7 +82,7 @@ export default function useTransferClusterModal(cluster: QueryCluster | undefine
         outPoint: cluster.cell?.outPoint!,
         fromInfos: [address],
         toLock: helpers.parseAddress(values.to, {
-          config: config.predefined.AGGRON4,
+          config: sporeConfig.lumos,
         }),
         useCapacityMarginAsFee: values.useCapacityMarginAsFee === '1',
       });

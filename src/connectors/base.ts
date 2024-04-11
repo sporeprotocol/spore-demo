@@ -1,3 +1,4 @@
+import { sporeConfig } from '@/config';
 import store from '@/state/store';
 import { WalletData, walletAtom } from '@/state/wallet';
 import { Script, Transaction, config, helpers } from '@ckb-lumos/lumos';
@@ -31,7 +32,7 @@ export default abstract class CKBConnector {
       return undefined;
     }
     return helpers.parseAddress(address, {
-      config: config.predefined.AGGRON4,
+      config: sporeConfig.lumos,
     });
   }
 
@@ -46,7 +47,7 @@ export default abstract class CKBConnector {
   protected getLockFromAddress(): Script {
     const { address } = this.getData();
     return helpers.parseAddress(address, {
-      config: config.predefined.AGGRON4,
+      config: sporeConfig.lumos,
     });
   }
 

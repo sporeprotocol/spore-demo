@@ -1,3 +1,4 @@
+import { sporeConfig } from '@/config';
 import {
   getAnyoneCanPayMinimumCapacity,
   isAnyoneCanPay,
@@ -36,7 +37,7 @@ export async function signTransaction(
   fromLock: Script,
   signMessage: (message: string) => Promise<string>,
 ): Promise<Transaction> {
-  config.initializeConfig(config.predefined.AGGRON4);
+  // config.initializeConfig(config.predefined.AGGRON4);
   const inputs = txSkeleton.get('inputs')!;
   const outputs = txSkeleton.get('outputs')!;
 
@@ -70,10 +71,10 @@ export async function signTransaction(
       });
     }
   });
-
   let tx = common.prepareSigningEntries(txSkeleton, {
-    config: config.predefined.AGGRON4,
+    config: sporeConfig.lumos,
   });
+
   const signedWitnesses = new Map<string, string>();
   const signingEntries = tx.get('signingEntries')!;
   for (let i = 0; i < signingEntries.size; i += 1) {

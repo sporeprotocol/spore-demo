@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useConnect } from './useConnect';
 import { createSpore, getSporeScript } from '@spore-sdk/core';
-import { BI } from '@ckb-lumos/lumos';
+import { BI, config } from '@ckb-lumos/lumos';
 import { isSameScript } from '@/utils/script';
 import { sporeConfig } from "@/config";
 
@@ -30,10 +30,11 @@ export default function useEstimatedOnChainSize(
           },
           fromInfos: [address],
           toLock: lock,
+          config: sporeConfig,
           // @ts-ignore
           capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
         });
-
+  
         const outputs = txSkeleton.get('outputs');
         const cell = outputs
           .filter((output) => isSameScript(output.cellOutput.lock, lock))

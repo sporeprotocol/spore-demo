@@ -15,6 +15,7 @@ import { QuerySpore } from '../query/type';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
+import { sporeConfig } from '@/config';
 
 export default function useTransferSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
@@ -67,7 +68,7 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
         outPoint: spore.cell.outPoint!,
         fromInfos: [address],
         toLock: helpers.parseAddress(values.to, {
-          config: config.predefined.AGGRON4,
+          config: sporeConfig.lumos,
         }),
         useCapacityMarginAsFee: values.useCapacityMarginAsFee === '1',
       });

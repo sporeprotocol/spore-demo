@@ -10,11 +10,15 @@ import { showSuccess } from '@/utils/notifications';
 import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { getMIMETypeByName } from '@/utils/mime';
-import { BI, Cell } from '@ckb-lumos/lumos';
+import { BI, Cell, commons, config } from '@ckb-lumos/lumos';
 import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useMintableClustersQuery } from '../query/useMintableClusters';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import { sporeConfig } from '@/config';
+import { RPC, Transaction } from '@ckb-lumos/lumos';
+import { common } from '@ckb-lumos/common-scripts';
+
 
 export default function useMintSporeModal(id?: string) {
   const theme = useMantineTheme();
@@ -59,7 +63,7 @@ export default function useMintSporeModal(id?: string) {
       if (!content || !address || !lock) {
         return;
       }
-
+      // config.initializeConfig(sporeConfig.lumos);
       const contentBuffer = await content.arrayBuffer();
       const contentType = content.type || getMIMETypeByName(content.name);
       const sporeCell = await addSporeMutation.mutateAsync({
@@ -70,9 +74,11 @@ export default function useMintSporeModal(id?: string) {
         },
         fromInfos: [address],
         toLock: lock,
+        config: sporeConfig,
         // @ts-ignore
         capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });
+    
       showSuccess('Spore minted!', () => {
         router.push(`/spore/${sporeCell?.cellOutput.type?.args}`);
       });

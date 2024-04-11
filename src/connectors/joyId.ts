@@ -1,13 +1,16 @@
 import { Script } from '@ckb-lumos/base';
 import { BI, Transaction, commons, config, helpers } from '@ckb-lumos/lumos';
 // @ts-ignore
-import { initConfig, connect, signMessage } from '@joyid/evm';
+import { initConfig, connect, signMessage, signRawTransaction } from '@joyid/ckb';
 // @ts-ignore
 import CKBConnector from './base';
 import { defaultWalletValue, walletAtom } from '@/state/wallet';
 import * as omnilock from './lock/omnilock';
 import { isSameScript } from '@/utils/script';
 import { bytes } from '@ckb-lumos/codec';
+import { createTransactionFromSkeleton } from '@ckb-lumos/lumos/helpers';
+import { registerCustomLockScriptInfos } from '@ckb-lumos/common-scripts/lib/common';
+import { createJoyIDScriptInfo } from '@/utils/joyid';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
@@ -20,25 +23,19 @@ export default class JoyIdConnector extends CKBConnector {
       name: 'Spore Demo',
       joyidAppURL: 'https://testnet.joyid.dev',
     });
-    this.enabled = false;
+    this.enabled = true;
   }
 
-  private setAddress(ethAddress: `0x${string}` | undefined) {
-    if (!ethAddress) {
+  private setAddress(address: string | undefined) {
+    if (!address) {
       this.setData(defaultWalletValue);
       return;
     }
-    config.initializeConfig(config.predefined.AGGRON4);
-    const lock = commons.omnilock.createOmnilockScript({
-      auth: { flag: 'ETHEREUM', content: ethAddress ?? '0x' },
-    });
-    const address = helpers.encodeToAddress(lock, {
-      config: config.predefined.AGGRON4,
-    });
+    // config.initializeConfig(config.predefined.AGGRON4);
     this.setData({
       address,
       connectorType: this.type.toLowerCase(),
-      data: ethAddress,
+      data: address,
     });
   }
 
@@ -47,8 +44,10 @@ export default class JoyIdConnector extends CKBConnector {
     if (connectorType === this.type.toLowerCase() && address) {
       return;
     }
-    const ethAddress = await connect();
-    this.setAddress(ethAddress);
+    const AuthData = await connect();
+    registerCustomLockScriptInfos([createJoyIDScriptInfo()]);
+
+    this.setAddress(AuthData.address);
     this.isConnected = true;
   }
 
@@ -70,40 +69,10 @@ export default class JoyIdConnector extends CKBConnector {
   public async signTransaction(
     txSkeleton: helpers.TransactionSkeletonType,
   ): Promise<Transaction> {
-    const { data: ethAddress } = this.getData();
-
-    const outputs = txSkeleton.get('outputs')!;
-    outputs.forEach((output, index) => {
-      const { lock, type } = output.cellOutput;
-
-      if (!type && isSameScript(lock, this.lock)) {
-        txSkeleton = txSkeleton.update('outputs', (outputs) => {
-          output.cellOutput.capacity = BI.from(output.cellOutput.capacity)
-            .sub(1000)
-            .toHexString();
-          return outputs.set(index, output);
-        });
-      }
-    });
-
-    const transaction = await omnilock.signTransaction(
-      txSkeleton,
-      this.lock!,
-      async (message) => {
-        return new Promise((resolve, reject) => {
-          const button = document.createElement('button');
-          button.onclick = async () => {
-            try {
-              const signature = await signMessage(bytes.bytify(message), ethAddress);
-              resolve(signature);
-            } catch (e) {
-              reject(e);
-            }
-          };
-          button.click();
-        })
-      },
-    );
-    return transaction;
+    const { address, connectorType } = this.getData();
+    let tx = createTransactionFromSkeleton(txSkeleton);
+    //@ts-ignore
+    let signTx = await signRawTransaction(tx, address);
+    return signTx
   }
 }

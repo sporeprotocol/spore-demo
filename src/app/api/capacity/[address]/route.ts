@@ -1,4 +1,4 @@
-import { BI, Indexer, helpers } from '@ckb-lumos/lumos';
+import { BI, Indexer, config, helpers } from '@ckb-lumos/lumos';
 import { sporeConfig } from "@/config";
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export async function GET(_: Request, { params }: { params: { address: string } 
 
   const indexer = new Indexer(sporeConfig.ckbIndexerUrl);
   const collector = indexer.collector({
-    lock: helpers.parseAddress(address as string, { config: sporeConfig.lumos }),
+    lock: helpers.parseAddress(address as string, { config: config.TESTNET }),
     data: '0x',
   });
 

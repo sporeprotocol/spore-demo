@@ -1,5 +1,4 @@
 import { forkSporeConfig, predefinedSporeConfigs, setSporeConfig, SporeConfig } from '@spore-sdk/core';
-
 const sporeConfig: SporeConfig = forkSporeConfig(predefinedSporeConfigs.Testnet, {
   lumos: {
     PREFIX: 'ckt',
@@ -7,14 +6,16 @@ const sporeConfig: SporeConfig = forkSporeConfig(predefinedSporeConfigs.Testnet,
       ...predefinedSporeConfigs.Testnet.lumos.SCRIPTS,
       OMNILOCK: {
         ...predefinedSporeConfigs.Testnet.lumos.SCRIPTS.OMNILOCK!,
-        TX_HASH: '0x3d4296df1bd2cc2bd3f483f61ab7ebeac462a2f336f2b944168fe6ba5d81c014',
-        INDEX: '0x0',
+        CODE_HASH: "0xa7a8a4f8eadb4d9736d32cdbe54259d1ee8e23785e7c28d15a971a0dbdc14ca6",
+        HASH_TYPE: "type",
+        TX_HASH: "0x65de639c5f4822cef9be430c4884c2b7689147a6b0098f3aa4028d0f7f9689d1",
+        INDEX: "0x0",
+        DEP_TYPE: "code",
       },
     },
   },
 });
 
-setSporeConfig(sporeConfig);
 
 export {
   sporeConfig,
