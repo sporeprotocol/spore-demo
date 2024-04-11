@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { useMantineTheme } from '@mantine/core';
 import { BI } from '@ckb-lumos/lumos';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import { sporeConfig } from '@/config';
 
 export default function useCreateClusterModal() {
   const [opened, { open, close }] = useDisclosure(false);
@@ -57,6 +58,7 @@ export default function useCreateClusterModal() {
         },
         fromInfos: [address],
         toLock,
+        config: sporeConfig,
         // @ts-ignore
         capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
       });

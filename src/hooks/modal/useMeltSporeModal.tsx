@@ -13,6 +13,7 @@ import { useSporesByAddressQuery } from '../query/useSporesByAddressQuery';
 import { useClusterSporesQuery } from '../query/useClusterSporesQuery';
 import { useSporeQuery } from '../query/useSporeQuery';
 import { useClustersByAddressQuery } from '../query/useClustersByAddress';
+import { sporeConfig } from '@/config';
 
 export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
   const modalId = useId();
@@ -92,6 +93,7 @@ export default function useMeltSporeModal(sourceSpore: QuerySpore | undefined) {
     }
     await meltSporeMutation.mutateAsync({
       outPoint: spore!.cell!.outPoint!,
+      config: sporeConfig
     });
     showSuccess('Spore melted!');
     modals.close(modalId);
