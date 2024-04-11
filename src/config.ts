@@ -1,5 +1,4 @@
 import { forkSporeConfig, predefinedSporeConfigs, setSporeConfig, SporeConfig } from '@spore-sdk/core';
-console.log('pre: ', predefinedSporeConfigs.Testnet)
 const sporeConfig: SporeConfig = forkSporeConfig(predefinedSporeConfigs.Testnet, {
   lumos: {
     PREFIX: 'ckt',
@@ -17,7 +16,6 @@ const sporeConfig: SporeConfig = forkSporeConfig(predefinedSporeConfigs.Testnet,
   },
 });
 
-setSporeConfig(sporeConfig);
 
 export {
   sporeConfig,

@@ -41,6 +41,7 @@ import { isAnyoneCanPay } from '@/utils/script';
 import Popover from './Popover';
 import { QueryCluster } from '@/hooks/query/type';
 import { useCapacity } from '@/hooks/query/useCapacity';
+import { sporeConfig } from '@/config';
 
 const MAX_SIZE_LIMIT = parseInt(
   process.env.NEXT_PUBLIC_MINT_SIZE_LIMIT ?? '300',
@@ -259,13 +260,13 @@ export default function MintSporeModal(props: MintSporeModalProps) {
       const clusterAddress = helpers.encodeToAddress(
         cluster.cell.cellOutput.lock,
         {
-          config: config.predefined.AGGRON4,
+          config: sporeConfig.lumos,
         },
       );
       if (clusterAddress === address) return true;
 
       const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
-        config: config.predefined.AGGRON4,
+        config: sporeConfig.lumos,
       });
       return clusterAddress === acpAddress;
     });

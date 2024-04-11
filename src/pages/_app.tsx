@@ -15,8 +15,9 @@ import { emotionCache } from '@/utils/emotion';
 import { GlobalOpenGraph } from '@/components/OpenGraph';
 import { GoogleAnalytics } from 'nextjs-google-analytics';
 import { config as _lumosConfig } from '@ckb-lumos/lumos';
-import '@/utils/joyid';
+import { createJoyIDScriptInfo } from '@/utils/joyid';
 import { sporeConfig } from '@/config';
+import { registerCustomLockScriptInfos } from '@ckb-lumos/common-scripts/lib/common';
 
 function StateProvider({
   children,
@@ -95,6 +96,7 @@ function UIProvider({ children }: React.PropsWithChildren<{}>) {
   );
 }
 
+_lumosConfig.initializeConfig(sporeConfig.lumos);
 const config = {
   autoConnect: true,
   connectors: [new MetaMaskConnector, new JoyIdConnector()],

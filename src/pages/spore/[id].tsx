@@ -30,6 +30,7 @@ import Popover from '@/components/Popover';
 import useSponsorSporeModal from '@/hooks/modal/useSponsorSporeModal';
 import { useSporeQuery } from '@/hooks/query/useSporeQuery';
 import { useClusterSporesQuery } from '@/hooks/query/useClusterSporesQuery';
+import { sporeConfig } from '@/config';
 
 export const useStyles = createStyles((theme) => ({
   image: {
@@ -84,7 +85,7 @@ export default function SporePage() {
     : 0;
   const owner = spore?.cell
     ? helpers.encodeToAddress(spore.cell.cellOutput.lock, {
-        config: config.predefined.AGGRON4,
+        config: sporeConfig.lumos,
       })
     : '';
 
@@ -106,7 +107,7 @@ export default function SporePage() {
       return true;
     }
     const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
-      config: config.predefined.AGGRON4,
+      config: sporeConfig.lumos,
     });
     if (acpAddress === owner) {
       return true;

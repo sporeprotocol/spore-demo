@@ -32,6 +32,7 @@ import DropMenu from '@/components/DropMenu';
 import useSponsorClusterModal from '@/hooks/modal/useSponsorClusterModal';
 import { useClusterQuery } from '@/hooks/query/useClusterQuery';
 import { useClusterSporesQuery } from '@/hooks/query/useClusterSporesQuery';
+import { sporeConfig } from '@/config';
 
 export const useStyles = createStyles((theme) => ({
   header: {
@@ -124,7 +125,7 @@ export default function ClusterPage() {
       return '';
     }
     const address = helpers.encodeToAddress(cluster.cell.cellOutput.lock, {
-      config: config.predefined.AGGRON4,
+      config: sporeConfig.lumos,
     });
     return address;
   }, [cluster]);
@@ -144,7 +145,7 @@ export default function ClusterPage() {
       return true;
     }
     const acpAddress = helpers.encodeToAddress(getAnyoneCanPayLock(), {
-      config: config.predefined.AGGRON4,
+      config: sporeConfig.lumos,
     });
     if (acpAddress === owner) {
       return true;

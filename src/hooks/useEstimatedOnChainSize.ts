@@ -30,11 +30,10 @@ export default function useEstimatedOnChainSize(
           },
           fromInfos: [address],
           toLock: lock,
+          config: sporeConfig,
           // @ts-ignore
           capacityMargin: useCapacityMargin ? BI.from(100_000_000) : BI.from(0),
         });
-
-        console.log('---->', JSON.stringify(txSkeleton));
   
         const outputs = txSkeleton.get('outputs');
         const cell = outputs

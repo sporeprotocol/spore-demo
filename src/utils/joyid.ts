@@ -4,6 +4,8 @@ import { registerCustomLockScriptInfos } from "@ckb-lumos/lumos/common-scripts/c
 import { WitnessArgs, commons, helpers, Script, Cell, config } from "@ckb-lumos/lumos";
 import { CKBComponents } from "@ckb-lumos/lumos/rpc";
 import { sporeConfig } from '@/config';
+import { common } from "@ckb-lumos/common-scripts";
+import { createTransactionSkeleton } from "@ckb-lumos/lumos/helpers";
 
 export interface CellCollector {
   collect(): AsyncIterable<Cell>;
@@ -53,7 +55,7 @@ export function createJoyIDScriptInfo(): commons.LockScriptInfo {
       // @ts-ignore  
       CellCollector: JoyIDCellCollector,
       // @ts-ignore data2 is not defined in joyid sdk
-      prepareSigningEntries: null,
+      prepareSigningEntries: commons.omnilock.prepareSigningEntries(),
       async setupInputCell(txSkeleton, inputCell, _, options = {}) {
         const template = getJoyIDLockScript();
 
@@ -133,5 +135,3 @@ function asserts(condition: unknown, message = "Assert failed"): asserts conditi
     throw new Error(message);
   }
 }
-
-registerCustomLockScriptInfos([createJoyIDScriptInfo()]);

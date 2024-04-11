@@ -9,6 +9,8 @@ import * as omnilock from './lock/omnilock';
 import { isSameScript } from '@/utils/script';
 import { bytes } from '@ckb-lumos/codec';
 import { createTransactionFromSkeleton } from '@ckb-lumos/lumos/helpers';
+import { registerCustomLockScriptInfos } from '@ckb-lumos/common-scripts/lib/common';
+import { createJoyIDScriptInfo } from '@/utils/joyid';
 
 export default class JoyIdConnector extends CKBConnector {
   public type: string = 'JoyID';
@@ -29,7 +31,7 @@ export default class JoyIdConnector extends CKBConnector {
       this.setData(defaultWalletValue);
       return;
     }
-    config.initializeConfig(config.predefined.AGGRON4);
+    // config.initializeConfig(config.predefined.AGGRON4);
     this.setData({
       address,
       connectorType: this.type.toLowerCase(),
@@ -42,8 +44,10 @@ export default class JoyIdConnector extends CKBConnector {
     if (connectorType === this.type.toLowerCase() && address) {
       return;
     }
-    const ethAddress = await connect();
-    this.setAddress(ethAddress.address);
+    const AuthData = await connect();
+    registerCustomLockScriptInfos([createJoyIDScriptInfo()]);
+
+    this.setAddress(AuthData.address);
     this.isConnected = true;
   }
 
