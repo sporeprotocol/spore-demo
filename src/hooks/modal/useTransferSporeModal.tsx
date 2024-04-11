@@ -70,6 +70,7 @@ export default function useTransferSporeModal(sourceSpore: QuerySpore | undefine
         toLock: helpers.parseAddress(values.to, {
           config: sporeConfig.lumos,
         }),
+        config: sporeConfig,
         useCapacityMarginAsFee: values.useCapacityMarginAsFee === '1',
       });
       showSuccess('Spore Transferred!');
