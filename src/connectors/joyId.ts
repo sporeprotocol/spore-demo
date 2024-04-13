@@ -40,13 +40,12 @@ export default class JoyIdConnector extends CKBConnector {
   }
 
   public async connect(): Promise<void> {
+    registerCustomLockScriptInfos([createJoyIDScriptInfo()]);
     const { address, connectorType } = this.getData();
     if (connectorType === this.type.toLowerCase() && address) {
       return;
     }
     const AuthData = await connect();
-    registerCustomLockScriptInfos([createJoyIDScriptInfo()]);
-
     this.setAddress(AuthData.address);
     this.isConnected = true;
   }

@@ -97,6 +97,7 @@ function UIProvider({ children }: React.PropsWithChildren<{}>) {
 }
 
 _lumosConfig.initializeConfig(sporeConfig.lumos);
+
 const config = {
   autoConnect: true,
   connectors: [new MetaMaskConnector, new JoyIdConnector()],
