@@ -231,10 +231,15 @@ export default function MintSporeModal(props: MintSporeModalProps) {
         setError(null);
       }
     }
-  }, [onChainSize, balance, error]);
+  }, [onChainSize, balance]);
 
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
+    console.log(file);
+    const isDob0 = file.name.split('.')[1];
+    if(isDob0 === 'dob0') {
+      file.type === 'dob/0';
+    }
     setError(null);
     setContent(file);
   }, []);
