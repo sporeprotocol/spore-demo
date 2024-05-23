@@ -235,7 +235,7 @@ export default function MintSporeModal(props: MintSporeModalProps) {
 
   const handleDrop: DropzoneProps['onDrop'] = useCallback((files) => {
     const [file] = files;
-    const isDob0 = file.name.split('.')[1];
+    const isDob0 = file.name.split('.').at(-1);
     if(isDob0 === 'dob0') {
       file.type === 'dob/0';
     }
